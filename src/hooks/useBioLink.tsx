@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { LinkData } from "@/components/biolink-editor/SortableLinkItem";
 import { UserData } from "@/components/biolink-editor/BioLinkPreview";
+import { useEffect } from "react";
 
 // Fetch user's bio link data
 const fetchBioLink = async (userId: string) => {
@@ -12,7 +13,7 @@ const fetchBioLink = async (userId: string) => {
     .select(`
       *,
       bio_link_items (
-        id, title, subtitle, url, iconId: icon_id, position
+        id, title, subtitle, url, iconId: icon, position
       )
     `)
     .eq("user_id", userId)
@@ -24,8 +25,24 @@ const fetchBioLink = async (userId: string) => {
   return data;
 };
 
+// Create a new bio link profile
+const createBioLink = async ({ userId, username, name }: { userId: string, username: string, name: string }) => {
+  const { data, error } = await supabase
+    .from('bio_links')
+    .insert({
+      user_id: userId,
+      username: username,
+      display_name: name,
+    })
+    .select()
+    .single();
+
+  if (error) throw new Error(error.message);
+  return data;
+};
+
 // Update bio link profile data
-const updateBioLinkProfile = async ({ userId, updates }: { userId: string, updates: Partial<UserData> & { id: string } }) => {
+const updateBioLinkProfile = async ({ updates }: { updates: Partial<UserData> & { id: string } }) => {
   const { id, ...profileData } = updates;
   const { error } = await supabase
     .from("bio_links")
@@ -39,32 +56,22 @@ const updateBioLinkProfile = async ({ userId, updates }: { userId: string, updat
   if (error) throw new Error(error.message);
 };
 
-// Update all links (for reordering, adding, deleting)
-const updateLinks = async ({ bioLinkId, links }: { bioLinkId: string, links: Omit<LinkData, 'id'>[] }) => {
-  // This is a complex operation. A simpler way for now is to delete and re-insert.
-  // For a production app, a better approach (e.g., a stored procedure) would be used.
-  
-  // 1. Delete existing items for this bio link
-  const { error: deleteError } = await supabase
-    .from("bio_link_items")
-    .delete()
-    .eq("bio_link_id", bioLinkId);
-  if (deleteError) throw deleteError;
+// Update all links
+const updateLinks = async ({ bioLinkId, links }: { bioLinkId: string, links: LinkData[] }) => {
+  // Delete existing items
+  await supabase.from("bio_link_items").delete().eq("bio_link_id", bioLinkId);
 
-  // 2. Insert new items with correct positions
+  // Insert new items if any
   if (links.length > 0) {
     const newItems = links.map((link, index) => ({
       bio_link_id: bioLinkId,
       title: link.title,
       subtitle: link.subtitle,
       url: link.url,
-      icon_id: link.iconId,
+      icon: link.iconId,
       position: index,
     }));
-
-    const { error: insertError } = await supabase
-      .from("bio_link_items")
-      .insert(newItems);
+    const { error: insertError } = await supabase.from("bio_link_items").insert(newItems);
     if (insertError) throw insertError;
   }
 };
@@ -73,11 +80,32 @@ export function useBioLink() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: bioLink, isLoading, isError } = useQuery({
+  const { data: bioLink, isLoading: isQueryLoading, isError, isSuccess } = useQuery({
     queryKey: ["bioLink", user?.id],
     queryFn: () => fetchBioLink(user!.id),
     enabled: !!user,
   });
+
+  const createMutation = useMutation({
+    mutationFn: createBioLink,
+    onSuccess: () => {
+      toast.info("Perfil de Bio Link criado para você!");
+      queryClient.invalidateQueries({ queryKey: ["bioLink", user?.id] });
+    },
+    onError: (error) => {
+      toast.error("Erro ao criar seu perfil de Bio Link", { description: error.message });
+    },
+  });
+
+  useEffect(() => {
+    if (isSuccess && !bioLink && user && !createMutation.isPending) {
+      createMutation.mutate({
+        userId: user.id,
+        username: user.username,
+        name: user.name,
+      });
+    }
+  }, [isSuccess, bioLink, user, createMutation]);
 
   const profileMutation = useMutation({
     mutationFn: updateBioLinkProfile,
@@ -103,7 +131,7 @@ export function useBioLink() {
 
   const handleProfileUpdate = (updates: Partial<UserData>) => {
     if (!user || !bioLink) return;
-    profileMutation.mutate({ userId: user.id, updates: { ...updates, id: bioLink.id } });
+    profileMutation.mutate({ updates: { ...updates, id: bioLink.id } });
   };
 
   const handleLinksUpdate = (links: LinkData[]) => {
@@ -118,11 +146,13 @@ export function useBioLink() {
       bio: bioLink.bio || '',
       avatar: bioLink.avatar_url || user?.avatar || '',
     },
-    links: (bioLink.bio_link_items || []).sort((a, b) => a.position - b.position).map((item: any) => ({
+    links: (bioLink.bio_link_items || []).sort((a: any, b: any) => a.position - b.position).map((item: any) => ({
       ...item,
-      iconId: item.iconId || 'website' // fallback icon
+      iconId: item.iconId || 'website'
     })),
   } : null;
+
+  const isLoading = isQueryLoading || createMutation.isPending;
 
   return {
     bioLinkData,
