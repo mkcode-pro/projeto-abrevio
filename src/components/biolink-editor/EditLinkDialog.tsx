@@ -17,13 +17,11 @@ interface EditLinkDialogProps {
 export function EditLinkDialog({ open, onOpenChange, link, onSave }: EditLinkDialogProps) {
   const [selectedIcon, setSelectedIcon] = useState<IconData>(iconLibrary[0])
   const [title, setTitle] = useState('')
-  const [subtitle, setSubtitle] = useState('')
   const [url, setUrl] = useState('')
 
   useEffect(() => {
     if (link) {
       setTitle(link.title)
-      setSubtitle(link.subtitle || '')
       setUrl(link.url)
       const icon = iconLibrary.find(i => i.id === link.iconId) || iconLibrary[0]
       setSelectedIcon(icon)
@@ -38,7 +36,6 @@ export function EditLinkDialog({ open, onOpenChange, link, onSave }: EditLinkDia
 
     const updates = {
       title,
-      subtitle: subtitle || '',
       url,
       iconId: selectedIcon.id
     }
@@ -92,17 +89,6 @@ export function EditLinkDialog({ open, onOpenChange, link, onSave }: EditLinkDia
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex: Instagram"
-              className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="edit-subtitle" className="text-white text-sm">Subtítulo</Label>
-            <Input
-              id="edit-subtitle"
-              value={subtitle}
-              onChange={(e) => setSubtitle(e.target.value)}
-              placeholder="Ex: Conteúdo diário e stories"
               className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
             />
           </div>

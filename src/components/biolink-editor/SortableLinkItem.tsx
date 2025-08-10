@@ -9,7 +9,6 @@ import { getIconById } from './IconLibrary'
 export interface LinkData {
   id: string
   title: string
-  subtitle?: string
   url: string
   iconId: string
 }
@@ -55,7 +54,6 @@ const SortableLinkItem = memo(function SortableLinkItem({ link, onEdit, onDelete
         {/* Content */}
         <div className="flex-1 min-w-0">
           <h4 className="text-white font-medium text-sm truncate">{link.title}</h4>
-          <p className="text-white/60 text-xs truncate">{link.subtitle}</p>
           <p className="text-white/40 text-xs truncate">{link.url}</p>
         </div>
 

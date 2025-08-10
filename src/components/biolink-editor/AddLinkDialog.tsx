@@ -16,7 +16,6 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
   const [open, setOpen] = useState(false)
   const [selectedIcon, setSelectedIcon] = useState<IconData>(iconLibrary[0])
   const [title, setTitle] = useState('')
-  const [subtitle, setSubtitle] = useState('')
   const [url, setUrl] = useState('')
 
   const handleAdd = () => {
@@ -27,7 +26,6 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
 
     const newLink = {
       title,
-      subtitle: subtitle || '',
       url,
       iconId: selectedIcon.id
     }
@@ -36,7 +34,6 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
     
     // Reset form
     setTitle('')
-    setSubtitle('')
     setUrl('')
     setSelectedIcon(iconLibrary[0])
     setOpen(false)
@@ -92,17 +89,6 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ex: Instagram"
-              className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="subtitle" className="text-white text-sm">Subtítulo</Label>
-            <Input
-              id="subtitle"
-              value={subtitle}
-              onChange={(e) => setSubtitle(e.target.value)}
-              placeholder="Ex: Conteúdo diário e stories"
               className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
             />
           </div>

@@ -12,7 +12,7 @@ const fetchBioLink = async (userId: string) => {
     .select(`
       *,
       bio_link_items (
-        id, title, subtitle, url, icon, position
+        id, title, url, icon, position
       )
     `)
     .eq("user_id", userId)
@@ -65,7 +65,6 @@ const updateBioLinkItems = async ({ bioLinkId, links }: { bioLinkId: string; lin
     const newItems = links.map((link, index) => ({
       bio_link_id: bioLinkId,
       title: link.title,
-      subtitle: link.subtitle || null,
       url: link.url,
       icon: link.iconId,
       position: index,
@@ -144,7 +143,6 @@ export function useBioLink() {
       .map((item: any) => ({
         id: item.id,
         title: item.title,
-        subtitle: item.subtitle || '',
         url: item.url,
         iconId: item.icon || 'website'
       })) || [],

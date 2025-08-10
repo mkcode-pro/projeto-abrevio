@@ -54,9 +54,6 @@ export function BioLinkPreview({ userData, links }: BioLinkPreviewProps) {
                   </div>
                   <div className="flex-1">
                     <h4 className="text-white font-medium text-sm">{link.title}</h4>
-                    {link.subtitle && (
-                      <p className="text-white/60 text-xs">{link.subtitle}</p>
-                    )}
                   </div>
                 </div>
               </div>

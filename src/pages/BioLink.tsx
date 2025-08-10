@@ -17,7 +17,7 @@ const fetchPublicBioLink = async (username: string) => {
       bio,
       avatar_url,
       view_count,
-      bio_link_items ( title, subtitle, url, icon, position )
+      bio_link_items ( title, url, icon, position )
     `)
     .eq('username', username)
     .eq('is_active', true)
@@ -58,7 +58,6 @@ function LinkButton({ link, index }: { link: any, index: number }) {
             </div>
             <div className="flex-1 text-left">
               <h3 className="font-semibold text-white text-base leading-tight">{link.title}</h3>
-              {link.subtitle && <p className="text-sm text-white/70 mt-1">{link.subtitle}</p>}
             </div>
             <ExternalLink className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
           </div>
