@@ -10,9 +10,9 @@ export const StatsCards = memo(function StatsCards() {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Skeleton className="h-32" />
-        <Skeleton className="h-32" />
-        <Skeleton className="h-32" />
+        <Skeleton className="h-32 rounded-2xl" />
+        <Skeleton className="h-32 rounded-2xl" />
+        <Skeleton className="h-32 rounded-2xl" />
       </div>
     );
   }
@@ -22,21 +22,21 @@ export const StatsCards = memo(function StatsCards() {
       title: "Visualizações Totais", 
       value: data?.totalViews?.toLocaleString() || "0", 
       icon: Eye, 
-      change: "+12% vs mês anterior", // Mock change for now
+      change: "Desde o início",
       color: "text-neon-blue"
     },
     { 
       title: "Cliques Totais", 
       value: data?.totalClicks?.toLocaleString() || "0", 
       icon: MousePointer, 
-      change: "+8% vs mês anterior", // Mock change for now
+      change: "Em todos os links",
       color: "text-emerald-400"
     },
     { 
       title: "Top Link", 
       value: data?.topLink || "N/A", 
       icon: TrendingUp, 
-      change: "Performance", // Mock change for now
+      change: "Mais popular",
       color: "text-violet-400"
     },
   ]

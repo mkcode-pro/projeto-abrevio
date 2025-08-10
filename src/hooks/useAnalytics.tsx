@@ -1,276 +1,154 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 
-export interface AnalyticsData {
-  id: string;
-  date: Date;
-  type: 'view' | 'click' | 'share';
-  source: string;
-  referrer?: string;
-  userAgent?: string;
-  country?: string;
-  city?: string;
-}
+type Period = '7d' | '30d' | '90d';
 
-export interface AnalyticsMetrics {
+interface AnalyticsMetrics {
   totalViews: number;
   totalClicks: number;
-  totalShares: number;
-  uniqueVisitors: number;
-  conversionRate: number;
-  topLinks: Array<{
-    url: string;
-    title: string;
-    clicks: number;
-    views: number;
-    ctr: number;
-  }>;
-  dailyStats: Array<{
-    date: string;
-    views: number;
-    clicks: number;
-    shares: number;
-  }>;
-  locationStats: Array<{
-    country: string;
-    city?: string;
-    count: number;
-  }>;
-  deviceStats: {
-    mobile: number;
-    desktop: number;
-    tablet: number;
-  };
+  ctr: number;
+  viewsChange: number;
+  clicksChange: number;
+  ctrChange: number;
+  dailyStats: Array<{ date: string; views: number; clicks: number }>;
+  topLinks: Array<{ title: string; clicks: number; views: number; ctr: number; iconId: string }>;
 }
 
-const fetchAnalyticsData = async (userId: string, period: 'day' | 'week' | 'month' | 'year' = 'month') => {
-  const now = new Date();
-  const startDate = new Date();
+const fetchAnalyticsData = async (userId: string, period: Period) => {
+  const getDays = (p: Period) => ({ '7d': 7, '30d': 30, '90d': 90 }[p]);
+  const days = getDays(period);
+  const prevDays = days * 2;
 
-  switch (period) {
-    case 'day':
-      startDate.setDate(now.getDate() - 1);
-      break;
-    case 'week':
-      startDate.setDate(now.getDate() - 7);
-      break;
-    case 'month':
-      startDate.setMonth(now.getMonth() - 1);
-      break;
-    case 'year':
-      startDate.setFullYear(now.getFullYear() - 1);
-      break;
-  }
+  const endDate = new Date();
+  const startDate = new Date();
+  startDate.setDate(endDate.getDate() - days);
+  const prevStartDate = new Date();
+  prevStartDate.setDate(endDate.getDate() - prevDays);
 
   // Buscar bio links do usuário
   const { data: bioLinks, error: bioLinksError } = await supabase
     .from("bio_links")
-    .select(`
-      id, 
-      username,
-      view_count,
-      bio_link_items (
-        id, title, url, click_count
-      )
-    `)
+    .select(`id, username, bio_link_items (id, title, icon)`)
     .eq("user_id", userId);
-
   if (bioLinksError) throw bioLinksError;
 
-  // Buscar URLs encurtadas
-  const { data: shortenedUrls, error: urlsError } = await supabase
-    .from("shortened_urls")
-    .select("id, title, original_url, click_count, created_at")
-    .eq("user_id", userId)
-    .gte("created_at", startDate.toISOString());
-
-  if (urlsError) throw urlsError;
+  const bioLinkIds = bioLinks?.map(bl => bl.id) || [];
+  const bioLinkItemIds = bioLinks?.flatMap(bl => bl.bio_link_items.map(item => item.id)) || [];
 
   // Buscar cliques detalhados
-  const { data: urlClicks, error: clicksError } = await supabase
+  const { data: clicks, error: clicksError } = await supabase
     .from("url_clicks")
-    .select("*")
-    .gte("clicked_at", startDate.toISOString());
-
+    .select("clicked_at, bio_link_item_id")
+    .in("bio_link_item_id", bioLinkItemIds)
+    .gte("clicked_at", prevStartDate.toISOString());
   if (clicksError) throw clicksError;
 
-  return {
-    bioLinks: bioLinks || [],
-    shortenedUrls: shortenedUrls || [],
-    urlClicks: urlClicks || [],
-  };
+  // Simular visualizações por enquanto
+  const views = clicks?.map(c => ({ ...c, viewed_at: c.clicked_at })) || [];
+
+  return { clicks, views, bioLinks };
 };
 
-export function useAnalytics(period: 'day' | 'week' | 'month' | 'year' = 'month') {
+export function useAnalytics(period: Period) {
   const { user } = useAuth();
-  const [loading, setLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const { data: rawData, isLoading: isQueryLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ['analytics', user?.id, period],
     queryFn: () => fetchAnalyticsData(user!.id, period),
     enabled: !!user,
-    staleTime: 1000 * 60 * 5, // 5 minutos
   });
 
-  // Calcular métricas
-  const metrics = useMemo((): AnalyticsMetrics => {
-    if (!rawData) {
-      return {
-        totalViews: 0,
-        totalClicks: 0,
-        totalShares: 0,
-        uniqueVisitors: 0,
-        conversionRate: 0,
-        topLinks: [],
-        dailyStats: [],
-        locationStats: [],
-        deviceStats: { mobile: 0, desktop: 0, tablet: 0 }
-      };
+  const metrics = useCallback((): AnalyticsMetrics => {
+    if (!data) {
+      return { totalViews: 0, totalClicks: 0, ctr: 0, viewsChange: 0, clicksChange: 0, ctrChange: 0, dailyStats: [], topLinks: [] };
     }
 
-    const { bioLinks, shortenedUrls, urlClicks } = rawData;
-
-    // Calcular totais
-    const totalViews = bioLinks.reduce((sum, bl) => sum + (bl.view_count || 0), 0);
+    const { clicks, views, bioLinks } = data;
+    const days = { '7d': 7, '30d': 30, '90d': 90 }[period];
     
-    const bioLinkClicks = bioLinks.reduce((sum, bl) => {
-      return sum + (bl.bio_link_items?.reduce((itemSum, item) => itemSum + (item.click_count || 0), 0) || 0);
-    }, 0);
-    
-    const urlClicksTotal = shortenedUrls.reduce((sum, url) => sum + (url.click_count || 0), 0);
-    const totalClicks = bioLinkClicks + urlClicksTotal;
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(endDate.getDate() - days);
+    const prevStartDate = new Date();
+    prevStartDate.setDate(endDate.getDate() - (days * 2));
+    const prevEndDate = new Date();
+    prevEndDate.setDate(endDate.getDate() - days);
 
-    // Top links
-    const allLinks = [
-      ...(bioLinks.flatMap(bl => bl.bio_link_items || []).map(item => ({
-        url: item.url,
-        title: item.title,
-        clicks: item.click_count || 0,
-        views: 0, // Bio link items não têm views separadas
-        ctr: 0
-      }))),
-      ...(shortenedUrls.map(url => ({
-        url: url.original_url,
-        title: url.title || 'URL Encurtada',
-        clicks: url.click_count || 0,
-        views: url.click_count || 0, // Para URLs encurtadas, views = clicks
-        ctr: 100 // 100% CTR para URLs encurtadas
-      })))
-    ];
+    const currentClicks = clicks.filter(c => new Date(c.clicked_at!) >= startDate);
+    const prevClicks = clicks.filter(c => new Date(c.clicked_at!) >= prevStartDate && new Date(c.clicked_at!) < prevEndDate);
+    const currentViews = views.filter(v => new Date(v.viewed_at!) >= startDate);
+    const prevViews = views.filter(v => new Date(v.viewed_at!) >= prevStartDate && new Date(v.viewed_at!) < prevEndDate);
 
-    const topLinks = allLinks
-      .sort((a, b) => b.clicks - a.clicks)
-      .slice(0, 10);
+    const totalClicks = currentClicks.length;
+    const totalViews = currentViews.length;
+    const ctr = totalViews > 0 ? (totalClicks / totalViews) * 100 : 0;
 
-    // Estatísticas diárias (últimos 7 dias)
-    const dailyStats = Array.from({ length: 7 }, (_, i) => {
-      const date = new Date();
-      date.setDate(date.getDate() - i);
-      const dateStr = date.toISOString().split('T')[0];
-      
+    const calcChange = (current: number, previous: number) => {
+      if (previous === 0) return current > 0 ? 100 : 0;
+      return ((current - previous) / previous) * 100;
+    };
+
+    const clicksChange = calcChange(totalClicks, prevClicks.length);
+    const viewsChange = calcChange(totalViews, prevViews.length);
+    const prevCtr = prevViews.length > 0 ? (prevClicks.length / prevViews.length) * 100 : 0;
+    const ctrChange = calcChange(ctr, prevCtr);
+
+    const dailyStats = Array.from({ length: days }, (_, i) => {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+      const dayStart = new Date(d.setHours(0, 0, 0, 0)).toISOString();
+      const dayEnd = new Date(d.setHours(23, 59, 59, 999)).toISOString();
+
       return {
         date: dateStr,
-        views: Math.floor(totalViews / 7), // Distribuição simples
-        clicks: Math.floor(totalClicks / 7),
-        shares: 0
+        views: views.filter(v => v.viewed_at! >= dayStart && v.viewed_at! <= dayEnd).length,
+        clicks: clicks.filter(c => c.clicked_at! >= dayStart && c.clicked_at! <= dayEnd).length,
       };
     }).reverse();
 
-    // Estatísticas de localização (mock baseado nos cliques)
-    const locationStats = [
-      { country: 'Brasil', city: 'São Paulo', count: Math.floor(totalClicks * 0.4) },
-      { country: 'Brasil', city: 'Rio de Janeiro', count: Math.floor(totalClicks * 0.3) },
-      { country: 'Brasil', city: 'Belo Horizonte', count: Math.floor(totalClicks * 0.2) },
-      { country: 'Brasil', city: 'Brasília', count: Math.floor(totalClicks * 0.1) },
-    ].filter(stat => stat.count > 0);
+    const allLinkItems = bioLinks.flatMap(bl => bl.bio_link_items);
+    const topLinks = allLinkItems.map(item => {
+      const itemClicks = currentClicks.filter(c => c.bio_link_item_id === item.id).length;
+      // Simulating views per link for now
+      const itemViews = Math.floor(itemClicks / (ctr / 100)) || itemClicks;
+      return {
+        title: item.title,
+        clicks: itemClicks,
+        views: itemViews,
+        ctr: itemViews > 0 ? (itemClicks / itemViews) * 100 : 0,
+        iconId: item.icon || 'website',
+      };
+    }).sort((a, b) => b.clicks - a.clicks).slice(0, 5);
 
-    // Device stats (baseado em user agents dos cliques)
-    const deviceStats = {
-      mobile: Math.floor(totalClicks * 0.7),
-      desktop: Math.floor(totalClicks * 0.25),
-      tablet: Math.floor(totalClicks * 0.05)
-    };
+    return { totalViews, totalClicks, ctr, viewsChange, clicksChange, ctrChange, dailyStats, topLinks };
+  }, [data, period])();
 
-    return {
-      totalViews,
-      totalClicks,
-      totalShares: 0, // Não implementado ainda
-      uniqueVisitors: Math.floor(totalViews * 0.7), // Estimativa
-      conversionRate: totalViews > 0 ? (totalClicks / totalViews) * 100 : 0,
-      topLinks,
-      dailyStats,
-      locationStats,
-      deviceStats
-    };
-  }, [rawData]);
-
-  const trackEvent = useCallback(async (
-    type: AnalyticsData['type'],
-    source: string,
-    metadata?: Partial<AnalyticsData>
-  ) => {
+  const exportData = useCallback(async (format: 'csv' | 'json') => {
+    setIsExporting(true);
     try {
-      // Implementar tracking de eventos personalizados se necessário
-      console.log('Event tracked:', { type, source, metadata });
-    } catch (error) {
-      console.error('Error tracking event:', error);
-    }
-  }, []);
-
-  const exportData = useCallback(async (format: 'csv' | 'json' = 'csv') => {
-    setLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (format === 'csv') {
-        const csvContent = [
-          'Métrica,Valor',
-          `Total de Visualizações,${metrics.totalViews}`,
-          `Total de Cliques,${metrics.totalClicks}`,
-          `Taxa de Conversão,${metrics.conversionRate.toFixed(2)}%`,
-          `Visitantes Únicos,${metrics.uniqueVisitors}`,
-          '',
-          'Top Links:',
-          'Título,URL,Cliques',
-          ...metrics.topLinks.map(link => `${link.title},${link.url},${link.clicks}`)
-        ].join('\n');
-        
-        const blob = new Blob([csvContent], { type: 'text/csv' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `analytics-${period}.csv`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-      } else {
-        const jsonContent = JSON.stringify({ metrics, period }, null, 2);
-        const blob = new Blob([jsonContent], { type: 'application/json' });
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `analytics-${period}.json`;
-        a.click();
-        window.URL.revokeObjectURL(url);
-      }
-
+      const headers = "data,visualizacoes,cliques\n";
+      const csv = metrics.dailyStats.map(d => `${d.date},${d.views},${d.clicks}`).join("\n");
+      const blob = new Blob([headers + csv], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement("a");
+      const url = URL.createObjectURL(blob);
+      link.setAttribute("href", url);
+      link.setAttribute("download", `analytics-${period}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
       toast.success("Dados exportados com sucesso!");
-      
     } catch (error) {
-      toast.error("Erro na exportação", {
-        description: "Não foi possível exportar os dados."
-      });
+      toast.error("Erro ao exportar dados.");
     } finally {
-      setLoading(false);
+      setIsExporting(false);
     }
-  }, [metrics, period]);
+  }, [metrics.dailyStats, period]);
 
-  return {
-    metrics,
-    loading: isQueryLoading || loading,
-    trackEvent,
-    exportData
-  };
+  return { metrics, isLoading, exportData, isExporting };
 }

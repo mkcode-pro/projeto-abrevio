@@ -6,89 +6,17 @@ import {
   Calendar, 
   Download, 
   ArrowUpRight, 
-  ArrowDownRight,
   Filter,
-  Instagram,
-  MessageCircle,
-  Youtube,
-  Globe
+  Loader2
 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, PieChart, Pie, Cell } from 'recharts'
-
-// Mock data for different periods
-const mockData = {
-  '7': {
-    totalViews: 2540,
-    totalClicks: 1234,
-    clickRate: 48.6,
-    growth: {
-      views: 12.5,
-      clicks: 8.3
-    },
-    chartData: [
-      { date: '19/01', clicks: 156, views: 320 },
-      { date: '20/01', clicks: 142, views: 298 },
-      { date: '21/01', clicks: 189, views: 380 },
-      { date: '22/01', clicks: 167, views: 342 },
-      { date: '23/01', clicks: 203, views: 410 },
-      { date: '24/01', clicks: 178, views: 365 },
-      { date: '25/01', clicks: 199, views: 425 }
-    ],
-    linkData: [
-      { id: 1, name: 'WhatsApp Business', icon: MessageCircle, color: 'from-green-400 to-green-600', clicks: 556, views: 1143, rate: 48.6, change: 15.2 },
-      { id: 2, name: 'Instagram', icon: Instagram, color: 'from-purple-500 to-pink-500', clicks: 395, views: 812, rate: 48.6, change: 8.7 },
-      { id: 3, name: 'YouTube', icon: Youtube, color: 'from-red-500 to-red-700', clicks: 185, views: 432, rate: 42.8, change: -2.1 },
-      { id: 4, name: 'Site Pessoal', icon: Globe, color: 'from-blue-500 to-indigo-600', clicks: 98, views: 153, rate: 64.0, change: 5.3 }
-    ]
-  },
-  '30': {
-    totalViews: 8750,
-    totalClicks: 4320,
-    clickRate: 49.4,
-    growth: {
-      views: 18.7,
-      clicks: 22.1
-    },
-    chartData: [
-      { date: 'Sem 1', clicks: 890, views: 1820 },
-      { date: 'Sem 2', clicks: 1050, views: 2150 },
-      { date: 'Sem 3', clicks: 1180, views: 2380 },
-      { date: 'Sem 4', clicks: 1200, views: 2400 }
-    ],
-    linkData: [
-      { id: 1, name: 'WhatsApp Business', icon: MessageCircle, color: 'from-green-400 to-green-600', clicks: 1944, views: 3937, rate: 49.4, change: 22.1 },
-      { id: 2, name: 'Instagram', icon: Instagram, color: 'from-purple-500 to-pink-500', clicks: 1382, views: 2800, rate: 49.4, change: 18.7 },
-      { id: 3, name: 'YouTube', icon: Youtube, color: 'from-red-500 to-red-700', clicks: 648, views: 1575, rate: 41.1, change: 12.3 },
-      { id: 4, name: 'Site Pessoal', icon: Globe, color: 'from-blue-500 to-indigo-600', clicks: 346, views: 438, rate: 79.0, change: 15.8 }
-    ]
-  },
-  '90': {
-    totalViews: 24800,
-    totalClicks: 12650,
-    clickRate: 51.0,
-    growth: {
-      views: 45.2,
-      clicks: 52.8
-    },
-    chartData: [
-      { date: 'Mês 1', clicks: 3200, views: 6800 },
-      { date: 'Mês 2', clicks: 4150, views: 8200 },
-      { date: 'Mês 3', clicks: 5300, views: 9800 }
-    ],
-    linkData: [
-      { id: 1, name: 'WhatsApp Business', icon: MessageCircle, color: 'from-green-400 to-green-600', clicks: 5692, views: 11160, rate: 51.0, change: 52.8 },
-      { id: 2, name: 'Instagram', icon: Instagram, color: 'from-purple-500 to-pink-500', clicks: 4048, views: 7936, rate: 51.0, change: 45.2 },
-      { id: 3, name: 'YouTube', icon: Youtube, color: 'from-red-500 to-red-700', clicks: 1898, views: 3720, rate: 51.0, change: 38.9 },
-      { id: 4, name: 'Site Pessoal', icon: Globe, color: 'from-blue-500 to-indigo-600', clicks: 1012, views: 984, rate: 102.8, change: 67.3 }
-    ]
-  }
-}
-
-const pieColors = ['#00B8FF', '#8B5CF6', '#EF4444', '#3B82F6']
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
+import { useAnalytics } from "@/hooks/useAnalytics"
+import { Skeleton } from "@/components/ui/skeleton"
+import { getIconById } from "@/components/biolink-editor/IconLibrary"
 
 function MetricCard({ title, value, change, icon: Icon, suffix = "" }: {
   title: string
@@ -97,7 +25,7 @@ function MetricCard({ title, value, change, icon: Icon, suffix = "" }: {
   icon: any
   suffix?: string
 }) {
-  const isPositive = change > 0
+  const isPositive = change >= 0
   
   return (
     <Card className="glass-card border-white/20 hover:border-neon-blue/50 transition-all">
@@ -110,11 +38,7 @@ function MetricCard({ title, value, change, icon: Icon, suffix = "" }: {
               {suffix}
             </p>
             <div className="flex items-center gap-1 mt-2">
-              {isPositive ? (
-                <ArrowUpRight className="w-4 h-4 text-emerald-400" />
-              ) : (
-                <ArrowDownRight className="w-4 h-4 text-red-400" />
-              )}
+              <ArrowUpRight className={`w-4 h-4 ${isPositive ? 'text-emerald-400' : 'text-red-400'}`} />
               <span className={`text-sm font-medium ${isPositive ? 'text-emerald-400' : 'text-red-400'}`}>
                 {Math.abs(change)}%
               </span>
@@ -137,7 +61,7 @@ function CustomTooltip({ active, payload, label }: any) {
         <p className="text-white font-medium">{label}</p>
         {payload.map((entry: any, index: number) => (
           <p key={index} className="text-sm" style={{ color: entry.color }}>
-            {entry.dataKey === 'clicks' ? 'Cliques' : 'Visualizações'}: {entry.value.toLocaleString()}
+            {entry.name}: {entry.value.toLocaleString()}
           </p>
         ))}
       </div>
@@ -146,46 +70,20 @@ function CustomTooltip({ active, payload, label }: any) {
   return null
 }
 
+const PIE_COLORS = ['#00B8FF', '#8B5CF6', '#10B981', '#F59E0B', '#EF4444'];
+
 export default function Analytics() {
-  const [selectedPeriod, setSelectedPeriod] = useState<'7' | '30' | '90'>('7')
-  const [sortBy, setSortBy] = useState<'clicks' | 'views' | 'rate'>('clicks')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [period, setPeriod] = useState<'7d' | '30d' | '90d'>('7d')
+  const { metrics, isLoading, exportData, isExporting } = useAnalytics(period)
 
-  const currentData = mockData[selectedPeriod]
-
-  const handleExport = () => {
-    // Simulate export functionality
-    const exportData = {
-      period: selectedPeriod,
-      ...currentData
-    }
-    
-    const dataStr = JSON.stringify(exportData, null, 2)
-    const dataBlob = new Blob([dataStr], { type: 'application/json' })
-    const url = URL.createObjectURL(dataBlob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `analytics-${selectedPeriod}dias-${new Date().toISOString().split('T')[0]}.json`
-    link.click()
-    URL.revokeObjectURL(url)
+  if (isLoading) {
+    return <AnalyticsSkeleton />
   }
 
-  const sortedLinkData = [...currentData.linkData].sort((a, b) => {
-    const aValue = a[sortBy]
-    const bValue = b[sortBy]
-    return sortOrder === 'desc' ? bValue - aValue : aValue - bValue
-  })
-
-  const pieData = currentData.linkData.map((link, index) => ({
-    name: link.name,
-    value: link.clicks,
-    color: pieColors[index]
-  }))
-
   const periodLabels = {
-    '7': 'Últimos 7 dias',
-    '30': 'Últimos 30 dias',
-    '90': 'Últimos 90 dias'
+    '7d': 'Últimos 7 dias',
+    '30d': 'Últimos 30 dias',
+    '90d': 'Últimos 90 dias'
   }
 
   return (
@@ -199,140 +97,70 @@ export default function Analytics() {
           </div>
           
           <div className="flex flex-col sm:flex-row gap-3">
-            <Select value={selectedPeriod} onValueChange={(value: '7' | '30' | '90') => setSelectedPeriod(value)}>
+            <Select value={period} onValueChange={(value: '7d' | '30d' | '90d') => setPeriod(value)}>
               <SelectTrigger className="w-full sm:w-48 bg-white/5 border-white/20 text-white">
                 <Calendar className="w-4 h-4 mr-2" />
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="glass-card border-white/20">
-                <SelectItem value="7">{periodLabels['7']}</SelectItem>
-                <SelectItem value="30">{periodLabels['30']}</SelectItem>
-                <SelectItem value="90">{periodLabels['90']}</SelectItem>
+                <SelectItem value="7d">{periodLabels['7d']}</SelectItem>
+                <SelectItem value="30d">{periodLabels['30d']}</SelectItem>
+                <SelectItem value="90d">{periodLabels['90d']}</SelectItem>
               </SelectContent>
             </Select>
             
             <Button 
-              onClick={handleExport}
+              onClick={() => exportData('csv')}
               variant="outline" 
               className="border-white/20 text-white hover:bg-white/10"
+              disabled={isExporting}
             >
-              <Download className="w-4 h-4 mr-2" />
-              Exportar
+              {isExporting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Download className="w-4 h-4 mr-2" />}
+              {isExporting ? 'Exportando...' : 'Exportar CSV'}
             </Button>
           </div>
         </div>
 
         {/* Metrics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <MetricCard
-            title="Total de Visualizações"
-            value={currentData.totalViews}
-            change={currentData.growth.views}
-            icon={Eye}
-          />
-          <MetricCard
-            title="Total de Cliques"
-            value={currentData.totalClicks}
-            change={currentData.growth.clicks}
-            icon={MousePointer}
-          />
-          <MetricCard
-            title="Taxa de Cliques"
-            value={currentData.clickRate}
-            change={2.1}
-            icon={TrendingUp}
-            suffix="%"
-          />
-          <MetricCard
-            title="Link Mais Clicado"
-            value={currentData.linkData[0].name}
-            change={currentData.linkData[0].change}
-            icon={currentData.linkData[0].icon}
-          />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <MetricCard title="Visualizações" value={metrics.totalViews} change={metrics.viewsChange} icon={Eye} />
+          <MetricCard title="Cliques" value={metrics.totalClicks} change={metrics.clicksChange} icon={MousePointer} />
+          <MetricCard title="Taxa de Cliques" value={metrics.ctr.toFixed(2)} change={metrics.ctrChange} icon={TrendingUp} suffix="%" />
         </div>
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Line Chart */}
           <Card className="glass-card border-white/20">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <TrendingUp className="w-5 h-5 text-neon-blue" />
-                Cliques por Período
-              </CardTitle>
+              <CardTitle className="text-white">Visualizações e Cliques</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
-                <LineChart data={currentData.chartData}>
+                <LineChart data={metrics.dailyStats}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" />
-                  <XAxis 
-                    dataKey="date" 
-                    stroke="#fff" 
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis 
-                    stroke="#fff" 
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
+                  <XAxis dataKey="date" stroke="#fff" fontSize={12} tickLine={false} axisLine={false} />
+                  <YAxis stroke="#fff" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip content={<CustomTooltip />} />
-                  <Line 
-                    type="monotone" 
-                    dataKey="clicks" 
-                    stroke="#00B8FF" 
-                    strokeWidth={3}
-                    dot={{ fill: '#00B8FF', strokeWidth: 2, r: 4 }}
-                    activeDot={{ r: 6, stroke: '#00B8FF', strokeWidth: 2, fill: '#fff' }}
-                  />
-                  <Line 
-                    type="monotone" 
-                    dataKey="views" 
-                    stroke="#8B5CF6" 
-                    strokeWidth={2}
-                    strokeDasharray="5 5"
-                    dot={{ fill: '#8B5CF6', strokeWidth: 2, r: 3 }}
-                  />
+                  <Line type="monotone" dataKey="views" name="Visualizações" stroke="#8B5CF6" strokeWidth={2} />
+                  <Line type="monotone" dataKey="clicks" name="Cliques" stroke="#00B8FF" strokeWidth={3} />
                 </LineChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>
 
-          {/* Pie Chart */}
           <Card className="glass-card border-white/20">
             <CardHeader>
-              <CardTitle className="text-white flex items-center gap-2">
-                <Filter className="w-5 h-5 text-neon-blue" />
-                Distribuição de Cliques
-              </CardTitle>
+              <CardTitle className="text-white">Distribuição de Cliques</CardTitle>
             </CardHeader>
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <PieChart>
-                  <Pie
-                    data={pieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={5}
-                    dataKey="value"
-                  >
-                    {pieData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                  <Pie data={metrics.topLinks} dataKey="clicks" nameKey="title" cx="50%" cy="50%" innerRadius={60} outerRadius={100} paddingAngle={5}>
+                    {metrics.topLinks.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={PIE_COLORS[index % PIE_COLORS.length]} />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    formatter={(value: number) => [value.toLocaleString(), 'Cliques']}
-                    contentStyle={{
-                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
-                      border: '1px solid rgba(255, 255, 255, 0.2)',
-                      borderRadius: '8px',
-                      color: '#fff'
-                    }}
-                  />
+                  <Tooltip content={<CustomTooltip />} />
                 </PieChart>
               </ResponsiveContainer>
             </CardContent>
@@ -342,23 +170,7 @@ export default function Analytics() {
         {/* Performance Table */}
         <Card className="glass-card border-white/20">
           <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <CardTitle className="text-white flex items-center gap-2">
-                <MousePointer className="w-5 h-5 text-neon-blue" />
-                Performance por Link
-              </CardTitle>
-              <Select value={sortBy} onValueChange={(value: 'clicks' | 'views' | 'rate') => setSortBy(value)}>
-                <SelectTrigger className="w-full sm:w-48 bg-white/5 border-white/20 text-white">
-                  <Filter className="w-4 h-4 mr-2" />
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="glass-card border-white/20">
-                  <SelectItem value="clicks">Ordenar por Cliques</SelectItem>
-                  <SelectItem value="views">Ordenar por Visualizações</SelectItem>
-                  <SelectItem value="rate">Ordenar por Taxa</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            <CardTitle className="text-white">Performance por Link</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
@@ -366,40 +178,27 @@ export default function Analytics() {
                 <TableHeader>
                   <TableRow className="border-white/10">
                     <TableHead className="text-white/80">Link</TableHead>
-                    <TableHead className="text-white/80">Cliques</TableHead>
-                    <TableHead className="text-white/80">Visualizações</TableHead>
-                    <TableHead className="text-white/80">Taxa de Cliques</TableHead>
-                    <TableHead className="text-white/80">Crescimento</TableHead>
+                    <TableHead className="text-white/80 text-right">Cliques</TableHead>
+                    <TableHead className="text-white/80 text-right">Visualizações</TableHead>
+                    <TableHead className="text-white/80 text-right">Taxa de Cliques</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedLinkData.map((link) => {
-                    const IconComponent = link.icon
+                  {metrics.topLinks.map((link) => {
+                    const IconComponent = getIconById(link.iconId)?.icon || Filter;
                     return (
-                      <TableRow key={link.id} className="border-white/10 hover:bg-white/5">
+                      <TableRow key={link.title} className="border-white/10 hover:bg-white/5">
                         <TableCell>
                           <div className="flex items-center gap-3">
-                            <div className={`p-2 rounded-lg bg-gradient-to-r ${link.color}`}>
-                              <IconComponent className="w-4 h-4 text-white" />
+                            <div className="p-2 rounded-lg bg-white/10">
+                              <IconComponent className="w-4 h-4 text-neon-blue" />
                             </div>
-                            <span className="text-white font-medium">{link.name}</span>
+                            <span className="text-white font-medium">{link.title}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="text-white font-mono">{link.clicks.toLocaleString()}</TableCell>
-                        <TableCell className="text-white/80 font-mono">{link.views.toLocaleString()}</TableCell>
-                        <TableCell className="text-white/80 font-mono">{link.rate.toFixed(1)}%</TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-1">
-                            {link.change > 0 ? (
-                              <ArrowUpRight className="w-4 h-4 text-emerald-400" />
-                            ) : (
-                              <ArrowDownRight className="w-4 h-4 text-red-400" />
-                            )}
-                            <span className={`font-medium ${link.change > 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                              {Math.abs(link.change).toFixed(1)}%
-                            </span>
-                          </div>
-                        </TableCell>
+                        <TableCell className="text-white font-mono text-right">{link.clicks.toLocaleString()}</TableCell>
+                        <TableCell className="text-white/80 font-mono text-right">{link.views.toLocaleString()}</TableCell>
+                        <TableCell className="text-white/80 font-mono text-right">{link.ctr.toFixed(2)}%</TableCell>
                       </TableRow>
                     )
                   })}
@@ -408,21 +207,29 @@ export default function Analytics() {
             </div>
           </CardContent>
         </Card>
-
-        {/* Summary Footer */}
-        <Card className="glass-card border-white/20">
-          <CardContent className="p-6">
-            <div className="text-center">
-              <p className="text-white/60 text-sm">
-                Relatório gerado para o período de <span className="text-neon-blue font-medium">{periodLabels[selectedPeriod].toLowerCase()}</span>
-              </p>
-              <p className="text-white/40 text-xs mt-1">
-                Última atualização: {new Date().toLocaleString('pt-BR')}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   )
 }
+
+const AnalyticsSkeleton = () => (
+  <div className="p-6 max-w-7xl mx-auto space-y-6">
+    <div className="flex justify-between items-center">
+      <Skeleton className="h-10 w-64" />
+      <div className="flex gap-3">
+        <Skeleton className="h-10 w-48" />
+        <Skeleton className="h-10 w-32" />
+      </div>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <Skeleton className="h-36 rounded-2xl" />
+      <Skeleton className="h-36 rounded-2xl" />
+      <Skeleton className="h-36 rounded-2xl" />
+    </div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Skeleton className="h-80 rounded-2xl" />
+      <Skeleton className="h-80 rounded-2xl" />
+    </div>
+    <Skeleton className="h-96 rounded-2xl" />
+  </div>
+);
