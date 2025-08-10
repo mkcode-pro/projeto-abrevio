@@ -23,7 +23,6 @@ export function UrlShortenerCard() {
       return
     }
 
-    // Validar URL
     try {
       new URL(originalUrl)
     } catch {
@@ -66,7 +65,6 @@ export function UrlShortenerCard() {
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="title" className="text-white text-sm">Título (opcional)</Label>
@@ -117,7 +115,6 @@ export function UrlShortenerCard() {
           </Button>
         </form>
 
-        {/* URLs List */}
         <div className="space-y-3">
           <h4 className="text-white font-semibold text-sm">Links Recentes</h4>
           {isLoadingUrls ? (

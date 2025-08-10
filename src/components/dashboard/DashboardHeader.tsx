@@ -1,4 +1,4 @@
-import { Plus, Bell, Search, Menu } from "lucide-react"
+import { Plus, Bell, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SidebarTrigger } from "@/components/ui/sidebar"
