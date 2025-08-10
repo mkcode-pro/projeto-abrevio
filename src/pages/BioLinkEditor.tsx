@@ -11,57 +11,64 @@ import { useBioLink } from "@/hooks/useBioLink"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export default function BioLinkEditor() {
-  const { bioLinkData, isLoading, updateProfile, updateLinks, isSaving } = useBioLink()
+  const { bioLinkData, isLoading, isError, updateProfile, updateLinks, isSaving } = useBioLink()
   
-  const [userData, setUserData] = useState<UserData | null>(null)
-  const [links, setLinks] = useState<LinkData[]>([])
+  const [editedUserData, setEditedUserData] = useState<UserData | null>(null)
+  const [editedLinks, setEditedLinks] = useState<LinkData[]>([])
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   
   const isMobile = useIsMobile()
 
   useEffect(() => {
     if (bioLinkData) {
-      setUserData(bioLinkData.userData)
-      setLinks(bioLinkData.links)
+      setEditedUserData(bioLinkData.userData)
+      setEditedLinks(bioLinkData.links)
+      setHasUnsavedChanges(false) // Reset on data load
     }
   }, [bioLinkData])
 
   const handleUserDataUpdate = (updates: Partial<UserData>) => {
-    if (!userData) return;
-    setUserData(prev => ({ ...prev!, ...updates }))
+    if (!editedUserData) return;
+    setEditedUserData(prev => ({ ...prev!, ...updates }))
     setHasUnsavedChanges(true)
   }
 
   const handleLinksChange = (newLinks: LinkData[]) => {
-    setLinks(newLinks)
+    setEditedLinks(newLinks)
     setHasUnsavedChanges(true)
   }
 
   const handleSave = () => {
-    if (userData) {
-      updateProfile(userData)
+    if (editedUserData) {
+      updateProfile(editedUserData)
     }
-    updateLinks(links)
+    updateLinks(editedLinks)
     setHasUnsavedChanges(false)
   }
 
   const handlePreview = () => {
-    if (userData?.username) {
-      window.open(`/bio/${userData.username}`, '_blank')
+    if (editedUserData?.username) {
+      window.open(`/bio/${editedUserData.username}`, '_blank')
     }
   }
 
-  if (isLoading) {
+  if (isLoading || (!bioLinkData && !isError)) {
     return <EditorSkeleton isMobile={isMobile} />
   }
 
-  if (!userData) {
-    // TODO: Handle case where user has no bio link yet
+  if (isError) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-white">
-        Carregando dados do editor...
+      <div className="min-h-screen flex items-center justify-center text-red-400">
+        <p>Ocorreu um erro ao carregar os dados. Tente recarregar a página.</p>
       </div>
     )
+  }
+
+  const userDataToDisplay = editedUserData || bioLinkData?.userData;
+  const linksToDisplay = editedLinks;
+
+  if (!userDataToDisplay) {
+      return <EditorSkeleton isMobile={isMobile} />;
   }
 
   return (
@@ -106,12 +113,12 @@ export default function BioLinkEditor() {
           {/* Painel de Edição */}
           <div className="lg:col-span-8 space-y-8">
             <ProfileEditor
-              userData={userData}
+              userData={userDataToDisplay}
               onUpdate={handleUserDataUpdate}
             />
             
             <LinksManager
-              links={links}
+              links={linksToDisplay}
               onLinksChange={handleLinksChange}
             />
           </div>
@@ -119,7 +126,7 @@ export default function BioLinkEditor() {
           {/* Painel de Preview */}
           <div className="lg:col-span-4">
             <div className="sticky top-24">
-              <BioLinkPreview userData={userData} links={links} />
+              <BioLinkPreview userData={userDataToDisplay} links={linksToDisplay} />
             </div>
           </div>
         </div>
