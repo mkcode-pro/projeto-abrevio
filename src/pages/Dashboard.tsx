@@ -29,10 +29,10 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen">
-      {!isMobile ? (
-        // Desktop: Layout com sidebar
-        <SidebarProvider>
+    <SidebarProvider>
+      <div className="min-h-screen">
+        {!isMobile ? (
+          // Desktop: Layout com sidebar
           <div className="flex min-h-screen w-full">
             <AppSidebar />
             <main className="flex-1">
@@ -50,32 +50,32 @@ export default function Dashboard() {
               </ResponsiveContainer>
             </main>
           </div>
-        </SidebarProvider>
-      ) : (
-        // Mobile: Layout otimizado
-        <div className="min-h-screen">
-          <DashboardHeader />
-          <ResponsiveContainer padding="md" className="py-6">
-            <div className="space-y-6">
-              {/* Cards principais em grid otimizado */}
-              <StatsCards />
-              
-              {/* Bio Links */}
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-white">Suas Bio Pages</h2>
-                <BiolinksGrid />
+        ) : (
+          // Mobile: Layout otimizado
+          <div className="min-h-screen">
+            <DashboardHeader />
+            <ResponsiveContainer padding="md" className="py-6">
+              <div className="space-y-6">
+                {/* Cards principais em grid otimizado */}
+                <StatsCards />
+                
+                {/* Bio Links */}
+                <div className="space-y-4">
+                  <h2 className="text-lg font-semibold text-white">Suas Bio Pages</h2>
+                  <BiolinksGrid />
+                </div>
+                
+                {/* URL Shortener */}
+                <div className="space-y-4">
+                  <h2 className="text-lg font-semibold text-white">Encurtador de Links</h2>
+                  <UrlShortenerCard />
+                </div>
               </div>
-              
-              {/* URL Shortener */}
-              <div className="space-y-4">
-                <h2 className="text-lg font-semibold text-white">Encurtador de Links</h2>
-                <UrlShortenerCard />
-              </div>
-            </div>
-          </ResponsiveContainer>
-        </div>
-      )}
-    </div>
+            </ResponsiveContainer>
+          </div>
+        )}
+      </div>
+    </SidebarProvider>
   )
 }
 
