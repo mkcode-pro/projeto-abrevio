@@ -1,101 +1,73 @@
 import { useState, useCallback } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 interface UseFileUploadOptions {
+  bucket: string;
   maxSize?: number; // in bytes
   allowedTypes?: string[];
-  onSuccess?: (file: File, url: string) => void;
-  onError?: (error: string) => void;
 }
 
 export function useFileUpload({
+  bucket,
   maxSize = 5 * 1024 * 1024, // 5MB default
   allowedTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"],
-  onSuccess,
-  onError
-}: UseFileUploadOptions = {}) {
+}: UseFileUploadOptions) {
+  const { user } = useAuth();
   const [uploading, setUploading] = useState(false);
-  const [preview, setPreview] = useState<string | null>(null);
-  const { toast } = useToast();
+  const [progress, setProgress] = useState(0);
 
-  const validateFile = useCallback((file: File): string | null => {
+  const uploadFile = useCallback(async (file: File): Promise<string | null> => {
+    if (!user) {
+      toast.error("Você precisa estar logado para fazer upload.");
+      return null;
+    }
+
+    // Validate file
     if (file.size > maxSize) {
-      return `Arquivo muito grande. Máximo ${(maxSize / (1024 * 1024)).toFixed(1)}MB`;
+      toast.error("Arquivo muito grande", { description: `O tamanho máximo é ${maxSize / 1024 / 1024}MB.` });
+      return null;
     }
-
     if (!allowedTypes.includes(file.type)) {
-      return "Tipo de arquivo não suportado. Use JPG, PNG, GIF ou WebP";
-    }
-
-    return null;
-  }, [maxSize, allowedTypes]);
-
-  const uploadFile = useCallback(async (file: File) => {
-    const validationError = validateFile(file);
-    if (validationError) {
-      toast({
-        title: "Erro no arquivo",
-        description: validationError,
-        variant: "destructive"
-      });
-      onError?.(validationError);
+      toast.error("Tipo de arquivo inválido", { description: "Por favor, selecione uma imagem." });
       return null;
     }
 
     setUploading(true);
+    setProgress(0);
 
     try {
-      // Create preview
-      const reader = new FileReader();
-      reader.onload = () => {
-        setPreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/${Date.now()}.${fileExt}`;
 
-      // Simulate upload (replace with real upload logic)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Generate a mock URL (in real app, this would come from your storage service)
-      const mockUrl = URL.createObjectURL(file);
-      
-      toast({
-        title: "Upload realizado",
-        description: "Arquivo enviado com sucesso!",
-      });
+      const { error } = await supabase.storage
+        .from(bucket)
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
 
-      onSuccess?.(file, mockUrl);
-      return mockUrl;
-    } catch (error) {
-      const errorMessage = "Erro ao fazer upload do arquivo";
-      toast({
-        title: "Erro no upload",
-        description: errorMessage,
-        variant: "destructive"
-      });
-      onError?.(errorMessage);
+      if (error) throw error;
+
+      const { data } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(filePath);
+
+      toast.success("Upload concluído!");
+      return data.publicUrl;
+    } catch (error: any) {
+      toast.error("Erro no upload", { description: error.message });
       return null;
     } finally {
       setUploading(false);
+      setProgress(100);
     }
-  }, [validateFile, toast, onSuccess, onError]);
-
-  const handleFileSelect = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      uploadFile(file);
-    }
-  }, [uploadFile]);
-
-  const clearPreview = useCallback(() => {
-    setPreview(null);
-  }, []);
+  }, [user, bucket, maxSize, allowedTypes]);
 
   return {
     uploading,
-    preview,
+    progress,
     uploadFile,
-    handleFileSelect,
-    clearPreview,
-    validateFile
   };
 }

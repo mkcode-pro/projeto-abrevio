@@ -1,13 +1,13 @@
 import { useRef } from "react"
-import { Upload } from "lucide-react"
+import { Upload, Loader2 } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { toast } from "sonner"
 import { UserData } from './BioLinkPreview'
+import { useFileUpload } from "@/hooks/useFileUpload"
 
 interface ProfileEditorProps {
   userData: UserData
@@ -16,16 +16,15 @@ interface ProfileEditorProps {
 
 export function ProfileEditor({ userData, onUpdate }: ProfileEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const { uploadFile, uploading } = useFileUpload({ bucket: 'avatars' })
 
-  const handleAvatarUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      const reader = new FileReader()
-      reader.onload = (e) => {
-        onUpdate({ avatar: e.target?.result as string })
-        toast.success("Avatar atualizado!")
+      const publicUrl = await uploadFile(file)
+      if (publicUrl) {
+        onUpdate({ avatar: publicUrl })
       }
-      reader.readAsDataURL(file)
     }
   }
 
@@ -49,9 +48,14 @@ export function ProfileEditor({ userData, onUpdate }: ProfileEditorProps) {
               variant="outline"
               size="sm"
               className="border-white/20 text-white hover:bg-white/10"
+              disabled={uploading}
             >
-              <Upload className="w-4 h-4 mr-2" />
-              Alterar Avatar
+              {uploading ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Upload className="w-4 h-4 mr-2" />
+              )}
+              {uploading ? 'Enviando...' : 'Alterar Avatar'}
             </Button>
             <input
               ref={fileInputRef}
