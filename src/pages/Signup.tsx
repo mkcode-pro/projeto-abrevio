@@ -31,25 +31,31 @@ export default function Signup() {
   })
 
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
+  const [usernameCheckError, setUsernameCheckError] = useState<string | null>(null);
   const usernameValue = watch('username');
   const debouncedUsername = useDebounce(usernameValue, 500);
 
   useEffect(() => {
     const checkUsername = async () => {
+      setUsernameCheckError(null);
       if (!debouncedUsername || debouncedUsername.length < 3) {
         setUsernameStatus('idle');
         return;
       }
       setUsernameStatus('checking');
-      const { data, error } = await supabase.rpc('username_exists', { p_username: debouncedUsername });
-      
-      if (error) {
+      try {
+        const { data, error } = await supabase.rpc('username_exists', { p_username: debouncedUsername });
+        
+        if (error) {
+          throw new Error(error.message);
+        }
+        
+        setUsernameStatus(data ? 'taken' : 'available');
+      } catch (error) {
         console.error("Erro ao verificar username:", error);
-        setUsernameStatus('idle'); // Reset in case of error
-        return;
+        setUsernameStatus('idle');
+        setUsernameCheckError("Não foi possível verificar o usuário. Tente novamente.");
       }
-      
-      setUsernameStatus(data ? 'taken' : 'available');
     };
 
     checkUsername();
@@ -101,6 +107,7 @@ export default function Signup() {
               </div>
               {errors.username && <p className="text-sm text-red-400">{errors.username.message}</p>}
               {usernameStatus === 'taken' && <p className="text-sm text-red-400">Este nome de usuário já está em uso.</p>}
+              {usernameCheckError && <p className="text-sm text-amber-400">{usernameCheckError}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>

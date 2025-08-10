@@ -40,6 +40,7 @@ export default function Settings() {
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
+  const [usernameCheckError, setUsernameCheckError] = useState<string | null>(null);
 
   const { register, handleSubmit, formState: { errors, isDirty }, reset, watch } = useForm<UserDataForm>({
     resolver: zodResolver(userDataSchema),
@@ -60,20 +61,21 @@ export default function Settings() {
 
   useEffect(() => {
     const checkUsername = async () => {
+      setUsernameCheckError(null);
       if (!user || !debouncedUsername || debouncedUsername === user.username || debouncedUsername.length < 3) {
         setUsernameStatus('idle');
         return;
       }
       setUsernameStatus('checking');
-      const { data, error } = await supabase.rpc('username_exists', { p_username: debouncedUsername });
-
-      if (error) {
+      try {
+        const { data, error } = await supabase.rpc('username_exists', { p_username: debouncedUsername });
+        if (error) throw new Error(error.message);
+        setUsernameStatus(data ? 'taken' : 'available');
+      } catch (error) {
         console.error("Erro ao verificar username:", error);
         setUsernameStatus('idle');
-        return;
+        setUsernameCheckError("Não foi possível verificar o usuário. Tente novamente.");
       }
-      
-      setUsernameStatus(data ? 'taken' : 'available');
     };
     checkUsername();
   }, [debouncedUsername, user]);
@@ -162,6 +164,7 @@ export default function Settings() {
                   </div>
                   {errors.username && <p className="text-sm text-destructive">{errors.username.message}</p>}
                   {usernameStatus === 'taken' && <p className="text-sm text-red-400">Este nome de usuário já está em uso.</p>}
+                  {usernameCheckError && <p className="text-sm text-amber-400">{usernameCheckError}</p>}
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="email">E-mail</Label>
