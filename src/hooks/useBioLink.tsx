@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { LinkData } from "@/components/biolink-editor/SortableLinkItem";
 import { UserData } from "@/components/biolink-editor/BioLinkPreview";
+import { useMemo } from "react";
 
 // Buscar bio link do usuário
 const fetchBioLink = async (userId: string) => {
@@ -133,21 +134,25 @@ export function useBioLink() {
     });
   };
 
-  const bioLinkData = user ? {
-    userData: {
-      name: bioLink?.display_name || user.name || '',
-      username: bioLink?.username || user.username || '',
-      bio: bioLink?.bio || '',
-      avatar: bioLink?.avatar_url || user.avatar || '',
-    },
-    links: bioLink?.bio_link_items?.sort((a: any, b: any) => a.position - b.position)
-      .map((item: any) => ({
-        id: item.id,
-        title: item.title,
-        url: item.url,
-        iconId: item.icon || 'website'
-      })) || [],
-  } : null;
+  const bioLinkData = useMemo(() => {
+    if (!user) return null;
+    
+    return {
+      userData: {
+        name: bioLink?.display_name || user.name || '',
+        username: bioLink?.username || user.username || '',
+        bio: bioLink?.bio || '',
+        avatar: bioLink?.avatar_url || user.avatar || '',
+      },
+      links: bioLink?.bio_link_items?.sort((a: any, b: any) => a.position - b.position)
+        .map((item: any) => ({
+          id: item.id,
+          title: item.title,
+          url: item.url,
+          iconId: item.icon || 'website'
+        })) || [],
+    };
+  }, [user, bioLink]);
 
   return {
     bioLinkData,
