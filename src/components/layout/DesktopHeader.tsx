@@ -19,6 +19,8 @@ import {
   Home
 } from 'lucide-react'
 import { ConfirmLogoutModal } from '@/components/modals/ConfirmLogoutModal'
+import { useAuth } from '@/contexts/AuthContext'
+import { Skeleton } from '@/components/ui/skeleton'
 
 const navigationItems = [
   { label: 'Dashboard', href: '/dashboard', icon: Home },
@@ -31,13 +33,36 @@ export function DesktopHeader() {
   const navigate = useNavigate()
   const location = useLocation()
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const { user, logout, loading } = useAuth()
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logout()
     setShowLogoutModal(false)
     navigate('/')
   }
 
   const isActive = (path: string) => location.pathname === path
+
+  if (loading) {
+    return (
+      <header className="fixed top-0 left-0 right-0 z-50 bg-glass backdrop-blur-xl border-b border-white/10">
+        <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Skeleton className="h-8 w-32" />
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-8 w-24" />
+            <Skeleton className="h-8 w-24" />
+          </div>
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-8 w-20" />
+            <Skeleton className="h-8 w-8 rounded-full" />
+          </div>
+        </div>
+      </header>
+    )
+  }
+
+  if (!user) return null
 
   return (
     <>
@@ -98,8 +123,8 @@ export function DesktopHeader() {
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-glass border-white/10">
                 <div className="px-3 py-2">
-                  <p className="text-sm font-medium text-white">João Silva</p>
-                  <p className="text-xs text-white/60">@joaosilva</p>
+                  <p className="text-sm font-medium text-white">{user.name}</p>
+                  <p className="text-xs text-white/60">@{user.username}</p>
                 </div>
                 <DropdownMenuSeparator className="bg-white/10" />
                 <DropdownMenuItem 

@@ -102,36 +102,34 @@ export default function Dashboard() {
 const DashboardSkeleton = ({ isMobile }: { isMobile: boolean }) => (
   <div className="min-h-screen">
     {!isMobile ? (
-      <SidebarProvider>
-        <div className="flex min-h-screen w-full">
-          <AppSidebar />
-          <main className="flex-1">
-            <ResponsiveContainer size="xl" padding="lg" className="py-8">
-              <div className="space-y-8">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Skeleton className="h-9 w-64 mb-2" />
-                    <Skeleton className="h-5 w-80" />
-                  </div>
+      <div className="flex min-h-screen w-full">
+        <Skeleton className="w-14 hidden md:block" /> {/* Sidebar Skeleton */}
+        <main className="flex-1">
+          <ResponsiveContainer size="xl" padding="lg" className="py-8">
+            <div className="space-y-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Skeleton className="h-9 w-64 mb-2" />
+                  <Skeleton className="h-5 w-80" />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Skeleton className="h-24" />
-                  <Skeleton className="h-24" />
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <Skeleton className="h-32" />
-                  <Skeleton className="h-32" />
-                  <Skeleton className="h-32" />
-                </div>
-                <ResponsiveGrid cols={{ desktop: 2, tablet: 1, mobile: 1 }} gap="lg">
-                  <Skeleton className="h-96" />
-                  <Skeleton className="h-96" />
-                </ResponsiveGrid>
               </div>
-            </ResponsiveContainer>
-          </main>
-        </div>
-      </SidebarProvider>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Skeleton className="h-24" />
+                <Skeleton className="h-24" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Skeleton className="h-32" />
+                <Skeleton className="h-32" />
+                <Skeleton className="h-32" />
+              </div>
+              <ResponsiveGrid cols={{ desktop: 2, tablet: 1, mobile: 1 }} gap="lg">
+                <Skeleton className="h-96" />
+                <Skeleton className="h-96" />
+              </ResponsiveGrid>
+            </div>
+          </ResponsiveContainer>
+        </main>
+      </div>
     ) : (
       <ResponsiveContainer padding="md" className="py-6">
         <div className="space-y-6">
