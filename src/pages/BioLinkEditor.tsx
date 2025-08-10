@@ -23,7 +23,7 @@ export default function BioLinkEditor() {
     if (bioLinkData) {
       setEditedUserData(bioLinkData.userData)
       setEditedLinks(bioLinkData.links)
-      setHasUnsavedChanges(false) // Reset on data load
+      setHasUnsavedChanges(false)
     }
   }, [bioLinkData])
 
@@ -52,24 +52,32 @@ export default function BioLinkEditor() {
     }
   }
 
-  if (isLoading || (!bioLinkData && !isError)) {
+  // Show loading while data is being fetched or bio_link is being created
+  if (isLoading) {
     return <EditorSkeleton isMobile={isMobile} />
   }
 
+  // Show error only if there's a real error (not just missing bio_link)
   if (isError) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-red-400">
-        <p>Ocorreu um erro ao carregar os dados. Tente recarregar a página.</p>
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-400 mb-4">Ocorreu um erro ao carregar os dados.</p>
+          <Button onClick={() => window.location.reload()}>
+            Recarregar Página
+          </Button>
+        </div>
       </div>
     )
   }
 
-  const userDataToDisplay = editedUserData || bioLinkData?.userData;
-  const linksToDisplay = editedLinks;
-
-  if (!userDataToDisplay) {
-      return <EditorSkeleton isMobile={isMobile} />;
+  // Show loading if we don't have bioLinkData yet
+  if (!bioLinkData) {
+    return <EditorSkeleton isMobile={isMobile} />
   }
+
+  const userDataToDisplay = editedUserData || bioLinkData.userData;
+  const linksToDisplay = editedLinks;
 
   return (
     <div className="min-h-screen bg-gradient-hero">

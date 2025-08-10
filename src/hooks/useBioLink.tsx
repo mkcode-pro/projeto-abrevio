@@ -19,7 +19,11 @@ const fetchBioLink = async (userId: string) => {
     .eq("user_id", userId)
     .single();
 
-  if (error && error.code !== 'PGRST116') { // PGRST116 = no rows found
+  if (error) {
+    if (error.code === 'PGRST116') {
+      // No bio_link found - this is OK, we'll create one
+      return null;
+    }
     throw new Error(error.message);
   }
   return data;
@@ -84,12 +88,19 @@ export function useBioLink() {
     queryKey: ["bioLink", user?.id],
     queryFn: () => fetchBioLink(user!.id),
     enabled: !!user,
+    retry: (failureCount, error: any) => {
+      // Don't retry if it's just a "not found" error
+      if (error?.message?.includes('PGRST116')) {
+        return false;
+      }
+      return failureCount < 3;
+    }
   });
 
   const createMutation = useMutation({
     mutationFn: createBioLink,
     onSuccess: () => {
-      toast.info("Perfil de Bio Link criado para você!");
+      toast.success("Perfil de Bio Link criado para você!");
       queryClient.invalidateQueries({ queryKey: ["bioLink", user?.id] });
     },
     onError: (error) => {
@@ -97,8 +108,9 @@ export function useBioLink() {
     },
   });
 
+  // Auto-create bio_link if user doesn't have one
   useEffect(() => {
-    if (isSuccess && !bioLink && user && !createMutation.isPending) {
+    if (isSuccess && bioLink === null && user && !createMutation.isPending) {
       createMutation.mutate({
         userId: user.id,
         username: user.username,
@@ -139,17 +151,22 @@ export function useBioLink() {
     linksMutation.mutate({ bioLinkId: bioLink.id, links });
   };
 
-  const bioLinkData = bioLink ? {
+  // Create bioLinkData even if bioLink is null (for new users)
+  const bioLinkData = user ? {
     userData: {
-      name: bioLink.display_name || user?.name || '',
-      username: bioLink.username || user?.username || '',
-      bio: bioLink.bio || '',
-      avatar: bioLink.avatar_url || user?.avatar || '',
+      name: bioLink?.display_name || user.name || '',
+      username: bioLink?.username || user.username || '',
+      bio: bioLink?.bio || '',
+      avatar: bioLink?.avatar_url || user.avatar || '',
     },
-    links: (bioLink.bio_link_items || []).sort((a: any, b: any) => a.position - b.position).map((item: any) => ({
-      ...item,
-      iconId: item.icon || 'website'
-    })),
+    links: bioLink?.bio_link_items 
+      ? bioLink.bio_link_items
+          .sort((a: any, b: any) => a.position - b.position)
+          .map((item: any) => ({
+            ...item,
+            iconId: item.icon || 'website'
+          }))
+      : [],
   } : null;
 
   const isLoading = isQueryLoading || createMutation.isPending;
@@ -157,7 +174,7 @@ export function useBioLink() {
   return {
     bioLinkData,
     isLoading,
-    isError,
+    isError: isError && !createMutation.isPending, // Don't show error if we're creating
     updateProfile: handleProfileUpdate,
     updateLinks: handleLinksUpdate,
     isSaving: profileMutation.isPending || linksMutation.isPending,
