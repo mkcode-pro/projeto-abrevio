@@ -58,7 +58,7 @@ export default function Settings() {
 
   useEffect(() => {
     const checkUsername = async () => {
-      if (!user || debouncedUsername === user.username || debouncedUsername.length < 3) {
+      if (!user || !debouncedUsername || debouncedUsername === user.username || debouncedUsername.length < 3) {
         setUsernameStatus('idle');
         return;
       }
