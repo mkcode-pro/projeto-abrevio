@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { Home, Plus, BarChart3, Settings, LogOut } from "lucide-react"
-import { NavLink } from "react-router-dom"
+import { NavLink, useNavigate } from "react-router-dom"
 import {
   Sidebar,
   SidebarContent,
@@ -14,6 +14,8 @@ import {
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ConfirmLogoutModal } from "@/components/modals/ConfirmLogoutModal"
+import { useAuth } from "@/contexts/AuthContext"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const sidebarItems = [
   { title: "Meus Links", url: "/dashboard", icon: Home },
@@ -22,29 +24,41 @@ const sidebarItems = [
   { title: "Configurações", url: "/dashboard/settings", icon: Settings },
 ]
 
-// Mock data
-const userData = {
-  name: "João Silva",
-  username: "@joaosilva",
-  bio: "Criador de conteúdo digital",
-  avatar: "JS"
-}
-
 export function AppSidebar() {
   const { open } = useSidebar()
   const [showLogoutModal, setShowLogoutModal] = useState(false)
+  const { user, logout, loading } = useAuth()
+  const navigate = useNavigate()
 
-  const handleLogout = () => {
-    // Clear user data from localStorage
-    localStorage.removeItem('user-session')
-    localStorage.removeItem('user-data')
-    
-    // Close modal
+  const handleLogout = async () => {
+    await logout()
     setShowLogoutModal(false)
-    
-    // Redirect to home page
-    window.location.href = '/'
+    navigate('/')
   }
+
+  if (loading) {
+    return (
+      <Sidebar className={!open ? "w-14" : "w-64"} collapsible="icon">
+        <SidebarContent className="glass-card border-r border-white/10">
+          <div className="p-6 border-b border-white/10">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-10 w-10 rounded-full" />
+              {open && (
+                <div className="flex-1 space-y-2">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-3 w-24" />
+                </div>
+              )}
+            </div>
+          </div>
+        </SidebarContent>
+      </Sidebar>
+    )
+  }
+
+  if (!user) return null
+
+  const userInitials = user.name.split(' ').map(n => n[0]).join('').toUpperCase()
 
   return (
     <>
@@ -55,13 +69,13 @@ export function AppSidebar() {
             <div className="flex items-center gap-3">
               <Avatar className="glass border border-white/20">
                 <AvatarFallback className="bg-gradient-neon text-black font-semibold">
-                  {userData.avatar}
+                  {userInitials}
                 </AvatarFallback>
               </Avatar>
               {open && (
                 <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-white truncate">{userData.name}</p>
-                  <p className="text-sm text-muted-foreground truncate">{userData.username}</p>
+                  <p className="font-semibold text-white truncate">{user.name}</p>
+                  <p className="text-sm text-muted-foreground truncate">@{user.username}</p>
                 </div>
               )}
             </div>
@@ -116,4 +130,3 @@ export function AppSidebar() {
       />
     </>
   )
-}

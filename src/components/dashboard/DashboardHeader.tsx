@@ -1,4 +1,4 @@
-import { Plus, Bell, Search, User, Menu } from "lucide-react"
+import { Plus, Bell, Search, Menu } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { SidebarTrigger } from "@/components/ui/sidebar"
@@ -6,15 +6,21 @@ import { useNavigate } from "react-router-dom"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { cn } from "@/lib/utils"
+import { useAuth } from "@/contexts/AuthContext"
 
-interface DashboardHeaderProps {
-  userName: string
-}
-
-export function DashboardHeader({ userName }: DashboardHeaderProps) {
+export function DashboardHeader() {
   const navigate = useNavigate()
   const isMobile = useIsMobile()
-  const userInitials = userName.split(' ').map(n => n[0]).join('').toUpperCase()
+  const { user } = useAuth()
+
+  if (!user) {
+    // Renderiza um header mínimo ou skeleton se não houver usuário
+    return (
+      <header className="sticky top-0 z-50 glass backdrop-blur-xl border-b border-white/5 bg-background/80 h-16" />
+    )
+  }
+
+  const userInitials = user.name.split(' ').map(n => n[0]).join('').toUpperCase()
 
   return (
     <header className="sticky top-0 z-50 glass backdrop-blur-xl border-b border-white/5 bg-background/80">
@@ -35,7 +41,7 @@ export function DashboardHeader({ userName }: DashboardHeaderProps) {
               <h1 className="text-lg font-bold text-foreground leading-none">Dashboard</h1>
               <div className="w-1 h-1 rounded-full bg-foreground/30"></div>
               <span className="text-sm text-foreground/60 font-medium truncate">
-                Olá, {userName.split(' ')[0]}!
+                Olá, {user.name.split(' ')[0]}!
               </span>
             </div>
           </div>
@@ -98,7 +104,7 @@ export function DashboardHeader({ userName }: DashboardHeaderProps) {
               "ring-2 ring-white/10 hover:ring-primary/30 transition-all cursor-pointer",
               isMobile ? "w-7 h-7" : "w-8 h-8"
             )}>
-              <AvatarImage src="" />
+              <AvatarImage src={user.avatar} />
               <AvatarFallback className="bg-gradient-primary text-primary-foreground text-xs font-semibold">
                 {userInitials}
               </AvatarFallback>
