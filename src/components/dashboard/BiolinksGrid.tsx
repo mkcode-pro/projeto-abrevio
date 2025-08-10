@@ -13,7 +13,7 @@ interface BioLink {
 }
 
 const fetchUserBioLinks = async (userId: string): Promise<BioLink[]> => {
-  // First get the bio_links
+  // Primeiro busca os bio_links
   const { data: bioLinks, error: bioLinksError } = await supabase
     .from("bio_links")
     .select("id, display_name, username")
@@ -22,7 +22,7 @@ const fetchUserBioLinks = async (userId: string): Promise<BioLink[]> => {
   if (bioLinksError) throw new Error(bioLinksError.message);
   if (!bioLinks) return [];
 
-  // Then get the link counts for each bio_link
+  // Depois busca a contagem de links para cada bio_link
   const bioLinksWithCounts = await Promise.all(
     bioLinks.map(async (bioLink) => {
       const { count } = await supabase
@@ -88,7 +88,7 @@ export function BiolinksGrid() {
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 text-white/60 hover:text-white hover:bg-white/10"
-                onClick={() => navigate("/bio-link-editor")}
+                onClick={() => navigate("/dashboard/editor")}
               >
                 <Plus className="h-4 w-4" />
               </Button>
@@ -108,7 +108,7 @@ export function BiolinksGrid() {
       {bioLinks.length === 0 && (
         <div className="col-span-full text-center py-8">
           <p className="text-white/60 mb-4">Você ainda não criou nenhum Bio Link</p>
-          <Button onClick={() => navigate("/bio-link-editor")} className="bg-gradient-neon">
+          <Button onClick={() => navigate("/dashboard/editor")} className="bg-gradient-neon">
             <Plus className="h-4 w-4 mr-2" />
             Criar primeiro Bio Link
           </Button>
