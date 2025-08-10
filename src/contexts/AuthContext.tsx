@@ -30,21 +30,44 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+// Função para criar perfil automaticamente
+const createUserProfile = async (supabaseUser: SupabaseUser, additionalData?: { username?: string; name?: string }) => {
+  const { data: existingProfile } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', supabaseUser.id)
+    .single();
 
-  const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User | null> => {
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', supabaseUser.id)
-      .single();
+  if (existingProfile) {
+    return existingProfile;
+  }
 
-    if (error) {
-      console.error("Erro ao buscar perfil do usuário:", error);
-      return null;
-    }
+  // Criar perfil se não existir
+  const profileData = {
+    id: supabaseUser.id,
+    email: supabaseUser.email!,
+    username: additionalData?.username || supabaseUser.email!.split('@')[0],
+    name: additionalData?.name || supabaseUser.user_metadata?.name || 'Usuário',
+    plan: 'free' as const,
+  };
+
+  const { data: newProfile, error } = await supabase
+    .from('profiles')
+    .insert(profileData)
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Erro ao criar perfil:', error);
+    throw error;
+  }
+
+  return newProfile;
+};
+
+const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User | null> => {
+  try {
+    const profile = await createUserProfile(supabaseUser);
 
     return {
       id: supabaseUser.id,
@@ -56,12 +79,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       createdAt: supabaseUser.created_at,
       lastLoginAt: supabaseUser.last_sign_in_at,
     };
-  };
+  } catch (error) {
+    console.error('Erro ao buscar perfil:', error);
+    return null;
+  }
+};
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Verificar sessão inicial
+    const getInitialSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const userProfile = await fetchUserProfile(session.user);
+        setUser(userProfile);
+      }
+      setLoading(false);
+    };
+
+    getInitialSession();
+
+    // Escutar mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, session: Session | null) => {
-        setLoading(true);
+        console.log('Auth state changed:', event, session?.user?.email);
+        
         if (session?.user) {
           const userProfile = await fetchUserProfile(session.user);
           setUser(userProfile);
@@ -72,17 +117,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    const checkInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const userProfile = await fetchUserProfile(session.user);
-        setUser(userProfile);
-      }
-      setLoading(false);
-    };
-
-    checkInitialSession();
-
     return () => {
       subscription.unsubscribe();
     };
@@ -91,12 +125,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
+      
       if (error) {
-        toast.error("Erro no login", { description: "Verifique suas credenciais e tente novamente." });
+        if (error.message.includes('Invalid login credentials')) {
+          toast.error("Credenciais inválidas", { 
+            description: "Email ou senha incorretos. Verifique e tente novamente." 
+          });
+        } else {
+          toast.error("Erro no login", { 
+            description: error.message 
+          });
+        }
         throw error;
       }
-      toast.success("Login realizado com sucesso!");
+
+      if (data.user) {
+        toast.success("Login realizado com sucesso!");
+      }
+    } catch (error) {
+      console.error('Erro no login:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -105,7 +157,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = useCallback(async (email: string, password: string, username: string, name: string) => {
     setLoading(true);
     try {
-      const { error } = await supabase.auth.signUp({
+      // Verificar se username já existe
+      const { data: existingUser } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
+        .single();
+
+      if (existingUser) {
+        toast.error("Username já existe", { 
+          description: "Escolha outro nome de usuário." 
+        });
+        throw new Error('Username já existe');
+      }
+
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -115,11 +181,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           },
         },
       });
+
       if (error) {
-        toast.error("Erro ao criar conta", { description: "Este email ou usuário já pode estar em uso." });
+        if (error.message.includes('already registered')) {
+          toast.error("Email já cadastrado", { 
+            description: "Este email já possui uma conta. Tente fazer login." 
+          });
+        } else {
+          toast.error("Erro ao criar conta", { 
+            description: error.message 
+          });
+        }
         throw error;
       }
-      toast.success("Conta criada com sucesso!", { description: "Verifique seu email para confirmar a conta." });
+
+      if (data.user) {
+        // Criar perfil imediatamente
+        await createUserProfile(data.user, { username, name });
+        toast.success("Conta criada com sucesso!", { 
+          description: "Você já pode começar a usar a plataforma." 
+        });
+      }
+    } catch (error) {
+      console.error('Erro no registro:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -130,11 +215,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
-        toast.error("Erro ao sair", { description: "Tente novamente mais tarde." });
+        toast.error("Erro ao sair", { description: error.message });
         throw error;
       }
       setUser(null);
       toast.info("Você foi desconectado.");
+    } catch (error) {
+      console.error('Erro no logout:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -156,17 +244,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .eq('id', user.id);
 
       if (error) {
-        toast.error("Erro ao atualizar perfil", { description: "Não foi possível salvar as alterações." });
+        toast.error("Erro ao atualizar perfil", { description: error.message });
         throw error;
       }
 
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const updatedUser = await fetchUserProfile(session.user);
-        setUser(updatedUser);
-      }
-
+      // Atualizar estado local
+      setUser(prev => prev ? { ...prev, ...updates } : null);
       toast.success("Perfil atualizado com sucesso!");
+    } catch (error) {
+      console.error('Erro ao atualizar perfil:', error);
+      throw error;
     } finally {
       setLoading(false);
     }
@@ -177,10 +264,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) {
-        toast.error("Erro ao alterar senha", { description: "Tente novamente mais tarde." });
+        toast.error("Erro ao alterar senha", { description: error.message });
         throw error;
       }
       toast.success("Senha alterada com sucesso!");
+    } catch (error) {
+      console.error('Erro ao alterar senha:', error);
+      throw error;
     } finally {
       setLoading(false);
     }

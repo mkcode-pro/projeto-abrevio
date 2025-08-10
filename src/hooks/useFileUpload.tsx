@@ -26,11 +26,16 @@ export function useFileUpload({
 
     // Validate file
     if (file.size > maxSize) {
-      toast.error("Arquivo muito grande", { description: `O tamanho máximo é ${maxSize / 1024 / 1024}MB.` });
+      toast.error("Arquivo muito grande", { 
+        description: `O tamanho máximo é ${Math.round(maxSize / 1024 / 1024)}MB.` 
+      });
       return null;
     }
+    
     if (!allowedTypes.includes(file.type)) {
-      toast.error("Tipo de arquivo inválido", { description: "Por favor, selecione uma imagem." });
+      toast.error("Tipo de arquivo inválido", { 
+        description: "Por favor, selecione uma imagem válida." 
+      });
       return null;
     }
 
@@ -39,29 +44,42 @@ export function useFileUpload({
 
     try {
       const fileExt = file.name.split('.').pop();
-      const filePath = `${user.id}/${Date.now()}.${fileExt}`;
+      const fileName = `${user.id}/${Date.now()}.${fileExt}`;
 
-      const { error } = await supabase.storage
+      // Simular progresso
+      const progressInterval = setInterval(() => {
+        setProgress(prev => Math.min(prev + 10, 90));
+      }, 100);
+
+      const { data, error } = await supabase.storage
         .from(bucket)
-        .upload(filePath, file, {
+        .upload(fileName, file, {
           cacheControl: '3600',
-          upsert: false,
+          upsert: true, // Permite sobrescrever
         });
 
-      if (error) throw error;
+      clearInterval(progressInterval);
+      setProgress(100);
 
-      const { data } = supabase.storage
+      if (error) {
+        throw error;
+      }
+
+      // Obter URL pública
+      const { data: { publicUrl } } = supabase.storage
         .from(bucket)
-        .getPublicUrl(filePath);
+        .getPublicUrl(fileName);
 
-      toast.success("Upload concluído!");
-      return data.publicUrl;
+      toast.success("Upload concluído com sucesso!");
+      return publicUrl;
     } catch (error: any) {
-      toast.error("Erro no upload", { description: error.message });
+      toast.error("Erro no upload", { 
+        description: error.message || "Não foi possível fazer upload do arquivo." 
+      });
       return null;
     } finally {
       setUploading(false);
-      setProgress(100);
+      setProgress(0);
     }
   }, [user, bucket, maxSize, allowedTypes]);
 

@@ -4,9 +4,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { LinkData } from "@/components/biolink-editor/SortableLinkItem";
 import { UserData } from "@/components/biolink-editor/BioLinkPreview";
-import { useEffect } from "react";
 
-// Fetch user's bio link data
+// Buscar bio link do usuário
 const fetchBioLink = async (userId: string) => {
   const { data, error } = await supabase
     .from("bio_links")
@@ -21,7 +20,7 @@ const fetchBioLink = async (userId: string) => {
 
   if (error) {
     if (error.code === 'PGRST116') {
-      // No bio_link found - this is OK, we'll create one
+      // Não encontrado - retorna null para criar um novo
       return null;
     }
     throw new Error(error.message);
@@ -29,54 +28,89 @@ const fetchBioLink = async (userId: string) => {
   return data;
 };
 
-// Create a new bio link profile
-const createBioLink = async ({ userId, username, name }: { userId: string, username: string, name: string }) => {
+// Criar novo bio link
+const createBioLink = async ({ userId, username, name }: { 
+  userId: string; 
+  username: string; 
+  name: string; 
+}) => {
   const { data, error } = await supabase
     .from('bio_links')
     .insert({
       user_id: userId,
       username: username,
       display_name: name,
+      bio: '',
+      is_active: true,
     })
     .select()
     .single();
 
-  if (error) throw new Error(error.message);
+  if (error) {
+    throw new Error(error.message);
+  }
   return data;
 };
 
-// Update bio link profile data
-const updateBioLinkProfile = async ({ updates }: { updates: Partial<UserData> & { id: string } }) => {
-  const { id, ...profileData } = updates;
+// Atualizar perfil do bio link
+const updateBioLinkProfile = async ({ 
+  bioLinkId, 
+  updates 
+}: { 
+  bioLinkId: string; 
+  updates: Partial<UserData>; 
+}) => {
   const { error } = await supabase
     .from("bio_links")
     .update({
-      display_name: profileData.name,
-      username: profileData.username,
-      bio: profileData.bio,
-      avatar_url: profileData.avatar,
+      display_name: updates.name,
+      username: updates.username,
+      bio: updates.bio,
+      avatar_url: updates.avatar,
     })
-    .eq("id", id);
-  if (error) throw new Error(error.message);
+    .eq("id", bioLinkId);
+
+  if (error) {
+    throw new Error(error.message);
+  }
 };
 
-// Update all links
-const updateLinks = async ({ bioLinkId, links }: { bioLinkId: string, links: LinkData[] }) => {
-  // Delete existing items
-  await supabase.from("bio_link_items").delete().eq("bio_link_id", bioLinkId);
+// Atualizar links do bio link
+const updateBioLinkItems = async ({ 
+  bioLinkId, 
+  links 
+}: { 
+  bioLinkId: string; 
+  links: LinkData[]; 
+}) => {
+  // Primeiro, deletar todos os links existentes
+  const { error: deleteError } = await supabase
+    .from("bio_link_items")
+    .delete()
+    .eq("bio_link_id", bioLinkId);
 
-  // Insert new items if any
+  if (deleteError) {
+    throw new Error(deleteError.message);
+  }
+
+  // Depois, inserir os novos links se houver algum
   if (links.length > 0) {
     const newItems = links.map((link, index) => ({
       bio_link_id: bioLinkId,
       title: link.title,
-      subtitle: link.subtitle,
+      subtitle: link.subtitle || null,
       url: link.url,
       icon: link.iconId,
       position: index,
     }));
-    const { error: insertError } = await supabase.from("bio_link_items").insert(newItems);
-    if (insertError) throw insertError;
+
+    const { error: insertError } = await supabase
+      .from("bio_link_items")
+      .insert(newItems);
+
+    if (insertError) {
+      throw new Error(insertError.message);
+    }
   }
 };
 
@@ -84,74 +118,103 @@ export function useBioLink() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: bioLink, isLoading: isQueryLoading, isError, isSuccess } = useQuery({
+  // Query para buscar bio link
+  const { 
+    data: bioLink, 
+    isLoading: isQueryLoading, 
+    isError,
+    error 
+  } = useQuery({
     queryKey: ["bioLink", user?.id],
     queryFn: () => fetchBioLink(user!.id),
     enabled: !!user,
     retry: (failureCount, error: any) => {
-      // Don't retry if it's just a "not found" error
+      // Não tentar novamente se for apenas "não encontrado"
       if (error?.message?.includes('PGRST116')) {
         return false;
       }
-      return failureCount < 3;
+      return failureCount < 2;
     }
   });
 
+  // Mutation para criar bio link
   const createMutation = useMutation({
     mutationFn: createBioLink,
     onSuccess: () => {
-      toast.success("Perfil de Bio Link criado para você!");
+      toast.success("Bio Link criado com sucesso!");
       queryClient.invalidateQueries({ queryKey: ["bioLink", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["userBioLinks", user?.id] });
     },
-    onError: (error) => {
-      toast.error("Erro ao criar seu perfil de Bio Link", { description: error.message });
+    onError: (error: any) => {
+      toast.error("Erro ao criar Bio Link", { 
+        description: error.message 
+      });
     },
   });
 
-  // Auto-create bio_link if user doesn't have one
-  useEffect(() => {
-    if (isSuccess && bioLink === null && user && !createMutation.isPending) {
+  // Mutation para atualizar perfil
+  const profileMutation = useMutation({
+    mutationFn: updateBioLinkProfile,
+    onSuccess: () => {
+      toast.success("Perfil atualizado com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["bioLink", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["userBioLinks", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["publicBioLink"] });
+    },
+    onError: (error: any) => {
+      toast.error("Erro ao atualizar perfil", { 
+        description: error.message 
+      });
+    },
+  });
+
+  // Mutation para atualizar links
+  const linksMutation = useMutation({
+    mutationFn: updateBioLinkItems,
+    onSuccess: () => {
+      toast.success("Links atualizados com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["bioLink", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["publicBioLink"] });
+    },
+    onError: (error: any) => {
+      toast.error("Erro ao atualizar links", { 
+        description: error.message 
+      });
+    },
+  });
+
+  // Criar bio link automaticamente se não existir
+  const handleCreateBioLink = () => {
+    if (user && !createMutation.isPending) {
       createMutation.mutate({
         userId: user.id,
         username: user.username,
         name: user.name,
       });
     }
-  }, [isSuccess, bioLink, user, createMutation]);
-
-  const profileMutation = useMutation({
-    mutationFn: updateBioLinkProfile,
-    onSuccess: () => {
-      toast.success("Perfil salvo com sucesso!");
-      queryClient.invalidateQueries({ queryKey: ["bioLink", user?.id] });
-    },
-    onError: (error) => {
-      toast.error("Erro ao salvar perfil", { description: error.message });
-    },
-  });
-
-  const linksMutation = useMutation({
-    mutationFn: updateLinks,
-    onSuccess: () => {
-      toast.success("Links salvos com sucesso!");
-      queryClient.invalidateQueries({ queryKey: ["bioLink", user?.id] });
-    },
-    onError: (error) => {
-      toast.error("Erro ao salvar links", { description: error.message });
-    },
-  });
-
-  const handleProfileUpdate = (updates: Partial<UserData>) => {
-    if (!user || !bioLink) return;
-    profileMutation.mutate({ updates: { ...updates, id: bioLink.id } });
   };
 
-  const handleLinksUpdate = (links: LinkData[]) => {
-    if (!user || !bioLink) return;
+  // Atualizar perfil
+  const updateProfile = (updates: Partial<UserData>) => {
+    if (!bioLink) {
+      toast.error("Bio Link não encontrado. Criando um novo...");
+      handleCreateBioLink();
+      return;
+    }
+    profileMutation.mutate({ bioLinkId: bioLink.id, updates });
+  };
+
+  // Atualizar links
+  const updateLinks = (links: LinkData[]) => {
+    if (!bioLink) {
+      toast.error("Bio Link não encontrado. Criando um novo...");
+      handleCreateBioLink();
+      return;
+    }
     linksMutation.mutate({ bioLinkId: bioLink.id, links });
   };
 
-  // Create bioLinkData even if bioLink is null (for new users)
+  // Preparar dados para o componente
   const bioLinkData = user ? {
     userData: {
       name: bioLink?.display_name || user.name || '',
@@ -163,20 +226,27 @@ export function useBioLink() {
       ? bioLink.bio_link_items
           .sort((a: any, b: any) => a.position - b.position)
           .map((item: any) => ({
-            ...item,
+            id: item.id,
+            title: item.title,
+            subtitle: item.subtitle || '',
+            url: item.url,
             iconId: item.icon || 'website'
           }))
       : [],
   } : null;
 
   const isLoading = isQueryLoading || createMutation.isPending;
+  const isSaving = profileMutation.isPending || linksMutation.isPending;
 
   return {
     bioLinkData,
     isLoading,
-    isError: isError && !createMutation.isPending, // Don't show error if we're creating
-    updateProfile: handleProfileUpdate,
-    updateLinks: handleLinksUpdate,
-    isSaving: profileMutation.isPending || linksMutation.isPending,
+    isError: isError && !createMutation.isPending,
+    error,
+    updateProfile,
+    updateLinks,
+    isSaving,
+    createBioLink: handleCreateBioLink,
+    needsCreation: !bioLink && !isQueryLoading && !createMutation.isPending,
   };
 }

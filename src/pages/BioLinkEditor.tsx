@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Save, Eye, Loader2 } from "lucide-react"
+import { Save, Eye, Loader2, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { ProfileEditor } from "@/components/biolink-editor/ProfileEditor"
 import { LinksManager } from "@/components/biolink-editor/LinksManager"
@@ -9,9 +9,20 @@ import { ResponsiveContainer } from "@/components/layout/ResponsiveContainer"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { useBioLink } from "@/hooks/useBioLink"
 import { Skeleton } from "@/components/ui/skeleton"
+import { Card, CardContent } from "@/components/ui/card"
 
 export default function BioLinkEditor() {
-  const { bioLinkData, isLoading, isError, updateProfile, updateLinks, isSaving } = useBioLink()
+  const { 
+    bioLinkData, 
+    isLoading, 
+    isError, 
+    error,
+    updateProfile, 
+    updateLinks, 
+    isSaving,
+    createBioLink,
+    needsCreation
+  } = useBioLink()
   
   const [editedUserData, setEditedUserData] = useState<UserData | null>(null)
   const [editedLinks, setEditedLinks] = useState<LinkData[]>([])
@@ -52,26 +63,57 @@ export default function BioLinkEditor() {
     }
   }
 
-  // Show loading while data is being fetched or bio_link is being created
+  // Mostrar loading enquanto carrega
   if (isLoading) {
     return <EditorSkeleton isMobile={isMobile} />
   }
 
-  // Show error only if there's a real error (not just missing bio_link)
-  if (isError) {
+  // Mostrar erro se houver um erro real
+  if (isError && !needsCreation) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-400 mb-4">Ocorreu um erro ao carregar os dados.</p>
-          <Button onClick={() => window.location.reload()}>
-            Recarregar Página
-          </Button>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-hero">
+        <Card className="glass-card border-red-500/20 max-w-md">
+          <CardContent className="p-6 text-center">
+            <div className="text-red-400 mb-4">
+              <h3 className="text-lg font-semibold mb-2">Erro ao carregar dados</h3>
+              <p className="text-sm">{error?.message || "Ocorreu um erro inesperado"}</p>
+            </div>
+            <Button onClick={() => window.location.reload()}>
+              Recarregar Página
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     )
   }
 
-  // Show loading if we don't have bioLinkData yet
+  // Mostrar tela de criação se precisar criar bio link
+  if (needsCreation) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-hero">
+        <Card className="glass-card border-neon-blue/20 max-w-md">
+          <CardContent className="p-6 text-center">
+            <div className="mb-6">
+              <Plus className="w-16 h-16 text-neon-blue mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-white mb-2">Criar seu Bio Link</h3>
+              <p className="text-white/70">
+                Você ainda não tem um Bio Link. Vamos criar um para você!
+              </p>
+            </div>
+            <Button 
+              onClick={createBioLink}
+              className="w-full bg-gradient-neon hover:shadow-neon"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Criar Bio Link
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Mostrar loading se não tiver dados ainda
   if (!bioLinkData) {
     return <EditorSkeleton isMobile={isMobile} />
   }
@@ -83,28 +125,33 @@ export default function BioLinkEditor() {
     <div className="min-h-screen bg-gradient-hero">
       <ResponsiveContainer size="xl" padding="lg" className="py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Editor de Bio Link</h1>
             <p className="text-white/60">Personalize sua página de links e acompanhe o desempenho</p>
+            {hasUnsavedChanges && (
+              <p className="text-amber-400 text-sm mt-1">
+                ⚠️ Você tem alterações não salvas
+              </p>
+            )}
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <Button 
               onClick={handlePreview}
               variant="outline" 
               size="lg"
               className="border-white/20 text-white hover:bg-white/10"
+              disabled={!userDataToDisplay.username}
             >
               <Eye className="w-5 h-5 mr-2" />
               Visualizar Página
             </Button>
             <Button 
               onClick={handleSave}
-              variant="gradient" 
               size="lg"
               disabled={isSaving || !hasUnsavedChanges}
-              className="btn-futuristic shadow-lg shadow-neon-blue/25"
+              className="bg-gradient-neon hover:shadow-neon btn-futuristic"
             >
               {isSaving ? (
                 <Loader2 className="w-5 h-5 mr-2 animate-spin" />
@@ -134,7 +181,10 @@ export default function BioLinkEditor() {
           {/* Painel de Preview */}
           <div className="lg:col-span-4">
             <div className="sticky top-24">
-              <BioLinkPreview userData={userDataToDisplay} links={linksToDisplay} />
+              <BioLinkPreview 
+                userData={userDataToDisplay} 
+                links={linksToDisplay} 
+              />
             </div>
           </div>
         </div>
