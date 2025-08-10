@@ -2,6 +2,7 @@ create or replace function public.username_exists(p_username text)
 returns boolean
 language plpgsql
 security definer
+set search_path = public
 as $$
 begin
   -- Compara os nomes de usuário em minúsculas para ser case-insensitive
