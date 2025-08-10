@@ -21,8 +21,8 @@ interface AuthState {
 }
 
 interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, username: string, name: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<boolean>;
+  register: (email: string, password: string, username: string, name: string) => Promise<boolean>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<Pick<User, 'name' | 'username' | 'avatar'>>) => Promise<void>;
   changePassword: (newPassword: string) => Promise<void>;
@@ -123,13 +123,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ 
-        email, 
-        password 
-      });
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
         if (error.message.includes('Invalid login credentials')) {
@@ -137,28 +134,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             description: "Email ou senha incorretos. Verifique e tente novamente." 
           });
         } else {
-          toast.error("Erro no login", { 
-            description: error.message 
-          });
+          toast.error("Erro no login", { description: error.message });
         }
-        throw error;
+        return false;
       }
 
-      if (data.user) {
-        toast.success("Login realizado com sucesso!");
-      }
-    } catch (error) {
-      console.error('Erro no login:', error);
-      throw error;
+      toast.success("Login realizado com sucesso!");
+      return true;
+    } catch (error: any) {
+      console.error('Erro inesperado no login:', error);
+      toast.error("Erro inesperado", { description: error.message });
+      return false;
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const register = useCallback(async (email: string, password: string, username: string, name: string) => {
+  const register = useCallback(async (email: string, password: string, username: string, name: string): Promise<boolean> => {
     setLoading(true);
     try {
-      // Verificar se username já existe
       const { data: existingUser } = await supabase
         .from('profiles')
         .select('username')
@@ -166,46 +160,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .single();
 
       if (existingUser) {
-        toast.error("Username já existe", { 
-          description: "Escolha outro nome de usuário." 
-        });
-        throw new Error('Username já existe');
+        toast.error("Username já existe", { description: "Escolha outro nome de usuário." });
+        return false;
       }
 
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
-        options: {
-          data: {
-            name,
-            username,
-          },
-        },
+        options: { data: { name, username } },
       });
 
       if (error) {
         if (error.message.includes('already registered')) {
-          toast.error("Email já cadastrado", { 
-            description: "Este email já possui uma conta. Tente fazer login." 
-          });
+          toast.error("Email já cadastrado", { description: "Este email já possui uma conta. Tente fazer login." });
         } else {
-          toast.error("Erro ao criar conta", { 
-            description: error.message 
-          });
+          toast.error("Erro ao criar conta", { description: error.message });
         }
-        throw error;
+        return false;
       }
 
       if (data.user) {
-        // Criar perfil imediatamente
         await createUserProfile(data.user, { username, name });
-        toast.success("Conta criada com sucesso!", { 
-          description: "Você já pode começar a usar a plataforma." 
-        });
+        return true;
       }
-    } catch (error) {
+      return false;
+    } catch (error: any) {
       console.error('Erro no registro:', error);
-      throw error;
+      toast.error("Erro inesperado no cadastro", { description: error.message });
+      return false;
     } finally {
       setLoading(false);
     }
@@ -249,7 +231,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         throw error;
       }
 
-      // Atualizar estado local
       setUser(prev => prev ? { ...prev, ...updates } : null);
       toast.success("Perfil atualizado com sucesso!");
     } catch (error) {
@@ -285,7 +266,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         toast.error("Erro ao deletar conta", { description: error.message });
         throw error;
       }
-      setUser(null); // Limpa o usuário local
+      setUser(null);
       toast.success("Sua conta foi deletada com sucesso.");
     } catch (error) {
       console.error('Erro ao deletar conta:', error);

@@ -11,6 +11,7 @@ import { Link2, UserPlus, Loader2, CheckCircle, XCircle } from "lucide-react"
 import { useDebounce } from "@/hooks/useDebounce"
 import { useEffect, useState } from "react"
 import { supabase } from "@/integrations/supabase/client"
+import { toast } from "sonner"
 
 const signupSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -58,13 +59,16 @@ export default function Signup() {
 
   const onSubmit = async (data: SignupFormValues) => {
     if (usernameStatus === 'taken') {
+      toast.error("Nome de usuário indisponível");
       return;
     }
-    try {
-      await signup(data.email, data.password, data.username, data.name)
-      navigate("/login")
-    } catch (error) {
-      console.error("Falha no cadastro:", error)
+    
+    const success = await signup(data.email, data.password, data.username, data.name);
+    if (success) {
+      toast.success("Conta criada com sucesso!", {
+        description: "Agora faça login para acessar sua conta."
+      });
+      navigate("/login");
     }
   }
 

@@ -25,12 +25,9 @@ export default function Login() {
   })
 
   const onSubmit = async (data: LoginFormValues) => {
-    try {
-      await login(data.email, data.password)
-      navigate("/dashboard")
-    } catch (error) {
-      // O toast de erro já é exibido no AuthContext
-      console.error("Falha no login:", error)
+    const success = await login(data.email, data.password);
+    if (success) {
+      navigate("/dashboard");
     }
   }
 
