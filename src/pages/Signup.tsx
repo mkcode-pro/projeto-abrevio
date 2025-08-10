@@ -7,11 +7,11 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Link2, UserPlus, Loader2, CheckCircle, XCircle } from "lucide-react"
-import { useDebounce } from "@/hooks/useDebounce"
-import { useEffect, useState } from "react"
-import { supabase } from "@/integrations/supabase/client"
+import { Link2, UserPlus, Loader2, CheckCircle, XCircle, AlertCircle, Lightbulb } from "lucide-react"
+import { useUsernameCheck, useClearUsernameCache } from "@/hooks/useUsernameCheck"
+import { getUsernameQualityScore } from "@/lib/usernameValidator"
 import { toast } from "sonner"
+import { Badge } from "@/components/ui/badge"
 
 const signupSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -25,55 +25,40 @@ type SignupFormValues = z.infer<typeof signupSchema>
 export default function Signup() {
   const navigate = useNavigate()
   const { register: signup, loading } = useAuth()
-  const { register, handleSubmit, formState: { errors, isValid }, watch } = useForm<SignupFormValues>({
+  const clearCache = useClearUsernameCache()
+  const { register, handleSubmit, formState: { errors, isValid }, watch, setValue } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
     mode: "onChange"
   })
 
-  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
-  const [usernameCheckError, setUsernameCheckError] = useState<string | null>(null);
   const usernameValue = watch('username');
-  const debouncedUsername = useDebounce(usernameValue, 500);
-
-  useEffect(() => {
-    const checkUsername = async () => {
-      setUsernameCheckError(null);
-      if (!debouncedUsername || debouncedUsername.length < 3) {
-        setUsernameStatus('idle');
-        return;
-      }
-      setUsernameStatus('checking');
-      try {
-        const { data, error } = await supabase.rpc('username_exists', { p_username: debouncedUsername });
-        
-        if (error) {
-          throw new Error(error.message);
-        }
-        
-        setUsernameStatus(data ? 'taken' : 'available');
-      } catch (error) {
-        console.error("Erro ao verificar username:", error);
-        setUsernameStatus('idle');
-        setUsernameCheckError("Não foi possível verificar o usuário. Tente novamente.");
-      }
-    };
-
-    checkUsername();
-  }, [debouncedUsername]);
+  const usernameCheck = useUsernameCheck(usernameValue);
+  const qualityScore = usernameValue ? getUsernameQualityScore(usernameValue) : null;
 
   const onSubmit = async (data: SignupFormValues) => {
-    if (usernameStatus === 'taken') {
-      toast.error("Nome de usuário indisponível");
+    if (usernameCheck.status === 'taken' || usernameCheck.status === 'error') {
+      toast.error("Nome de usuário indisponível ou inválido");
+      return;
+    }
+    
+    if (!usernameCheck.isValid) {
+      toast.error("Por favor, escolha um username válido");
       return;
     }
     
     const success = await signup(data.email, data.password, data.username, data.name);
     if (success) {
+      clearCache(data.username); // Limpar cache após registro bem-sucedido
       toast.success("Conta criada com sucesso!", {
         description: "Agora faça login para acessar sua conta."
       });
       navigate("/login");
     }
+  }
+
+  // Função para aplicar sugestão
+  const applySuggestion = (suggestion: string) => {
+    setValue('username', suggestion, { shouldValidate: true });
   }
 
   return (
@@ -98,16 +83,62 @@ export default function Signup() {
             <div className="space-y-2">
               <Label htmlFor="username">Usuário</Label>
               <div className="relative">
-                <Input id="username" placeholder="seu_usuario" {...register("username")} className="bg-white/5 border-white/20 text-white pr-8" />
+                <Input 
+                  id="username" 
+                  placeholder="seu_usuario" 
+                  {...register("username")} 
+                  className="bg-white/5 border-white/20 text-white pr-8" 
+                />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                  {usernameStatus === 'checking' && <Loader2 className="h-4 w-4 text-white/50 animate-spin" />}
-                  {usernameStatus === 'available' && <CheckCircle className="h-4 w-4 text-emerald-400" />}
-                  {usernameStatus === 'taken' && <XCircle className="h-4 w-4 text-red-400" />}
+                  {usernameCheck.status === 'checking' && <Loader2 className="h-4 w-4 text-white/50 animate-spin" />}
+                  {usernameCheck.status === 'available' && <CheckCircle className="h-4 w-4 text-emerald-400" />}
+                  {usernameCheck.status === 'taken' && <XCircle className="h-4 w-4 text-red-400" />}
+                  {usernameCheck.status === 'error' && <AlertCircle className="h-4 w-4 text-amber-400" />}
                 </div>
               </div>
+              
+              {/* Mensagens de erro */}
               {errors.username && <p className="text-sm text-red-400">{errors.username.message}</p>}
-              {usernameStatus === 'taken' && <p className="text-sm text-red-400">Este nome de usuário já está em uso.</p>}
-              {usernameCheckError && <p className="text-sm text-amber-400">{usernameCheckError}</p>}
+              {usernameCheck.error && <p className="text-sm text-red-400">{usernameCheck.error}</p>}
+              
+              {/* Badge de qualidade */}
+              {qualityScore && usernameCheck.status === 'available' && (
+                <div className="flex items-center gap-2">
+                  <Badge 
+                    variant="outline" 
+                    style={{ borderColor: qualityScore.color, color: qualityScore.color }}
+                    className="text-xs"
+                  >
+                    {qualityScore.badge === 'premium' && '⭐ Premium'}
+                    {qualityScore.badge === 'good' && '✓ Bom'}
+                    {qualityScore.badge === 'average' && 'Regular'}
+                    {qualityScore.badge === 'poor' && 'Fraco'}
+                  </Badge>
+                  <span className="text-xs text-white/50">Qualidade: {qualityScore.score}%</span>
+                </div>
+              )}
+              
+              {/* Sugestões de username */}
+              {usernameCheck.suggestions.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs text-white/60 flex items-center gap-1">
+                    <Lightbulb className="h-3 w-3" />
+                    Sugestões disponíveis:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {usernameCheck.suggestions.map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        onClick={() => applySuggestion(suggestion)}
+                        className="px-2 py-1 text-xs rounded-md bg-white/10 hover:bg-white/20 text-white/80 hover:text-white transition-colors"
+                      >
+                        @{suggestion}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -119,7 +150,11 @@ export default function Signup() {
               <Input id="password" type="password" placeholder="Crie uma senha forte" {...register("password")} className="bg-white/5 border-white/20 text-white" />
               {errors.password && <p className="text-sm text-red-400">{errors.password.message}</p>}
             </div>
-            <Button type="submit" disabled={!isValid || loading || usernameStatus !== 'available'} className="w-full bg-gradient-primary hover:opacity-90 btn-futuristic">
+            <Button 
+              type="submit" 
+              disabled={!isValid || loading || !usernameCheck.isValid || usernameCheck.status === 'checking'} 
+              className="w-full bg-gradient-primary hover:opacity-90 btn-futuristic"
+            >
               {loading ? "Criando conta..." : (
                 <>
                   <UserPlus className="h-4 w-4 mr-2" />

@@ -153,9 +153,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = useCallback(async (email: string, password: string, username: string, name: string): Promise<boolean> => {
     setLoading(true);
     try {
-      const { data: usernameExists, error: rpcError } = await supabase.rpc('username_exists', { p_username: username });
-
-      if (rpcError) throw rpcError;
+      // Tentar verificar username via RPC primeiro
+      let usernameExists = false;
+      
+      try {
+        const { data, error: rpcError } = await supabase.rpc('username_exists', { p_username: username });
+        
+        if (rpcError) {
+          console.warn('RPC username_exists falhou, tentando fallback:', rpcError);
+          // Fallback: verificar diretamente na tabela profiles
+          const { data: profileData, error: queryError } = await supabase
+            .from('profiles')
+            .select('username')
+            .ilike('username', username)
+            .maybeSingle();
+          
+          if (queryError && queryError.code !== 'PGRST116') {
+            throw queryError;
+          }
+          
+          usernameExists = !!profileData;
+        } else {
+          usernameExists = data as boolean;
+        }
+      } catch (checkError) {
+        console.error('Erro ao verificar username:', checkError);
+        // Em caso de erro, permitir continuar mas avisar o usuário
+        toast.warning("Não foi possível verificar completamente o username", {
+          description: "Continuando com o registro..."
+        });
+      }
 
       if (usernameExists) {
         toast.error("Username já existe", { description: "Escolha outro nome de usuário." });

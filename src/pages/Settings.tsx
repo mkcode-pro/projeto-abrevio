@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Camera, User, Palette, Lock, Save, Loader2, CheckCircle, XCircle, AlertTriangle, Trash2, LogOut } from "lucide-react";
+import { Camera, User, Palette, Lock, Save, Loader2, CheckCircle, XCircle, AlertTriangle, Trash2, LogOut, AlertCircle, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -18,8 +18,9 @@ import { ConfirmDeleteModal } from "@/components/modals/ConfirmDeleteModal";
 import { ConfirmLogoutModal } from "@/components/modals/ConfirmLogoutModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useDebounce } from "@/hooks/useDebounce";
-import { supabase } from "@/integrations/supabase/client";
+import { useUsernameCheck, useClearUsernameCache } from "@/hooks/useUsernameCheck";
+import { getUsernameQualityScore } from "@/lib/usernameValidator";
+import { Badge } from "@/components/ui/badge";
 
 const userDataSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -39,15 +40,14 @@ export default function Settings() {
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
-  const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
-  const [usernameCheckError, setUsernameCheckError] = useState<string | null>(null);
-
-  const { register, handleSubmit, formState: { errors, isDirty }, reset, watch } = useForm<UserDataForm>({
+  const clearCache = useClearUsernameCache();
+  const { register, handleSubmit, formState: { errors, isDirty }, reset, watch, setValue } = useForm<UserDataForm>({
     resolver: zodResolver(userDataSchema),
   });
 
   const usernameValue = watch('username');
-  const debouncedUsername = useDebounce(usernameValue, 500);
+  const usernameCheck = useUsernameCheck(usernameValue, user?.username);
+  const qualityScore = usernameValue ? getUsernameQualityScore(usernameValue) : null;
 
   useEffect(() => {
     if (user) {
@@ -59,33 +59,24 @@ export default function Settings() {
     }
   }, [user, reset]);
 
-  useEffect(() => {
-    const checkUsername = async () => {
-      setUsernameCheckError(null);
-      if (!user || !debouncedUsername || debouncedUsername === user.username || debouncedUsername.length < 3) {
-        setUsernameStatus('idle');
-        return;
-      }
-      setUsernameStatus('checking');
-      try {
-        const { data, error } = await supabase.rpc('username_exists', { p_username: debouncedUsername });
-        if (error) throw new Error(error.message);
-        setUsernameStatus(data ? 'taken' : 'available');
-      } catch (error) {
-        console.error("Erro ao verificar username:", error);
-        setUsernameStatus('idle');
-        setUsernameCheckError("Não foi possível verificar o usuário. Tente novamente.");
-      }
-    };
-    checkUsername();
-  }, [debouncedUsername, user]);
+  // Função para aplicar sugestão
+  const applySuggestion = (suggestion: string) => {
+    setValue('username', suggestion, { shouldValidate: true });
+  };
 
   const handleSave = async (data: UserDataForm) => {
-    if (usernameStatus === 'taken') {
-      toast.error("Nome de usuário indisponível");
+    if (usernameCheck.status === 'taken' || usernameCheck.status === 'error') {
+      toast.error("Nome de usuário indisponível ou inválido");
       return;
     }
+    
+    if (!usernameCheck.isValid && data.username !== user?.username) {
+      toast.error("Por favor, escolha um username válido");
+      return;
+    }
+    
     await updateProfile({ name: data.name, username: data.username });
+    clearCache(data.username); // Limpar cache após atualização
     reset(data);
   };
 
@@ -122,7 +113,7 @@ export default function Settings() {
             <h1 className="text-3xl font-bold neon-text">Configurações</h1>
             <p className="text-muted-foreground">Gerencie sua conta e preferências</p>
           </div>
-          <Button onClick={handleSubmit(handleSave)} disabled={!isDirty || authLoading || usernameStatus === 'taken'} className="bg-gradient-primary hover:opacity-90">
+          <Button onClick={handleSubmit(handleSave)} disabled={!isDirty || authLoading || (usernameCheck.status === 'taken' && usernameValue !== user?.username)} className="bg-gradient-primary hover:opacity-90">
             {authLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
             Salvar
           </Button>
@@ -157,14 +148,55 @@ export default function Settings() {
                   <div className="relative">
                     <Input id="username" {...register("username")} className="bg-background/50 pr-8" />
                     <div className="absolute inset-y-0 right-0 flex items-center pr-3">
-                      {usernameStatus === 'checking' && <Loader2 className="h-4 w-4 text-white/50 animate-spin" />}
-                      {usernameStatus === 'available' && <CheckCircle className="h-4 w-4 text-emerald-400" />}
-                      {usernameStatus === 'taken' && <XCircle className="h-4 w-4 text-red-400" />}
+                      {usernameCheck.status === 'checking' && <Loader2 className="h-4 w-4 text-white/50 animate-spin" />}
+                      {usernameCheck.status === 'available' && usernameValue !== user?.username && <CheckCircle className="h-4 w-4 text-emerald-400" />}
+                      {usernameCheck.status === 'taken' && <XCircle className="h-4 w-4 text-red-400" />}
+                      {usernameCheck.status === 'error' && <AlertCircle className="h-4 w-4 text-amber-400" />}
                     </div>
                   </div>
+                  
+                  {/* Mensagens de erro */}
                   {errors.username && <p className="text-sm text-destructive">{errors.username.message}</p>}
-                  {usernameStatus === 'taken' && <p className="text-sm text-red-400">Este nome de usuário já está em uso.</p>}
-                  {usernameCheckError && <p className="text-sm text-amber-400">{usernameCheckError}</p>}
+                  {usernameCheck.error && usernameValue !== user?.username && <p className="text-sm text-red-400">{usernameCheck.error}</p>}
+                  
+                  {/* Badge de qualidade */}
+                  {qualityScore && usernameCheck.status === 'available' && usernameValue !== user?.username && (
+                    <div className="flex items-center gap-2">
+                      <Badge 
+                        variant="outline" 
+                        style={{ borderColor: qualityScore.color, color: qualityScore.color }}
+                        className="text-xs"
+                      >
+                        {qualityScore.badge === 'premium' && '⭐ Premium'}
+                        {qualityScore.badge === 'good' && '✓ Bom'}
+                        {qualityScore.badge === 'average' && 'Regular'}
+                        {qualityScore.badge === 'poor' && 'Fraco'}
+                      </Badge>
+                      <span className="text-xs text-muted-foreground">Qualidade: {qualityScore.score}%</span>
+                    </div>
+                  )}
+                  
+                  {/* Sugestões de username */}
+                  {usernameCheck.suggestions.length > 0 && usernameValue !== user?.username && (
+                    <div className="space-y-2">
+                      <p className="text-xs text-muted-foreground flex items-center gap-1">
+                        <Lightbulb className="h-3 w-3" />
+                        Sugestões disponíveis:
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {usernameCheck.suggestions.map((suggestion) => (
+                          <button
+                            key={suggestion}
+                            type="button"
+                            onClick={() => applySuggestion(suggestion)}
+                            className="px-2 py-1 text-xs rounded-md bg-accent/20 hover:bg-accent/30 text-foreground/80 hover:text-foreground transition-colors"
+                          >
+                            @{suggestion}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2 md:col-span-2">
                   <Label htmlFor="email">E-mail</Label>
