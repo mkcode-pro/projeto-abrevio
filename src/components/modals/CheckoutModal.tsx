@@ -112,7 +112,7 @@ export function CheckoutModal({ open, onOpenChange, plan }: CheckoutModalProps) 
                 <>
                   <div className="flex items-center justify-between mb-2 text-emerald-400">
                     <span>Economia anual</span>
-                    <span className="font-semibold">-R$ {((details as any).savings || 0).toFixed(2).replace('.', ',')}</span>
+                    <span className="font-semibold">-R$ {('savings' in details ? details.savings : 0).toFixed(2).replace('.', ',')}</span>
                   </div>
                   <Separator className="my-2" />
                 </>

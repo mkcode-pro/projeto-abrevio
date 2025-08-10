@@ -13,39 +13,44 @@ import { Card, CardContent } from "@/components/ui/card";
 export default function BioLinkEditor() {
   const { bioLinkData, isLoading, isError, error, saveChanges, isSaving } = useBioLink();
   
-  const [userData, setUserData] = useState<UserData | null>(null);
-  const [links, setLinks] = useState<LinkData[]>([]);
+  // Estado local para guardar as edições do usuário
+  const [editedUserData, setEditedUserData] = useState<UserData | null>(null);
+  const [editedLinks, setEditedLinks] = useState<LinkData[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
+  // Inicializa o estado local com os dados do servidor quando eles chegam
   useEffect(() => {
     if (bioLinkData) {
-      setUserData(bioLinkData.userData);
-      setLinks(bioLinkData.links);
+      setEditedUserData(bioLinkData.userData);
+      setEditedLinks(bioLinkData.links);
       setHasUnsavedChanges(false);
     }
   }, [bioLinkData]);
 
+  // Atualiza o estado local do perfil quando o usuário digita
   const handleUserDataUpdate = (updates: Partial<UserData>) => {
-    if (!userData) return;
-    setUserData(prev => ({ ...prev!, ...updates }));
+    if (!editedUserData) return;
+    setEditedUserData(prev => ({ ...prev!, ...updates }));
     setHasUnsavedChanges(true);
   };
 
+  // Atualiza o estado local dos links quando o usuário os altera
   const handleLinksChange = (newLinks: LinkData[]) => {
-    setLinks(newLinks);
+    setEditedLinks(newLinks);
     setHasUnsavedChanges(true);
   };
 
+  // Salva as alterações usando o estado local
   const handleSave = () => {
-    if (userData) {
-      saveChanges(userData, links);
+    if (editedUserData) {
+      saveChanges(editedUserData, editedLinks);
       setHasUnsavedChanges(false);
     }
   };
 
   const handlePreview = () => {
-    if (userData?.username) {
-      window.open(`/bio/${userData.username}`, '_blank');
+    if (editedUserData?.username) {
+      window.open(`/bio/${editedUserData.username}`, '_blank');
     }
   };
 
@@ -63,7 +68,8 @@ export default function BioLinkEditor() {
     );
   }
 
-  if (!userData) return <EditorSkeleton />;
+  // Garante que temos dados para exibir antes de renderizar o editor
+  if (!editedUserData) return <EditorSkeleton />;
 
   return (
     <div className="min-h-screen bg-gradient-hero">
@@ -75,7 +81,7 @@ export default function BioLinkEditor() {
             {hasUnsavedChanges && <p className="text-amber-400 text-sm mt-1">⚠️ Você tem alterações não salvas</p>}
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
-            <Button onClick={handlePreview} variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10" disabled={!userData.username}>
+            <Button onClick={handlePreview} variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10" disabled={!editedUserData.username}>
               <Eye className="w-5 h-5 mr-2" />
               Visualizar
             </Button>
@@ -87,12 +93,12 @@ export default function BioLinkEditor() {
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-8">
-            <ProfileEditor userData={userData} onUpdate={handleUserDataUpdate} />
-            <LinksManager links={links} onLinksChange={handleLinksChange} />
+            <ProfileEditor userData={editedUserData} onUpdate={handleUserDataUpdate} />
+            <LinksManager links={editedLinks} onLinksChange={handleLinksChange} />
           </div>
           <div className="lg:col-span-4">
             <div className="sticky top-24">
-              <BioLinkPreview userData={userData} links={links} />
+              <BioLinkPreview userData={editedUserData} links={editedLinks} />
             </div>
           </div>
         </div>

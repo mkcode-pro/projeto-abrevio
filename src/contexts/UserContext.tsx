@@ -42,7 +42,7 @@ interface UserActivity {
   type: 'login' | 'profile_update' | 'link_created' | 'link_clicked' | 'biolink_updated' | 'plan_upgrade';
   description: string;
   timestamp: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface UserContextType {
@@ -51,7 +51,7 @@ interface UserContextType {
   activities: UserActivity[];
   loading: boolean;
   updatePreferences: (updates: Partial<UserPreferences>) => Promise<void>;
-  updateNestedPreference: (section: keyof UserPreferences, key: string, value: any) => Promise<void>;
+  updateNestedPreference: (section: keyof UserPreferences, key: string, value: unknown) => Promise<void>;
   addActivity: (activity: Omit<UserActivity, 'id' | 'timestamp'>) => void;
   clearActivities: () => void;
   exportUserData: () => Promise<void>;
@@ -169,11 +169,11 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const updateNestedPreference = useCallback(async (
     section: keyof UserPreferences, 
     key: string, 
-    value: any
+    value: unknown
   ) => {
     if (!isAuthenticated) return;
     
-    const currentSection = userPreferences[section] as Record<string, any>;
+    const currentSection = userPreferences[section] as Record<string, unknown>;
     const updatedSection = { ...currentSection, [key]: value };
     
     await updatePreferences({

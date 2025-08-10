@@ -1,13 +1,15 @@
 import { useRef } from "react"
-import { Upload, Loader2 } from "lucide-react"
+import { Upload, Loader2, CheckCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Progress } from "@/components/ui/progress"
 import { UserData } from './BioLinkPreview'
 import { useFileUpload } from "@/hooks/useFileUpload"
+import { toast } from "sonner"
 
 interface ProfileEditorProps {
   userData: UserData
@@ -16,15 +18,38 @@ interface ProfileEditorProps {
 
 export function ProfileEditor({ userData, onUpdate }: ProfileEditorProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const { uploadFile, uploading } = useFileUpload({ bucket: 'avatars' })
+  const { uploadFile, uploading, progress, preview } = useFileUpload({ 
+    bucket: 'avatars',
+    optimize: true // Otimização automática ativada
+  })
 
   const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (file) {
-      const publicUrl = await uploadFile(file)
-      if (publicUrl) {
-        onUpdate({ avatar: publicUrl })
+      try {
+        console.log('Iniciando upload da foto...')
+        const publicUrl = await uploadFile(file)
+        
+        if (publicUrl) {
+          console.log('Upload concluído, URL:', publicUrl)
+          onUpdate({ avatar: publicUrl })
+          toast.success("Foto carregada com sucesso!", {
+            duration: 3000,
+            description: "Clique em 'Salvar' para confirmar as alterações"
+          })
+        } else {
+          toast.error("Não foi possível fazer o upload da foto")
+        }
+      } catch (error) {
+        console.error('Erro no upload:', error)
+        toast.error("Erro ao enviar foto", {
+          description: "Por favor, tente novamente"
+        })
       }
+    }
+    // Limpar o input para permitir selecionar o mesmo arquivo novamente
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
     }
   }
 
@@ -37,12 +62,12 @@ export function ProfileEditor({ userData, onUpdate }: ProfileEditorProps) {
         {/* Avatar Upload */}
         <div className="flex items-center gap-4">
           <Avatar className="w-16 h-16 glass border border-white/20">
-            <AvatarImage src={userData.avatar} alt={userData.name} />
+            <AvatarImage src={preview || userData.avatar} alt={userData.name} />
             <AvatarFallback className="bg-gradient-neon text-black font-bold">
               {userData.name.split(' ').map(n => n[0]).join('')}
             </AvatarFallback>
           </Avatar>
-          <div>
+          <div className="flex-1">
             <Button 
               onClick={() => fileInputRef.current?.click()}
               variant="outline"
@@ -55,7 +80,7 @@ export function ProfileEditor({ userData, onUpdate }: ProfileEditorProps) {
               ) : (
                 <Upload className="w-4 h-4 mr-2" />
               )}
-              {uploading ? 'Enviando...' : 'Alterar Avatar'}
+              {uploading ? 'Enviando...' : 'Alterar Foto'}
             </Button>
             <input
               ref={fileInputRef}
@@ -64,6 +89,18 @@ export function ProfileEditor({ userData, onUpdate }: ProfileEditorProps) {
               onChange={handleAvatarUpload}
               className="hidden"
             />
+            {/* Barra de progresso do upload */}
+            {uploading && (
+              <div className="mt-2 space-y-1">
+                <Progress value={progress} className="h-2" />
+                <p className="text-xs text-white/60">
+                  {progress < 30 ? 'Preparando imagem...' : 
+                   progress < 50 ? 'Limpando fotos antigas...' :
+                   progress < 80 ? 'Enviando nova foto...' : 
+                   'Finalizando...'}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
@@ -74,8 +111,12 @@ export function ProfileEditor({ userData, onUpdate }: ProfileEditorProps) {
             <Input
               id="name"
               value={userData.name}
-              onChange={(e) => onUpdate({ name: e.target.value })}
+              onChange={(e) => {
+                console.log('Nome alterado para:', e.target.value);
+                onUpdate({ name: e.target.value });
+              }}
               className="bg-white/5 border-white/20 text-white"
+              placeholder="Seu nome"
             />
           </div>
           <div>
@@ -83,8 +124,12 @@ export function ProfileEditor({ userData, onUpdate }: ProfileEditorProps) {
             <Input
               id="username"
               value={userData.username}
-              onChange={(e) => onUpdate({ username: e.target.value })}
+              onChange={(e) => {
+                console.log('Username alterado para:', e.target.value);
+                onUpdate({ username: e.target.value });
+              }}
               className="bg-white/5 border-white/20 text-white"
+              placeholder="Seu username"
             />
           </div>
         </div>
@@ -94,9 +139,13 @@ export function ProfileEditor({ userData, onUpdate }: ProfileEditorProps) {
           <Textarea
             id="bio"
             value={userData.bio}
-            onChange={(e) => onUpdate({ bio: e.target.value })}
+            onChange={(e) => {
+              console.log('Bio alterada para:', e.target.value);
+              onUpdate({ bio: e.target.value });
+            }}
             className="bg-white/5 border-white/20 text-white resize-none"
             rows={3}
+            placeholder="Escreva uma bio interessante..."
           />
         </div>
       </CardContent>

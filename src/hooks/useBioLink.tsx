@@ -82,6 +82,7 @@ export function useBioLink() {
     queryKey: ["bioLink", user?.id],
     queryFn: () => fetchBioLink(user!.id),
     enabled: !!user,
+    refetchOnWindowFocus: false, // Impede que os dados sejam recarregados e apaguem as edições
   });
 
   const createMutation = useMutation({

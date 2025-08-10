@@ -94,7 +94,7 @@ export function useUserPreferences() {
 
   const updatePreference = useCallback((
     key: string, 
-    value: any
+    value: unknown
   ) => {
     setPreferences(prev => ({
       ...prev,
@@ -105,7 +105,7 @@ export function useUserPreferences() {
   const updateNestedPreference = useCallback((
     category: string,
     key: string, 
-    value: any
+    value: unknown
   ) => {
     setPreferences(prev => ({
       ...prev,

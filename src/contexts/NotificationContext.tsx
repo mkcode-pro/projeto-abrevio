@@ -15,7 +15,7 @@ interface Notification {
   actionUrl?: string;
   actionLabel?: string;
   expiresAt?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface NotificationPreferences {

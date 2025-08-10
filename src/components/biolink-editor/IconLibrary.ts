@@ -16,7 +16,7 @@ import {
 export interface IconData {
   id: string
   name: string
-  icon: React.ComponentType<any>
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
   color: string
 }
 
