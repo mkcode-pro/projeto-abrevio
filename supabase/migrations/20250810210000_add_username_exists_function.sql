@@ -4,7 +4,8 @@ language plpgsql
 security definer
 as $$
 begin
-  return exists(select 1 from public.profiles where username = p_username);
+  -- Compara os nomes de usuário em minúsculas para ser case-insensitive
+  return exists(select 1 from public.profiles where lower(username) = lower(p_username));
 end;
 $$;
 
