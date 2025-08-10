@@ -5,9 +5,10 @@ returns boolean
 language plpgsql
 stable
 security definer
-set search_path = public
+set search_path = '' -- Medida de segurança para evitar ataques
 as $$
 begin
-  return exists(select 1 from profiles where username = p_username);
+  -- Usando "public.profiles" para ser explícito e evitar problemas de search_path
+  return exists(select 1 from public.profiles where username = p_username);
 end;
 $$;
