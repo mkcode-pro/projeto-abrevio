@@ -153,13 +153,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const register = useCallback(async (email: string, password: string, username: string, name: string): Promise<boolean> => {
     setLoading(true);
     try {
-      const { data: existingUser } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', username)
-        .single();
+      const { data: usernameExists, error: rpcError } = await supabase.rpc('username_exists', { p_username: username });
 
-      if (existingUser) {
+      if (rpcError) throw rpcError;
+
+      if (usernameExists) {
         toast.error("Username já existe", { description: "Escolha outro nome de usuário." });
         return false;
       }

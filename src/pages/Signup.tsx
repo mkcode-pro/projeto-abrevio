@@ -41,14 +41,12 @@ export default function Signup() {
         return;
       }
       setUsernameStatus('checking');
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('username')
-        .eq('username', debouncedUsername)
-        .single();
+      const { data, error } = await supabase.rpc('username_exists', { p_username: debouncedUsername });
       
-      if (error && error.code !== 'PGRST116') { // PGRST116 is 'not found'
-        console.error(error);
+      if (error) {
+        console.error("Erro ao verificar username:", error);
+        setUsernameStatus('idle'); // Reset in case of error
+        return;
       }
       
       setUsernameStatus(data ? 'taken' : 'available');

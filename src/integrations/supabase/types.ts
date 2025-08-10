@@ -322,6 +322,12 @@ export type Database = {
         }
         Returns: boolean
       }
+      username_exists: {
+        Args: {
+          p_username: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"

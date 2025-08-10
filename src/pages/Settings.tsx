@@ -65,7 +65,14 @@ export default function Settings() {
         return;
       }
       setUsernameStatus('checking');
-      const { data } = await supabase.from('profiles').select('username').eq('username', debouncedUsername).single();
+      const { data, error } = await supabase.rpc('username_exists', { p_username: debouncedUsername });
+
+      if (error) {
+        console.error("Erro ao verificar username:", error);
+        setUsernameStatus('idle');
+        return;
+      }
+      
       setUsernameStatus(data ? 'taken' : 'available');
     };
     checkUsername();
