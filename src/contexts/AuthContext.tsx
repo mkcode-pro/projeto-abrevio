@@ -72,7 +72,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     );
 
-    // Verifica a sessão inicial
     const checkInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
@@ -91,87 +90,100 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      toast.error("Erro no login", { description: "Verifique suas credenciais e tente novamente." });
-      throw error;
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) {
+        toast.error("Erro no login", { description: "Verifique suas credenciais e tente novamente." });
+        throw error;
+      }
+      toast.success("Login realizado com sucesso!");
+    } finally {
+      setLoading(false);
     }
-    toast.success("Login realizado com sucesso!");
-    setLoading(false);
   }, []);
 
   const register = useCallback(async (email: string, password: string, username: string, name: string) => {
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-          username,
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            username,
+          },
         },
-      },
-    });
-    if (error) {
-      toast.error("Erro ao criar conta", { description: "Este email ou usuário já pode estar em uso." });
-      throw error;
+      });
+      if (error) {
+        toast.error("Erro ao criar conta", { description: "Este email ou usuário já pode estar em uso." });
+        throw error;
+      }
+      toast.success("Conta criada com sucesso!", { description: "Verifique seu email para confirmar a conta." });
+    } finally {
+      setLoading(false);
     }
-    toast.success("Conta criada com sucesso!", { description: "Verifique seu email para confirmar a conta." });
-    setLoading(false);
   }, []);
 
   const logout = useCallback(async () => {
     setLoading(true);
-    const { error } = await supabase.auth.signOut();
-    if (error) {
-      toast.error("Erro ao sair", { description: "Tente novamente mais tarde." });
-      throw error;
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        toast.error("Erro ao sair", { description: "Tente novamente mais tarde." });
+        throw error;
+      }
+      setUser(null);
+      toast.info("Você foi desconectado.");
+    } finally {
+      setLoading(false);
     }
-    setUser(null);
-    toast.info("Você foi desconectado.");
-    setLoading(false);
   }, []);
 
   const updateProfile = useCallback(async (updates: Partial<Pick<User, 'name' | 'username' | 'avatar'>>) => {
     if (!user) return;
     setLoading(true);
-    
-    const profileUpdates = {
-      name: updates.name,
-      username: updates.username,
-      avatar_url: updates.avatar,
-    };
+    try {
+      const profileUpdates = {
+        name: updates.name,
+        username: updates.username,
+        avatar_url: updates.avatar,
+      };
 
-    const { error } = await supabase
-      .from('profiles')
-      .update(profileUpdates)
-      .eq('id', user.id);
+      const { error } = await supabase
+        .from('profiles')
+        .update(profileUpdates)
+        .eq('id', user.id);
 
-    if (error) {
-      toast.error("Erro ao atualizar perfil", { description: "Não foi possível salvar as alterações." });
-      throw error;
+      if (error) {
+        toast.error("Erro ao atualizar perfil", { description: "Não foi possível salvar as alterações." });
+        throw error;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const updatedUser = await fetchUserProfile(session.user);
+        setUser(updatedUser);
+      }
+
+      toast.success("Perfil atualizado com sucesso!");
+    } finally {
+      setLoading(false);
     }
-
-    // Re-fetch user profile to update state
-    const { data: { session } } = await supabase.auth.getSession();
-    if (session?.user) {
-      const updatedUser = await fetchUserProfile(session.user);
-      setUser(updatedUser);
-    }
-
-    toast.success("Perfil atualizado com sucesso!");
-    setLoading(false);
   }, [user]);
 
   const changePassword = useCallback(async (newPassword: string) => {
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password: newPassword });
-    if (error) {
-      toast.error("Erro ao alterar senha", { description: "Tente novamente mais tarde." });
-      throw error;
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) {
+        toast.error("Erro ao alterar senha", { description: "Tente novamente mais tarde." });
+        throw error;
+      }
+      toast.success("Senha alterada com sucesso!");
+    } finally {
+      setLoading(false);
     }
-    toast.success("Senha alterada com sucesso!");
-    setLoading(false);
   }, []);
 
   const value: AuthContextType = {
