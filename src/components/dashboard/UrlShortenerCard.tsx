@@ -1,47 +1,43 @@
 import { useState } from "react"
-import { Copy, Link, Trash2, BarChart3, ExternalLink } from "lucide-react"
+import { Copy, Link, Trash2, ExternalLink } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Label } from "@/components/ui/label"
 import { useUrlShortener } from "@/hooks/useUrlShortener"
-import { useToast } from "@/hooks/use-toast"
+import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export function UrlShortenerCard() {
   const [originalUrl, setOriginalUrl] = useState("")
   const [customCode, setCustomCode] = useState("")
   const [title, setTitle] = useState("")
-  const { urls, shortenUrl, deleteUrl, loading } = useUrlShortener()
-  const { toast } = useToast()
+  const { urls, shortenUrl, isCreating, deleteUrl, isLoadingUrls } = useUrlShortener()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
     if (!originalUrl) {
-      toast({
-        title: "URL obrigatória",
-        description: "Digite uma URL para encurtar",
-        variant: "destructive"
-      })
+      toast.error("URL obrigatória", { description: "Digite uma URL para encurtar" })
       return
     }
 
-    const result = await shortenUrl(originalUrl, customCode, title)
+    shortenUrl({
+      original_url: originalUrl,
+      short_code: customCode || undefined,
+      title: title || undefined,
+    })
     
-    if (result) {
-      setOriginalUrl("")
-      setCustomCode("")
-      setTitle("")
-    }
+    setOriginalUrl("")
+    setCustomCode("")
+    setTitle("")
   }
 
-  const copyToClipboard = (shortUrl: string) => {
-    navigator.clipboard.writeText(`https://${shortUrl}`)
-    toast({
-      title: "Link copiado!",
-      description: "O link encurtado foi copiado para a área de transferência",
-    })
+  const copyToClipboard = (shortCode: string) => {
+    const url = `${window.location.origin}/${shortCode}`
+    navigator.clipboard.writeText(url)
+    toast.success("Link copiado!", { description: "O link encurtado foi copiado para a área de transferência." })
   }
 
   return (
@@ -98,17 +94,22 @@ export function UrlShortenerCard() {
 
           <Button 
             type="submit" 
-            disabled={loading}
+            disabled={isCreating}
             className="w-full bg-gradient-neon hover:opacity-90 text-black font-semibold"
           >
-            {loading ? "Encurtando..." : "Encurtar URL"}
+            {isCreating ? "Encurtando..." : "Encurtar URL"}
           </Button>
         </form>
 
         {/* URLs List */}
-        {urls.length > 0 && (
-          <div className="space-y-3">
-            <h4 className="text-white font-semibold text-sm">Links Recentes</h4>
+        <div className="space-y-3">
+          <h4 className="text-white font-semibold text-sm">Links Recentes</h4>
+          {isLoadingUrls ? (
+            <div className="space-y-2">
+              <Skeleton className="h-24 w-full" />
+              <Skeleton className="h-24 w-full" />
+            </div>
+          ) : urls.length > 0 ? (
             <div className="space-y-2 max-h-64 overflow-y-auto">
               {urls.slice(0, 5).map((url) => (
                 <div key={url.id} className="glass border border-white/10 rounded-lg p-3">
@@ -117,17 +118,17 @@ export function UrlShortenerCard() {
                       {url.title && (
                         <p className="text-white text-sm font-medium truncate">{url.title}</p>
                       )}
-                      <p className="text-neon-blue text-sm font-mono">{url.shortUrl}</p>
-                      <p className="text-white/60 text-xs truncate">{url.originalUrl}</p>
+                      <p className="text-neon-blue text-sm font-mono">abrev.io/{url.short_code}</p>
+                      <p className="text-white/60 text-xs truncate">{url.original_url}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="secondary" className="text-xs">
-                          {url.clicks} cliques
+                          {url.click_count || 0} cliques
                         </Badge>
                         <Badge 
-                          variant={url.isActive ? "default" : "destructive"} 
+                          variant={url.is_active ? "default" : "destructive"} 
                           className="text-xs"
                         >
-                          {url.isActive ? "Ativo" : "Inativo"}
+                          {url.is_active ? "Ativo" : "Inativo"}
                         </Badge>
                       </div>
                     </div>
@@ -136,7 +137,7 @@ export function UrlShortenerCard() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-white/60 hover:text-white"
-                        onClick={() => copyToClipboard(url.shortUrl)}
+                        onClick={() => copyToClipboard(url.short_code)}
                       >
                         <Copy className="h-3 w-3" />
                       </Button>
@@ -144,7 +145,7 @@ export function UrlShortenerCard() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-white/60 hover:text-white"
-                        onClick={() => window.open(`https://${url.originalUrl}`, '_blank')}
+                        onClick={() => window.open(url.original_url, '_blank')}
                       >
                         <ExternalLink className="h-3 w-3" />
                       </Button>
@@ -161,8 +162,10 @@ export function UrlShortenerCard() {
                 </div>
               ))}
             </div>
-          </div>
-        )}
+          ) : (
+            <p className="text-sm text-white/60 text-center py-4">Nenhum link encurtado ainda.</p>
+          )}
+        </div>
       </CardContent>
     </Card>
   )

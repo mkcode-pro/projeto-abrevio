@@ -1,186 +1,113 @@
-import { useState, useCallback } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export interface ShortenedUrl {
   id: string;
-  originalUrl: string;
-  shortCode: string;
-  shortUrl: string;
-  title?: string;
-  clicks: number;
-  createdAt: Date;
-  isActive: boolean;
-  qrCode?: string;
+  original_url: string;
+  short_code: string;
+  title?: string | null;
+  click_count: number;
+  created_at: string;
+  is_active: boolean;
 }
 
-const mockUrls: ShortenedUrl[] = [
-  {
-    id: "1",
-    originalUrl: "https://youtube.com/watch?v=dQw4w9WgXcQ",
-    shortCode: "yt-video",
-    shortUrl: "abrev.io/yt-video",
-    title: "Vídeo do YouTube",
-    clicks: 1234,
-    createdAt: new Date(2024, 0, 15),
-    isActive: true
-  },
-  {
-    id: "2", 
-    originalUrl: "https://docs.google.com/document/d/1234567890",
-    shortCode: "docs-link",
-    shortUrl: "abrev.io/docs-link",
-    title: "Documento Importante",
-    clicks: 567,
-    createdAt: new Date(2024, 0, 20),
-    isActive: true
-  },
-  {
-    id: "3",
-    originalUrl: "https://example-long-url.com/very/long/path/to/content",
-    shortCode: "example",
-    shortUrl: "abrev.io/example",
-    clicks: 89,
-    createdAt: new Date(2024, 0, 25),
-    isActive: false
+// Fetch user's shortened URLs
+const fetchUrls = async (userId: string) => {
+  const { data, error } = await supabase
+    .from("shortened_urls")
+    .select("*")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false });
+
+  if (error) throw new Error(error.message);
+  return data;
+};
+
+// Create a new shortened URL
+const createShortenedUrl = async ({
+  original_url,
+  short_code,
+  title,
+  user_id,
+}: {
+  original_url: string;
+  short_code?: string;
+  title?: string;
+  user_id: string;
+}) => {
+  const code = short_code || Math.random().toString(36).substring(2, 8);
+  
+  const { data, error } = await supabase
+    .from("shortened_urls")
+    .insert({
+      original_url,
+      short_code: code,
+      title,
+      user_id,
+    })
+    .select()
+    .single();
+
+  if (error) {
+    if (error.code === '23505') { // Unique constraint violation
+      throw new Error("Este código personalizado já está em uso.");
+    }
+    throw new Error(error.message);
   }
-];
+  return data;
+};
+
+// Delete a shortened URL
+const deleteShortenedUrl = async (id: string) => {
+  const { error } = await supabase.from("shortened_urls").delete().eq("id", id);
+  if (error) throw new Error(error.message);
+};
 
 export function useUrlShortener() {
-  const [urls, setUrls] = useState<ShortenedUrl[]>(mockUrls);
-  const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
 
-  const shortenUrl = useCallback(async (
-    originalUrl: string, 
-    customCode?: string,
-    title?: string
-  ): Promise<ShortenedUrl | null> => {
-    setLoading(true);
-    try {
-      // Validate URL
-      new URL(originalUrl);
+  const { data: urls, isLoading: isLoadingUrls } = useQuery({
+    queryKey: ["shortenedUrls", user?.id],
+    queryFn: () => fetchUrls(user!.id),
+    enabled: !!user,
+  });
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
+  const { mutate: shortenUrl, isPending: isCreating } = useMutation({
+    mutationFn: createShortenedUrl,
+    onSuccess: () => {
+      toast.success("URL encurtada com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["shortenedUrls", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats", user?.id] });
+    },
+    onError: (error) => {
+      toast.error("Erro ao encurtar URL", { description: error.message });
+    },
+  });
 
-      const shortCode = customCode || Math.random().toString(36).substring(2, 8);
-      const newUrl: ShortenedUrl = {
-        id: Date.now().toString(),
-        originalUrl,
-        shortCode,
-        shortUrl: `abrev.io/${shortCode}`,
-        title,
-        clicks: 0,
-        createdAt: new Date(),
-        isActive: true
-      };
-
-      setUrls(prev => [newUrl, ...prev]);
-      
-      toast({
-        title: "URL encurtada!",
-        description: `Link criado: ${newUrl.shortUrl}`,
-      });
-
-      return newUrl;
-    } catch (error) {
-      toast({
-        title: "Erro ao encurtar URL",
-        description: "Verifique se a URL é válida e tente novamente.",
-        variant: "destructive"
-      });
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
-
-  const updateUrl = useCallback(async (
-    id: string, 
-    updates: Partial<Pick<ShortenedUrl, 'title' | 'isActive'>>
-  ) => {
-    setLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setUrls(prev => prev.map(url => 
-        url.id === id ? { ...url, ...updates } : url
-      ));
-
-      toast({
-        title: "URL atualizada",
-        description: "As alterações foram salvas com sucesso.",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro ao atualizar",
-        description: "Ocorreu um erro ao salvar as alterações.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
-
-  const deleteUrl = useCallback(async (id: string) => {
-    setLoading(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setUrls(prev => prev.filter(url => url.id !== id));
-      
-      toast({
-        title: "URL removida",
-        description: "O link foi removido com sucesso.",
-      });
-    } catch (error) {
-      toast({
-        title: "Erro ao remover",
-        description: "Ocorreu um erro ao remover o link.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [toast]);
-
-  const incrementClick = useCallback((id: string) => {
-    setUrls(prev => prev.map(url => 
-      url.id === id ? { ...url, clicks: url.clicks + 1 } : url
-    ));
-  }, []);
-
-  const getAnalytics = useCallback(() => {
-    const totalUrls = urls.length;
-    const activeUrls = urls.filter(url => url.isActive).length;
-    const totalClicks = urls.reduce((sum, url) => sum + url.clicks, 0);
-    const thisMonthClicks = urls
-      .filter(url => {
-        const now = new Date();
-        const urlDate = new Date(url.createdAt);
-        return urlDate.getMonth() === now.getMonth() && 
-               urlDate.getFullYear() === now.getFullYear();
-      })
-      .reduce((sum, url) => sum + url.clicks, 0);
-
-    return {
-      totalUrls,
-      activeUrls,
-      totalClicks,
-      thisMonthClicks,
-      topPerforming: urls
-        .sort((a, b) => b.clicks - a.clicks)
-        .slice(0, 5)
-    };
-  }, [urls]);
+  const { mutate: deleteUrl, isPending: isDeleting } = useMutation({
+    mutationFn: deleteShortenedUrl,
+    onSuccess: () => {
+      toast.success("URL removida com sucesso!");
+      queryClient.invalidateQueries({ queryKey: ["shortenedUrls", user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardStats", user?.id] });
+    },
+    onError: (error) => {
+      toast.error("Erro ao remover URL", { description: error.message });
+    },
+  });
 
   return {
-    urls,
-    loading,
-    shortenUrl,
-    updateUrl,
+    urls: urls || [],
+    isLoadingUrls,
+    shortenUrl: (vars: { original_url: string; short_code?: string; title?: string; }) => {
+      if (!user) return;
+      shortenUrl({ ...vars, user_id: user.id });
+    },
+    isCreating,
     deleteUrl,
-    incrementClick,
-    analytics: getAnalytics()
+    isDeleting,
   };
 }

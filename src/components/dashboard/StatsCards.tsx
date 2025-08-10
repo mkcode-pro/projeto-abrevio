@@ -1,32 +1,46 @@
 import { memo } from 'react'
 import { Eye, MousePointer, TrendingUp } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
-
-const stats = [
-  { 
-    title: "Visualizações Totais", 
-    value: "2.540", 
-    icon: Eye, 
-    change: "+12% vs mês anterior",
-    color: "text-neon-blue"
-  },
-  { 
-    title: "Cliques Totais", 
-    value: "1.821", 
-    icon: MousePointer, 
-    change: "+8% vs mês anterior",
-    color: "text-emerald-400"
-  },
-  { 
-    title: "Top Link", 
-    value: "WhatsApp", 
-    icon: TrendingUp, 
-    change: "1.234 cliques",
-    color: "text-violet-400"
-  },
-]
+import { useDashboardStats } from "@/hooks/useDashboardStats"
+import { Skeleton } from "@/components/ui/skeleton"
 
 export const StatsCards = memo(function StatsCards() {
+  const { data, isLoading } = useDashboardStats();
+
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Skeleton className="h-32" />
+        <Skeleton className="h-32" />
+        <Skeleton className="h-32" />
+      </div>
+    );
+  }
+
+  const stats = [
+    { 
+      title: "Visualizações Totais", 
+      value: data?.totalViews?.toLocaleString() || "0", 
+      icon: Eye, 
+      change: "+12% vs mês anterior", // Mock change for now
+      color: "text-neon-blue"
+    },
+    { 
+      title: "Cliques Totais", 
+      value: data?.totalClicks?.toLocaleString() || "0", 
+      icon: MousePointer, 
+      change: "+8% vs mês anterior", // Mock change for now
+      color: "text-emerald-400"
+    },
+    { 
+      title: "Top Link", 
+      value: data?.topLink || "N/A", 
+      icon: TrendingUp, 
+      change: "Performance", // Mock change for now
+      color: "text-violet-400"
+    },
+  ]
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
       {stats.map((stat, index) => (
@@ -35,7 +49,7 @@ export const StatsCards = memo(function StatsCards() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">{stat.title}</p>
-                <p className="text-2xl font-bold text-white mt-1">{stat.value}</p>
+                <p className="text-2xl font-bold text-white mt-1 truncate">{stat.value}</p>
                 <p className={`text-xs mt-1 ${stat.color}`}>{stat.change}</p>
               </div>
               <div className={`p-3 rounded-xl bg-white/10`}>
