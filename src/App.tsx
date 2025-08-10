@@ -8,11 +8,11 @@ import { AppProviders } from "@/contexts";
 import { AppLayout } from "@/components/layout/AppLayout";
 import Index from "./pages/Index";
 import MobileDemo from "./pages/MobileDemo";
+import Dashboard from "./pages/Dashboard";
+import BioLinkEditor from "./pages/BioLinkEditor";
+import Analytics from "./pages/Analytics";
+import Settings from "./pages/Settings";
 import { 
-  Dashboard, 
-  BioLinkEditor, 
-  Analytics, 
-  Settings, 
   Pricing, 
   BioLink, 
   NotFound 
