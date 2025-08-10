@@ -13,7 +13,7 @@ const fetchBioLink = async (userId: string) => {
     .select(`
       *,
       bio_link_items (
-        id, title, subtitle, url, iconId: icon, position
+        id, title, subtitle, url, icon, position
       )
     `)
     .eq("user_id", userId)
@@ -148,7 +148,7 @@ export function useBioLink() {
     },
     links: (bioLink.bio_link_items || []).sort((a: any, b: any) => a.position - b.position).map((item: any) => ({
       ...item,
-      iconId: item.iconId || 'website'
+      iconId: item.icon || 'website'
     })),
   } : null;
 
