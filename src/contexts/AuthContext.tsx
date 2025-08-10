@@ -26,6 +26,7 @@ interface AuthContextType extends AuthState {
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<Pick<User, 'name' | 'username' | 'avatar'>>) => Promise<void>;
   changePassword: (newPassword: string) => Promise<void>;
+  deleteAccount: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -276,6 +277,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, []);
 
+  const deleteAccount = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { error } = await supabase.rpc('delete_user_account');
+      if (error) {
+        toast.error("Erro ao deletar conta", { description: error.message });
+        throw error;
+      }
+      setUser(null); // Limpa o usuário local
+      toast.success("Sua conta foi deletada com sucesso.");
+    } catch (error) {
+      console.error('Erro ao deletar conta:', error);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const value: AuthContextType = {
     user,
     isAuthenticated: !!user,
@@ -285,6 +304,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     logout,
     updateProfile,
     changePassword,
+    deleteAccount,
   };
 
   return (

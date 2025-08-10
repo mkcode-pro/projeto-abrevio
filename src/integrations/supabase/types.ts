@@ -311,6 +311,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      delete_user_account: {
+        Args: Record<string, never>
+        Returns: void
+      }
       has_role: {
         Args: {
           _user_id: string
