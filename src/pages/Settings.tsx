@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Camera, User, Palette, Lock, Save, Loader2, CheckCircle, XCircle, AlertTriangle, Trash2 } from "lucide-react";
+import { Camera, User, Palette, Lock, Save, Loader2, CheckCircle, XCircle, AlertTriangle, Trash2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { PasswordChangeModal } from "@/components/modals/PasswordChangeModal";
 import { ConfirmDeleteModal } from "@/components/modals/ConfirmDeleteModal";
+import { ConfirmLogoutModal } from "@/components/modals/ConfirmLogoutModal";
 import { useAuth } from "@/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useDebounce } from "@/hooks/useDebounce";
@@ -32,10 +33,11 @@ export default function Settings() {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { user, updateProfile, loading: authLoading, deleteAccount } = useAuth();
+  const { user, updateProfile, loading: authLoading, deleteAccount, logout } = useAuth();
   const { uploadFile, uploading } = useFileUpload({ bucket: 'avatars' });
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [logoutModalOpen, setLogoutModalOpen] = useState(false);
 
   const [usernameStatus, setUsernameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
 
@@ -91,6 +93,12 @@ export default function Settings() {
   const handleDeleteAccount = async () => {
     await deleteAccount();
     setDeleteModalOpen(false);
+    navigate('/');
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    setLogoutModalOpen(false);
     navigate('/');
   };
 
@@ -172,10 +180,17 @@ export default function Settings() {
           </Card>
           <Card className="glass-card border-accent/20">
             <CardHeader><CardTitle className="flex items-center gap-2"><Lock className="h-5 w-5 text-primary" />Segurança</CardTitle></CardHeader>
-            <CardContent>
+            <CardContent className="space-y-4">
               <div className="flex items-center justify-between p-4 rounded-lg bg-card/30">
                 <div><h4 className="font-medium">Alterar senha</h4><p className="text-sm text-muted-foreground">Recomendamos trocar sua senha regularmente</p></div>
                 <Button type="button" variant="outline" onClick={() => setPasswordModalOpen(true)}>Alterar</Button>
+              </div>
+              <div className="flex items-center justify-between p-4 rounded-lg bg-card/30">
+                <div><h4 className="font-medium">Sair da conta</h4><p className="text-sm text-muted-foreground">Desconectar sua sessão em todos os dispositivos</p></div>
+                <Button type="button" variant="outline" onClick={() => setLogoutModalOpen(true)}>
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sair
+                </Button>
               </div>
             </CardContent>
           </Card>
@@ -192,6 +207,7 @@ export default function Settings() {
       </div>
       <PasswordChangeModal open={passwordModalOpen} onOpenChange={setPasswordModalOpen} />
       <ConfirmDeleteModal open={deleteModalOpen} onOpenChange={setDeleteModalOpen} onConfirm={handleDeleteAccount} title="Deletar sua conta permanentemente?" itemName="sua conta e todos os dados associados" />
+      <ConfirmLogoutModal open={logoutModalOpen} onOpenChange={setLogoutModalOpen} onConfirm={handleLogout} />
     </div>
   );
 }
