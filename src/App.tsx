@@ -15,6 +15,7 @@ import Dashboard from "./pages/Dashboard";
 import BioLinkEditor from "./pages/BioLinkEditor";
 import Analytics from "./pages/Analytics";
 import Settings from "./pages/Settings";
+import RedirectPage from "./pages/RedirectPage";
 import { 
   Pricing, 
   BioLink, 
@@ -48,6 +49,9 @@ const App = () => (
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/bio/:username" element={<BioLink />} />
                 <Route path="/joaosilva" element={<BioLink />} />
+                
+                {/* URL Shortener Redirect Route */}
+                <Route path="/r/:shortCode" element={<RedirectPage />} />
 
                 {/* Protected Routes */}
                 <Route element={<ProtectedRoute />}>

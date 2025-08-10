@@ -23,6 +23,14 @@ export function UrlShortenerCard() {
       return
     }
 
+    // Validar URL
+    try {
+      new URL(originalUrl)
+    } catch {
+      toast.error("URL inválida", { description: "Digite uma URL válida (ex: https://exemplo.com)" })
+      return
+    }
+
     shortenUrl({
       original_url: originalUrl,
       short_code: customCode || undefined,
@@ -35,9 +43,15 @@ export function UrlShortenerCard() {
   }
 
   const copyToClipboard = (shortCode: string) => {
-    const url = `${window.location.origin}/${shortCode}`
+    const url = `${window.location.origin}/r/${shortCode}`
     navigator.clipboard.writeText(url)
-    toast.success("Link copiado!", { description: "O link encurtado foi copiado para a área de transferência." })
+    toast.success("Link copiado!", { 
+      description: "O link encurtado foi copiado para a área de transferência." 
+    })
+  }
+
+  const openOriginalUrl = (url: string) => {
+    window.open(url, '_blank')
   }
 
   return (
@@ -81,15 +95,17 @@ export function UrlShortenerCard() {
           <div className="space-y-2">
             <Label htmlFor="custom" className="text-white text-sm">Código personalizado (opcional)</Label>
             <div className="flex items-center gap-2">
-              <span className="text-white/60 text-sm">abrev.io/</span>
+              <span className="text-white/60 text-sm">abrev.io/r/</span>
               <Input
                 id="custom"
                 value={customCode}
-                onChange={(e) => setCustomCode(e.target.value)}
+                onChange={(e) => setCustomCode(e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ''))}
                 placeholder="meu-link"
                 className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
+                maxLength={20}
               />
             </div>
+            <p className="text-xs text-white/50">Apenas letras, números, hífen e underscore</p>
           </div>
 
           <Button 
@@ -118,7 +134,7 @@ export function UrlShortenerCard() {
                       {url.title && (
                         <p className="text-white text-sm font-medium truncate">{url.title}</p>
                       )}
-                      <p className="text-neon-blue text-sm font-mono">abrev.io/{url.short_code}</p>
+                      <p className="text-neon-blue text-sm font-mono">abrev.io/r/{url.short_code}</p>
                       <p className="text-white/60 text-xs truncate">{url.original_url}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="secondary" className="text-xs">
@@ -130,6 +146,9 @@ export function UrlShortenerCard() {
                         >
                           {url.is_active ? "Ativo" : "Inativo"}
                         </Badge>
+                        <span className="text-xs text-white/50">
+                          {new Date(url.created_at).toLocaleDateString('pt-BR')}
+                        </span>
                       </div>
                     </div>
                     <div className="flex gap-1">
@@ -138,6 +157,7 @@ export function UrlShortenerCard() {
                         size="icon"
                         className="h-8 w-8 text-white/60 hover:text-white"
                         onClick={() => copyToClipboard(url.short_code)}
+                        title="Copiar link"
                       >
                         <Copy className="h-3 w-3" />
                       </Button>
@@ -145,7 +165,8 @@ export function UrlShortenerCard() {
                         variant="ghost"
                         size="icon"
                         className="h-8 w-8 text-white/60 hover:text-white"
-                        onClick={() => window.open(url.original_url, '_blank')}
+                        onClick={() => openOriginalUrl(url.original_url)}
+                        title="Abrir URL original"
                       >
                         <ExternalLink className="h-3 w-3" />
                       </Button>
@@ -154,6 +175,7 @@ export function UrlShortenerCard() {
                         size="icon"
                         className="h-8 w-8 text-red-400 hover:text-red-300"
                         onClick={() => deleteUrl(url.id)}
+                        title="Excluir"
                       >
                         <Trash2 className="h-3 w-3" />
                       </Button>

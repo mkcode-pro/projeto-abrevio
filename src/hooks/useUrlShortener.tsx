@@ -11,9 +11,10 @@ export interface ShortenedUrl {
   click_count: number;
   created_at: string;
   is_active: boolean;
+  qr_code_url?: string | null;
 }
 
-// Fetch user's shortened URLs
+// Buscar URLs encurtadas do usuário
 const fetchUrls = async (userId: string) => {
   const { data, error } = await supabase
     .from("shortened_urls")
@@ -22,10 +23,10 @@ const fetchUrls = async (userId: string) => {
     .order("created_at", { ascending: false });
 
   if (error) throw new Error(error.message);
-  return data;
+  return data || [];
 };
 
-// Create a new shortened URL
+// Criar nova URL encurtada
 const createShortenedUrl = async ({
   original_url,
   short_code,
@@ -37,7 +38,22 @@ const createShortenedUrl = async ({
   title?: string;
   user_id: string;
 }) => {
-  const code = short_code || Math.random().toString(36).substring(2, 8);
+  // Gerar código aleatório se não fornecido
+  let code = short_code;
+  if (!code) {
+    code = Math.random().toString(36).substring(2, 8);
+  }
+  
+  // Verificar se o código já existe
+  const { data: existing } = await supabase
+    .from("shortened_urls")
+    .select("short_code")
+    .eq("short_code", code)
+    .single();
+    
+  if (existing) {
+    throw new Error("Este código personalizado já está em uso.");
+  }
   
   const { data, error } = await supabase
     .from("shortened_urls")
@@ -59,10 +75,52 @@ const createShortenedUrl = async ({
   return data;
 };
 
-// Delete a shortened URL
+// Deletar URL encurtada
 const deleteShortenedUrl = async (id: string) => {
   const { error } = await supabase.from("shortened_urls").delete().eq("id", id);
   if (error) throw new Error(error.message);
+};
+
+// Incrementar contador de cliques
+const incrementClickCount = async (shortCode: string) => {
+  // Primeiro, buscar a URL
+  const { data: url, error: fetchError } = await supabase
+    .from("shortened_urls")
+    .select("*")
+    .eq("short_code", shortCode)
+    .eq("is_active", true)
+    .single();
+
+  if (fetchError || !url) {
+    throw new Error("Link não encontrado ou inativo");
+  }
+
+  // Incrementar contador
+  const { error: updateError } = await supabase
+    .from("shortened_urls")
+    .update({ click_count: (url.click_count || 0) + 1 })
+    .eq("id", url.id);
+
+  if (updateError) {
+    console.error("Erro ao incrementar contador:", updateError);
+  }
+
+  // Registrar clique para analytics
+  const { error: clickError } = await supabase
+    .from("url_clicks")
+    .insert({
+      shortened_url_id: url.id,
+      ip_address: null, // Por privacidade, não vamos coletar IP
+      user_agent: navigator.userAgent,
+      referrer: document.referrer || null,
+      clicked_at: new Date().toISOString(),
+    });
+
+  if (clickError) {
+    console.error("Erro ao registrar clique:", clickError);
+  }
+
+  return url.original_url;
 };
 
 export function useUrlShortener() {
@@ -99,15 +157,25 @@ export function useUrlShortener() {
     },
   });
 
+  const handleShortenUrl = (vars: { 
+    original_url: string; 
+    short_code?: string; 
+    title?: string; 
+  }) => {
+    if (!user) {
+      toast.error("Você precisa estar logado para encurtar URLs");
+      return;
+    }
+    shortenUrl({ ...vars, user_id: user.id });
+  };
+
   return {
     urls: urls || [],
     isLoadingUrls,
-    shortenUrl: (vars: { original_url: string; short_code?: string; title?: string; }) => {
-      if (!user) return;
-      shortenUrl({ ...vars, user_id: user.id });
-    },
+    shortenUrl: handleShortenUrl,
     isCreating,
     deleteUrl,
     isDeleting,
+    incrementClickCount, // Exportar para uso em redirecionamentos
   };
 }

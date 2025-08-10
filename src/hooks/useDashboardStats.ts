@@ -2,42 +2,93 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 
-const fetchDashboardStats = async (userId: string) => {
-  // First, get the user's bio_link ID and view count
-  const { data: bioLink, error: bioLinkError } = await supabase
+interface DashboardStats {
+  totalViews: number;
+  totalClicks: number;
+  totalUrls: number;
+  totalBioLinks: number;
+  topLink: string;
+  recentActivity: Array<{
+    type: 'view' | 'click';
+    description: string;
+    timestamp: string;
+  }>;
+}
+
+const fetchDashboardStats = async (userId: string): Promise<DashboardStats> => {
+  // Buscar bio links do usuário
+  const { data: bioLinks, error: bioLinksError } = await supabase
     .from("bio_links")
-    .select("id, view_count")
-    .eq("user_id", userId)
-    .single();
+    .select(`
+      id, 
+      view_count,
+      bio_link_items (
+        id, title, click_count
+      )
+    `)
+    .eq("user_id", userId);
 
-  if (bioLinkError && bioLinkError.code !== 'PGRST116') {
-    throw new Error(bioLinkError.message);
+  if (bioLinksError) {
+    console.error("Erro ao buscar bio links:", bioLinksError);
   }
+
+  // Buscar URLs encurtadas
+  const { data: shortenedUrls, error: urlsError } = await supabase
+    .from("shortened_urls")
+    .select("id, title, click_count, created_at")
+    .eq("user_id", userId);
+
+  if (urlsError) {
+    console.error("Erro ao buscar URLs:", urlsError);
+  }
+
+  // Calcular estatísticas
+  const totalViews = bioLinks?.reduce((sum, bl) => sum + (bl.view_count || 0), 0) || 0;
   
-  if (!bioLink) {
-    return { totalViews: 0, totalClicks: 0, topLink: "N/A" };
-  }
+  const bioLinkClicks = bioLinks?.reduce((sum, bl) => {
+    return sum + (bl.bio_link_items?.reduce((itemSum, item) => itemSum + (item.click_count || 0), 0) || 0);
+  }, 0) || 0;
+  
+  const urlClicks = shortenedUrls?.reduce((sum, url) => sum + (url.click_count || 0), 0) || 0;
+  const totalClicks = bioLinkClicks + urlClicks;
 
-  const totalViews = bioLink.view_count || 0;
+  // Encontrar link mais clicado
+  const allLinks = [
+    ...(bioLinks?.flatMap(bl => bl.bio_link_items || []).map(item => ({
+      title: item.title,
+      clicks: item.click_count || 0
+    })) || []),
+    ...(shortenedUrls?.map(url => ({
+      title: url.title || 'URL Encurtada',
+      clicks: url.click_count || 0
+    })) || [])
+  ];
 
-  // Now get stats for items related to this bio_link
-  const { data: items, error: itemsError } = await supabase
-    .from("bio_link_items")
-    .select("title, click_count")
-    .eq("bio_link_id", bioLink.id);
-
-  if (itemsError) throw new Error(itemsError.message);
-
-  const totalClicks = items.reduce((sum, item) => sum + (item.click_count || 0), 0);
-
-  const topLink = items.length > 0 
-    ? items.reduce((max, item) => (item.click_count || 0) > (max.click_count || 0) ? item : max).title
+  const topLink = allLinks.length > 0 
+    ? allLinks.reduce((max, link) => link.clicks > max.clicks ? link : max).title
     : "N/A";
+
+  // Atividade recente (simulada por enquanto)
+  const recentActivity = [
+    {
+      type: 'click' as const,
+      description: `Link "${topLink}" foi clicado`,
+      timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString()
+    },
+    {
+      type: 'view' as const,
+      description: 'Sua página bio foi visualizada',
+      timestamp: new Date(Date.now() - 1000 * 60 * 60).toISOString()
+    }
+  ];
 
   return {
     totalViews,
     totalClicks,
+    totalUrls: shortenedUrls?.length || 0,
+    totalBioLinks: bioLinks?.length || 0,
     topLink,
+    recentActivity,
   };
 };
 
@@ -48,6 +99,7 @@ export function useDashboardStats() {
     queryKey: ["dashboardStats", user?.id],
     queryFn: () => fetchDashboardStats(user!.id),
     enabled: !!user,
-    staleTime: 1000 * 60 * 5, // 5 minutes
+    staleTime: 1000 * 60 * 5, // 5 minutos
+    refetchInterval: 1000 * 60 * 10, // Atualizar a cada 10 minutos
   });
 }
