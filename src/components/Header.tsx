@@ -25,7 +25,7 @@ const Header = () => {
           <Button 
             size="sm" 
             className="bg-gradient-neon hover:shadow-neon btn-futuristic text-xs px-4 h-8"
-            onClick={() => navigate("/dashboard")}
+            onClick={() => navigate("/signup")}
           >
             <Zap className="h-3 w-3 mr-1" />
             Criar
@@ -60,12 +60,14 @@ const Header = () => {
             variant="ghost" 
             size="sm"
             className="text-foreground/70 hover:text-neon-blue hover:bg-white/5"
+            onClick={() => navigate("/login")}
           >
             Entrar
           </Button>
           <Button 
             size="sm"
             className="bg-gradient-neon hover:shadow-neon btn-futuristic font-semibold"
+            onClick={() => navigate("/signup")}
           >
             Começar Grátis
           </Button>
@@ -122,10 +124,20 @@ const Header = () => {
               <Button 
                 variant="ghost" 
                 className="justify-start text-foreground hover:text-neon-blue hover:bg-white/5"
+                onClick={() => {
+                  navigate("/login");
+                  setIsMenuOpen(false);
+                }}
               >
                 Entrar
               </Button>
-              <Button className="bg-gradient-neon hover:shadow-neon btn-futuristic font-semibold">
+              <Button 
+                className="bg-gradient-neon hover:shadow-neon btn-futuristic font-semibold"
+                onClick={() => {
+                  navigate("/signup");
+                  setIsMenuOpen(false);
+                }}
+              >
                 Começar Grátis
               </Button>
             </div>

@@ -6,7 +6,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProviders } from "@/contexts";
 import { AppLayout } from "@/components/layout/AppLayout";
+import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
 import MobileDemo from "./pages/MobileDemo";
 import Dashboard from "./pages/Dashboard";
 import BioLinkEditor from "./pages/BioLinkEditor";
@@ -37,16 +40,24 @@ const App = () => (
           }>
             <AppLayout>
               <Routes>
+                {/* Public Routes */}
                 <Route path="/" element={<Index />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
                 <Route path="/demo" element={<MobileDemo />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/dashboard/editor" element={<BioLinkEditor />} />
-                <Route path="/dashboard/analytics" element={<Analytics />} />
-                <Route path="/dashboard/settings" element={<Settings />} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/bio/:username" element={<BioLink />} />
                 <Route path="/joaosilva" element={<BioLink />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
+                {/* Protected Routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/dashboard/editor" element={<BioLinkEditor />} />
+                  <Route path="/dashboard/analytics" element={<Analytics />} />
+                  <Route path="/dashboard/settings" element={<Settings />} />
+                </Route>
+
+                {/* Catch-all */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AppLayout>

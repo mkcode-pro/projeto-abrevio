@@ -12,7 +12,7 @@ interface AppLayoutProps {
 }
 
 // Páginas que não devem ter as barras de navegação
-const publicPages = ['/', '/pricing', '/demo']
+const publicPages = ['/', '/pricing', '/demo', '/login', '/signup']
 
 // Configurações específicas por rota
 const routeConfigs: Record<string, {
