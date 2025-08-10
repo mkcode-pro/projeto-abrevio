@@ -35,7 +35,7 @@ export default function Signup() {
 
   useEffect(() => {
     const checkUsername = async () => {
-      if (debouncedUsername.length < 3) {
+      if (!debouncedUsername || debouncedUsername.length < 3) {
         setUsernameStatus('idle');
         return;
       }
