@@ -1,14 +1,13 @@
+-- Função para verificar se um nome de usuário já existe
+-- Garante que a função pode acessar a tabela 'profiles' de forma segura
 create or replace function public.username_exists(p_username text)
 returns boolean
 language plpgsql
+stable
 security definer
 set search_path = public
 as $$
 begin
-  -- Compara os nomes de usuário em minúsculas para ser case-insensitive
-  return exists(select 1 from public.profiles where lower(username) = lower(p_username));
+  return exists(select 1 from profiles where username = p_username);
 end;
 $$;
-
-grant execute on function public.username_exists(text) to anon;
-grant execute on function public.username_exists(text) to authenticated;
