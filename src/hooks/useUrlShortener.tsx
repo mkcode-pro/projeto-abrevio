@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 export interface ShortenedUrl {
   id: string;
@@ -102,7 +103,7 @@ const incrementClickCount = async (shortCode: string) => {
     .eq("id", url.id);
 
   if (updateError) {
-    console.error("Erro ao incrementar contador:", updateError);
+    logger.error('Erro ao incrementar contador', updateError);
   }
 
   // Registrar clique para analytics
@@ -117,7 +118,7 @@ const incrementClickCount = async (shortCode: string) => {
     });
 
   if (clickError) {
-    console.error("Erro ao registrar clique:", clickError);
+    logger.error('Erro ao registrar clique', clickError);
   }
 
   return url.original_url;

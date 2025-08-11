@@ -11,7 +11,10 @@
       "Bash(taskkill:*)",
       "Bash(npm config get:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(git branch:*)",
+      "Bash(powershell:*)",
+      "Bash(npx tsc:*)"
     ],
     "deny": []
   }

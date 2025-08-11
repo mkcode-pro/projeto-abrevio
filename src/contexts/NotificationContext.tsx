@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useAuth } from './AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 interface Notification {
   id: string;
@@ -323,7 +324,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
         notification.close();
       };
     } catch (error) {
-      console.warn('Erro ao enviar notificação do navegador:', error);
+      logger.warn('Erro ao enviar notificação do navegador', error);
     }
   }, [preferences.browserNotifications]);
 

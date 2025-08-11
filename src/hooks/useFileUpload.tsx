@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import { optimizeImage, validateImageFile, createImagePreview } from "@/lib/imageOptimizer";
+import { logger } from "@/lib/logger";
 
 interface UseFileUploadOptions {
   bucket: string;
@@ -63,11 +64,11 @@ export function useFileUpload({
             .remove(filesToDelete);
 
           if (!deleteError) {
-            console.log(`${files.length} foto(s) antiga(s) removida(s)`);
+            logger.info('Fotos antigas removidas', { count: files.length });
           }
         }
       } catch (error) {
-        console.error('Erro ao limpar fotos antigas:', error);
+        logger.warn('Erro ao limpar fotos antigas', error);
       }
       
       setProgress(30);
@@ -103,8 +104,8 @@ export function useFileUpload({
       setProgress(70);
 
       // Upload para o Supabase
-      console.log('Iniciando upload para o bucket:', bucket);
-      console.log('Nome do arquivo:', fileName);
+      logger.debug('Iniciando upload', { bucket });
+      logger.debug('Upload do arquivo', { fileName });
       
       const { data, error } = await supabase.storage
         .from(bucket)
@@ -116,7 +117,7 @@ export function useFileUpload({
       setProgress(90);
 
       if (error) {
-        console.error('Erro detalhado do Supabase:', error);
+        logger.error('Erro detalhado do Supabase', error);
         
         // Verificar se é erro de bucket não existente
         if (error.message?.includes('not found') || error.message?.includes('Bucket not found')) {
@@ -131,14 +132,14 @@ export function useFileUpload({
         throw error;
       }
 
-      console.log('Upload bem sucedido:', data);
+      logger.info('Upload bem sucedido', { path: data?.path });
 
       // Obter URL pública
       const { data: { publicUrl } } = supabase.storage
         .from(bucket)
         .getPublicUrl(fileName);
 
-      console.log('URL pública gerada:', publicUrl);
+      logger.debug('URL pública gerada', { publicUrl });
       
       setProgress(100);
       
@@ -146,7 +147,7 @@ export function useFileUpload({
       return publicUrl;
       
     } catch (error) {
-      console.error('Erro no upload:', error);
+      logger.error('Erro no upload', error);
       toast.error("Erro no upload", { 
         description: error instanceof Error ? error.message : "Não foi possível fazer upload do arquivo." 
       });

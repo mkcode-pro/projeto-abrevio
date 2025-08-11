@@ -1,4 +1,5 @@
 import { useState, useCallback, useEffect } from "react";
+import { logger } from '@/lib/logger';
 
 export function useLocalStorage<T>(
   key: string,
@@ -14,7 +15,7 @@ export function useLocalStorage<T>(
       const item = window.localStorage.getItem(key);
       return item ? JSON.parse(item) : initialValue;
     } catch (error) {
-      console.warn(`Erro ao ler localStorage key "${key}":`, error);
+      logger.warn(`Erro ao ler localStorage key "${key}"`, error);
       return initialValue;
     }
   }, [initialValue, key]);
@@ -37,7 +38,7 @@ export function useLocalStorage<T>(
           window.localStorage.setItem(key, JSON.stringify(valueToStore));
         }
       } catch (error) {
-        console.warn(`Erro ao salvar no localStorage key "${key}":`, error);
+        logger.warn(`Erro ao salvar no localStorage key "${key}"`, error);
       }
     },
     [key, storedValue]
@@ -51,7 +52,7 @@ export function useLocalStorage<T>(
         window.localStorage.removeItem(key);
       }
     } catch (error) {
-      console.warn(`Erro ao remover localStorage key "${key}":`, error);
+      logger.warn(`Erro ao remover localStorage key "${key}"`, error);
     }
   }, [initialValue, key]);
 
@@ -62,7 +63,7 @@ export function useLocalStorage<T>(
         try {
           setStoredValue(JSON.parse(e.newValue));
         } catch (error) {
-          console.warn(`Erro ao sincronizar localStorage key "${key}":`, error);
+          logger.warn(`Erro ao sincronizar localStorage key "${key}"`, error);
         }
       }
     };

@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Loader2, ExternalLink, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { logger } from '@/lib/logger';
 
 export default function RedirectPage() {
   const { shortCode } = useParams<{ shortCode: string }>();
@@ -42,7 +43,7 @@ export default function RedirectPage() {
           .eq('id', url.id);
 
         if (updateError) {
-          console.error('Erro ao incrementar contador:', updateError);
+          logger.error('Erro ao incrementar contador de cliques', updateError);
         }
 
         // Registrar clique para analytics
@@ -71,7 +72,7 @@ export default function RedirectPage() {
 
         return () => clearInterval(timer);
       } catch (err) {
-        console.error('Erro no redirecionamento:', err);
+        logger.error('Erro no redirecionamento', err);
         setError('Erro interno do servidor');
         setLoading(false);
       }

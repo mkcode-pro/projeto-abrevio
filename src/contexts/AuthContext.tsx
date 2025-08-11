@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { AuthChangeEvent, Session, User as SupabaseUser } from '@supabase/supabase-js';
+import { logger } from '@/lib/logger';
 
 interface User {
   id: string;
@@ -62,7 +63,7 @@ const createUserProfile = async (supabaseUser: SupabaseUser, additionalData?: { 
     .single();
 
   if (error) {
-    console.error('Erro ao criar perfil:', error);
+    logger.error('Erro ao criar perfil', error);
     throw error;
   }
 
@@ -84,7 +85,7 @@ const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User | null
       lastLoginAt: supabaseUser.last_sign_in_at,
     };
   } catch (error) {
-    console.error('Erro ao buscar perfil:', error);
+    logger.error('Erro ao buscar perfil', error);
     return null;
   }
 };
@@ -143,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!silent) toast.success("Login realizado com sucesso!");
       return { success: true };
     } catch (error: any) {
-      console.error('Erro inesperado no login:', error);
+      logger.error('Erro inesperado no login', error);
       if (!silent) toast.error("Erro inesperado", { description: error.message });
       return { success: false, error: error.message };
     } finally {
@@ -177,7 +178,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       return { success: false, error: 'Usuário não foi criado.' };
     } catch (error: any) {
-      console.error('Erro no registro:', error);
+      logger.error('Erro no registro', error);
       if (!silent) toast.error("Erro inesperado no cadastro", { description: error.message });
       return { success: false, error: error.message };
     } finally {
@@ -196,7 +197,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       toast.info("Você foi desconectado.");
     } catch (error) {
-      console.error('Erro no logout:', error);
+      logger.error('Erro no logout', error);
       throw error;
     } finally {
       setLoading(false);
@@ -226,7 +227,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(prev => prev ? { ...prev, ...updates } : null);
       toast.success("Perfil atualizado com sucesso!");
     } catch (error) {
-      console.error('Erro ao atualizar perfil:', error);
+      logger.error('Erro ao atualizar perfil', error);
       throw error;
     } finally {
       setLoading(false);
@@ -243,7 +244,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       toast.success("Senha alterada com sucesso!");
     } catch (error) {
-      console.error('Erro ao alterar senha:', error);
+      logger.error('Erro ao alterar senha', error);
       throw error;
     } finally {
       setLoading(false);
@@ -261,7 +262,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
       toast.success("Sua conta foi deletada com sucesso.");
     } catch (error) {
-      console.error('Erro ao deletar conta:', error);
+      logger.error('Erro ao deletar conta', error);
       throw error;
     } finally {
       setLoading(false);

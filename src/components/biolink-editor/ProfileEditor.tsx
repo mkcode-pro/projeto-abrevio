@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress"
 import { UserData } from './BioLinkPreview'
 import { useFileUpload } from "@/hooks/useFileUpload"
 import { toast } from "sonner"
+import { logger } from "@/lib/logger"
 
 interface ProfileEditorProps {
   userData: UserData
@@ -27,11 +28,11 @@ export function ProfileEditor({ userData, onUpdate }: ProfileEditorProps) {
     const file = event.target.files?.[0]
     if (file) {
       try {
-        console.log('Iniciando upload da foto...')
+        logger.info('Iniciando upload da foto de perfil');
         const publicUrl = await uploadFile(file)
         
         if (publicUrl) {
-          console.log('Upload concluído, URL:', publicUrl)
+          logger.info('Upload da foto concluído', { url: publicUrl });
           onUpdate({ avatar: publicUrl })
           toast.success("Foto carregada com sucesso!", {
             duration: 3000,
@@ -41,7 +42,7 @@ export function ProfileEditor({ userData, onUpdate }: ProfileEditorProps) {
           toast.error("Não foi possível fazer o upload da foto")
         }
       } catch (error) {
-        console.error('Erro no upload:', error)
+        logger.error('Erro no upload da foto', error);
         toast.error("Erro ao enviar foto", {
           description: "Por favor, tente novamente"
         })
@@ -112,7 +113,7 @@ export function ProfileEditor({ userData, onUpdate }: ProfileEditorProps) {
               id="name"
               value={userData.name}
               onChange={(e) => {
-                console.log('Nome alterado para:', e.target.value);
+                logger.debug('Nome alterado', { name: e.target.value });
                 onUpdate({ name: e.target.value });
               }}
               className="bg-white/5 border-white/20 text-white"
@@ -125,7 +126,7 @@ export function ProfileEditor({ userData, onUpdate }: ProfileEditorProps) {
               id="username"
               value={userData.username}
               onChange={(e) => {
-                console.log('Username alterado para:', e.target.value);
+                logger.debug('Username alterado', { username: e.target.value });
                 onUpdate({ username: e.target.value });
               }}
               className="bg-white/5 border-white/20 text-white"
@@ -140,7 +141,7 @@ export function ProfileEditor({ userData, onUpdate }: ProfileEditorProps) {
             id="bio"
             value={userData.bio}
             onChange={(e) => {
-              console.log('Bio alterada para:', e.target.value);
+              logger.debug('Bio alterada', { bio: e.target.value });
               onUpdate({ bio: e.target.value });
             }}
             className="bg-white/5 border-white/20 text-white resize-none"

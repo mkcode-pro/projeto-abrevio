@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useAuth } from './AuthContext';
 import { toast } from '@/hooks/use-toast';
+import { logger } from '@/lib/logger';
 
 interface UserStats {
   totalViews: number;
@@ -263,7 +264,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       
       setUserStats(updatedStats);
     } catch (error) {
-      console.warn('Erro ao atualizar estatísticas:', error);
+      logger.warn('Erro ao atualizar estatísticas', error);
     } finally {
       setLoading(false);
     }
