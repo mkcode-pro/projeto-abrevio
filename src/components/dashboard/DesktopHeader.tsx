@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
-import { ThemeSelector } from '@/components/ui/theme-selector'
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -106,9 +105,6 @@ export function DesktopHeader() {
               <PlusCircle className="w-4 h-4 mr-2" />
               Criar
             </Button>
-
-            {/* Seletor de tema */}
-            <ThemeSelector />
 
             {/* Menu do usuário */}
             <DropdownMenu>
