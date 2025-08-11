@@ -52,7 +52,7 @@ export default function BioLinkEditor() {
     }
   };
 
-  if (isLoading) return <EditorSkeleton />;
+  if (isLoading) return <EditorSkeleton isMobile={isMobile} />;
 
   if (isError) {
     return (
@@ -66,7 +66,7 @@ export default function BioLinkEditor() {
     );
   }
 
-  if (!editedUserData) return <EditorSkeleton />;
+  if (!editedUserData) return <EditorSkeleton isMobile={isMobile} />;
 
   const headerActions = (
     <Button onClick={handleSave} size="sm" disabled={isSaving || !hasUnsavedChanges} className="bg-gradient-neon hover:shadow-neon btn-futuristic">
@@ -76,70 +76,76 @@ export default function BioLinkEditor() {
   );
 
   return (
-    <div className="min-h-screen bg-gradient-hero">
+    <>
       {isMobile && <MobileHeader title="Editor de Bio Link" showBackButton actions={headerActions} />}
-      
-      <ResponsiveContainer size="xl" padding="lg" className={isMobile ? "pt-20" : "py-8"}>
-        {!isMobile && (
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-white mb-2">Editor de Bio Link</h1>
-              <p className="text-white/60">Personalize sua página de links e acompanhe o desempenho</p>
-              {hasUnsavedChanges && (
-                <p className="text-amber-400 text-sm mt-1 flex items-center gap-2 animate-fade-in">
-                  <AlertTriangle className="w-4 h-4" />
-                  Você tem alterações não salvas
-                </p>
-              )}
+      <div className={isMobile ? "pt-14" : ""}>
+        <ResponsiveContainer size="xl" padding="lg" className="py-8">
+          {!isMobile && (
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+              <div>
+                <h1 className="text-3xl font-bold text-white mb-2">Editor de Bio Link</h1>
+                <p className="text-white/60">Personalize sua página de links e acompanhe o desempenho</p>
+                {hasUnsavedChanges && (
+                  <p className="text-amber-400 text-sm mt-1 flex items-center gap-2 animate-fade-in">
+                    <AlertTriangle className="w-4 h-4" />
+                    Você tem alterações não salvas
+                  </p>
+                )}
+              </div>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button onClick={handlePreview} variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10" disabled={!editedUserData.username}>
+                  <Eye className="w-5 h-5 mr-2" />
+                  Visualizar
+                </Button>
+                {headerActions}
+              </div>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button onClick={handlePreview} variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10" disabled={!editedUserData.username}>
-                <Eye className="w-5 h-5 mr-2" />
-                Visualizar
-              </Button>
-              {headerActions}
+          )}
+          
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-8 space-y-8">
+              <ProfileEditor userData={editedUserData} onUpdate={handleUserDataUpdate} />
+              <LinksManager links={editedLinks} onLinksChange={handleLinksChange} />
+            </div>
+            <div className="lg:col-span-4">
+              <div className="sticky top-24">
+                <BioLinkPreview userData={editedUserData} links={editedLinks} />
+              </div>
+            </div>
+          </div>
+        </ResponsiveContainer>
+      </div>
+    </>
+  );
+}
+
+const EditorSkeleton = ({ isMobile }: { isMobile: boolean }) => (
+  <>
+    {isMobile && <Skeleton className="h-14 w-full fixed top-0 left-0 z-50" />}
+    <div className={isMobile ? "pt-14" : ""}>
+      <ResponsiveContainer size="xl" padding="lg" className="py-8">
+        {!isMobile && (
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <Skeleton className="h-9 w-72 mb-2" />
+              <Skeleton className="h-5 w-96" />
+            </div>
+            <div className="flex gap-3">
+              <Skeleton className="h-12 w-40" />
+              <Skeleton className="h-12 w-40" />
             </div>
           </div>
         )}
-        
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-8">
-            <ProfileEditor userData={editedUserData} onUpdate={handleUserDataUpdate} />
-            <LinksManager links={editedLinks} onLinksChange={handleLinksChange} />
+            <Skeleton className="h-64 w-full" />
+            <Skeleton className="h-96 w-full" />
           </div>
           <div className="lg:col-span-4">
-            <div className="sticky top-24">
-              <BioLinkPreview userData={editedUserData} links={editedLinks} />
-            </div>
+            <Skeleton className="h-[80vh] w-full" />
           </div>
         </div>
       </ResponsiveContainer>
     </div>
-  );
-}
-
-const EditorSkeleton = () => (
-  <div className="min-h-screen bg-gradient-hero">
-    <ResponsiveContainer size="xl" padding="lg" className="py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <Skeleton className="h-9 w-72 mb-2" />
-          <Skeleton className="h-5 w-96" />
-        </div>
-        <div className="flex gap-3">
-          <Skeleton className="h-12 w-40" />
-          <Skeleton className="h-12 w-40" />
-        </div>
-      </div>
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-8 space-y-8">
-          <Skeleton className="h-64 w-full" />
-          <Skeleton className="h-96 w-full" />
-        </div>
-        <div className="lg:col-span-4">
-          <Skeleton className="h-[80vh] w-full" />
-        </div>
-      </div>
-    </ResponsiveContainer>
-  </div>
+  </>
 );

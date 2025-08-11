@@ -1,5 +1,3 @@
-import { SidebarProvider } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/dashboard/AppSidebar"
 import { StatsCards } from "@/components/dashboard/StatsCards"
 import { BiolinksGrid } from "@/components/dashboard/BiolinksGrid"
 import { UrlShortenerCard } from "@/components/dashboard/UrlShortenerCard"
@@ -8,7 +6,6 @@ import { ResponsiveGrid } from "@/components/layout/ResponsiveGrid"
 import { useIsMobile } from "@/store/hooks/use-mobile"
 import { useAuth } from "@/store/contexts/AuthContext"
 import { Skeleton } from "@/components/ui/skeleton"
-import { DashboardHeader } from "@/components/dashboard/DashboardHeader"
 import { MobileHeader } from "@/components/mobile/MobileHeader"
 
 export default function Dashboard() {
@@ -28,94 +25,40 @@ export default function Dashboard() {
   }
 
   return (
-    <SidebarProvider>
-      <div className="min-h-screen">
-        {!isMobile ? (
-          // Desktop: Layout com sidebar
-          <div className="flex min-h-screen w-full">
-            <AppSidebar />
-            <main className="flex-1">
-              <DashboardHeader />
-              <ResponsiveContainer size="xl" padding="lg" className="py-8">
-                <div className="space-y-8">
-                  <StatsCards />
-                  
-                  <ResponsiveGrid cols={{ desktop: 2, tablet: 1, mobile: 1 }} gap="lg">
-                    <BiolinksGrid />
-                    <UrlShortenerCard />
-                  </ResponsiveGrid>
-                </div>
-              </ResponsiveContainer>
-            </main>
+    <>
+      {isMobile && <MobileHeader title="Dashboard" />}
+      <div className={isMobile ? "pt-14" : ""}>
+        <ResponsiveContainer size="xl" padding="lg" className="py-8">
+          <div className="space-y-8">
+            <StatsCards />
+            <ResponsiveGrid cols={{ desktop: 2, tablet: 1, mobile: 1 }} gap="lg">
+              <BiolinksGrid />
+              <UrlShortenerCard />
+            </ResponsiveGrid>
           </div>
-        ) : (
-          // Mobile: Layout otimizado
-          <div className="min-h-screen">
-            <MobileHeader title="Dashboard" />
-            <div className="pt-14"> {/* Adiciona padding para o header fixo */}
-              <ResponsiveContainer padding="md" className="py-6">
-                <div className="space-y-6">
-                  <StatsCards />
-                  <div className="space-y-4">
-                    <h2 className="text-lg font-semibold text-white">Suas Bio Pages</h2>
-                    <BiolinksGrid />
-                  </div>
-                  <div className="space-y-4">
-                    <h2 className="text-lg font-semibold text-white">Encurtador de Links</h2>
-                    <UrlShortenerCard />
-                  </div>
-                </div>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        )}
+        </ResponsiveContainer>
       </div>
-    </SidebarProvider>
+    </>
   )
 }
 
-// Componente de Skeleton para o estado de carregamento
 const DashboardSkeleton = ({ isMobile }: { isMobile: boolean }) => (
-  <div className="min-h-screen">
-    {!isMobile ? (
-      <div className="flex min-h-screen w-full">
-        <Skeleton className="w-14 hidden md:block" /> {/* Sidebar Skeleton */}
-        <main className="flex-1">
-          <Skeleton className="h-16 w-full" /> {/* Header Skeleton */}
-          <ResponsiveContainer size="xl" padding="lg" className="py-8">
-            <div className="space-y-8">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Skeleton className="h-24" />
-                <Skeleton className="h-24" />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <Skeleton className="h-32" />
-                <Skeleton className="h-32" />
-                <Skeleton className="h-32" />
-              </div>
-              <ResponsiveGrid cols={{ desktop: 2, tablet: 1, mobile: 1 }} gap="lg">
-                <Skeleton className="h-96" />
-                <Skeleton className="h-96" />
-              </ResponsiveGrid>
-            </div>
-          </ResponsiveContainer>
-        </main>
-      </div>
-    ) : (
-      <>
-        <Skeleton className="h-14 w-full" /> {/* Header Skeleton */}
-        <ResponsiveContainer padding="md" className="py-6">
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <Skeleton className="h-32" />
-              <Skeleton className="h-32" />
-              <Skeleton className="h-32" />
-            </div>
-            <Skeleton className="h-64" />
-            <Skeleton className="h-96" />
+  <>
+    {isMobile && <Skeleton className="h-14 w-full fixed top-0 left-0 z-50" />}
+    <div className={isMobile ? "pt-14" : ""}>
+      <ResponsiveContainer padding="lg" className="py-8">
+        <div className="space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
+            <Skeleton className="h-32" />
           </div>
-        </ResponsiveContainer>
-      </>
-    )}
-  </div>
+          <ResponsiveGrid cols={{ desktop: 2, tablet: 1, mobile: 1 }} gap="lg">
+            <Skeleton className="h-96" />
+            <Skeleton className="h-96" />
+          </ResponsiveGrid>
+        </div>
+      </ResponsiveContainer>
+    </div>
+  </>
 );

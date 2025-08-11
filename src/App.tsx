@@ -6,7 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProviders } from "@/store/contexts";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { DevAutoLogin } from "@/components/auth/DevAutoLogin"; // Importando o novo componente
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { DevAutoLogin } from "@/components/auth/DevAutoLogin";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -29,7 +30,6 @@ const App = () => (
       <TooltipProvider>
         <Sonner />
         <BrowserRouter>
-          {/* Auto-login para facilitar o desenvolvimento */}
           <DevAutoLogin />
           
           <Suspense fallback={
@@ -50,18 +50,18 @@ const App = () => (
                 <Route path="/bio/:username" element={<BioLink />} />
                 <Route path="/joaosilva" element={<BioLink />} />
                 
-                {/* URL Shortener Redirect Route */}
                 <Route path="/r/:shortCode" element={<RedirectPage />} />
 
-                {/* Protected Routes */}
+                {/* Protected Routes with Dashboard Layout */}
                 <Route element={<ProtectedRoute />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/dashboard/editor" element={<BioLinkEditor />} />
-                  <Route path="/dashboard/analytics" element={<Analytics />} />
-                  <Route path="/dashboard/settings" element={<Settings />} />
+                  <Route element={<DashboardLayout />}>
+                    <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/dashboard/editor" element={<BioLinkEditor />} />
+                    <Route path="/dashboard/analytics" element={<Analytics />} />
+                    <Route path="/dashboard/settings" element={<Settings />} />
+                  </Route>
                 </Route>
 
-                {/* Catch-all */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AppLayout>
