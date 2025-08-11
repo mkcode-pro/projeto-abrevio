@@ -9,16 +9,17 @@ import { ResponsiveContainer } from "@/components/layout/ResponsiveContainer";
 import { useBioLink } from "@/store/hooks/useBioLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
+import { useIsMobile } from "@/store/hooks/use-mobile";
+import { MobileHeader } from "@/components/mobile/MobileHeader";
 
 export default function BioLinkEditor() {
   const { bioLinkData, isLoading, isError, error, saveChanges, isSaving } = useBioLink();
+  const isMobile = useIsMobile();
   
-  // Estado local para guardar as edições do usuário
   const [editedUserData, setEditedUserData] = useState<UserData | null>(null);
   const [editedLinks, setEditedLinks] = useState<LinkData[]>([]);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
-  // Inicializa o estado local com os dados do servidor quando eles chegam
   useEffect(() => {
     if (bioLinkData) {
       setEditedUserData(bioLinkData.userData);
@@ -27,20 +28,17 @@ export default function BioLinkEditor() {
     }
   }, [bioLinkData]);
 
-  // Atualiza o estado local do perfil quando o usuário digita
   const handleUserDataUpdate = (updates: Partial<UserData>) => {
     if (!editedUserData) return;
     setEditedUserData(prev => ({ ...prev!, ...updates }));
     setHasUnsavedChanges(true);
   };
 
-  // Atualiza o estado local dos links quando o usuário os altera
   const handleLinksChange = (newLinks: LinkData[]) => {
     setEditedLinks(newLinks);
     setHasUnsavedChanges(true);
   };
 
-  // Salva as alterações usando o estado local
   const handleSave = () => {
     if (editedUserData) {
       saveChanges(editedUserData, editedLinks);
@@ -68,34 +66,42 @@ export default function BioLinkEditor() {
     );
   }
 
-  // Garante que temos dados para exibir antes de renderizar o editor
   if (!editedUserData) return <EditorSkeleton />;
+
+  const headerActions = (
+    <Button onClick={handleSave} size="sm" disabled={isSaving || !hasUnsavedChanges} className="bg-gradient-neon hover:shadow-neon btn-futuristic">
+      {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+      <span className="ml-2">Salvar</span>
+    </Button>
+  );
 
   return (
     <div className="min-h-screen bg-gradient-hero">
-      <ResponsiveContainer size="xl" padding="lg" className="py-8">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Editor de Bio Link</h1>
-            <p className="text-white/60">Personalize sua página de links e acompanhe o desempenho</p>
-            {hasUnsavedChanges && (
-              <p className="text-amber-400 text-sm mt-1 flex items-center gap-2 animate-fade-in">
-                <AlertTriangle className="w-4 h-4" />
-                Você tem alterações não salvas
-              </p>
-            )}
+      {isMobile && <MobileHeader title="Editor de Bio Link" showBackButton actions={headerActions} />}
+      
+      <ResponsiveContainer size="xl" padding="lg" className={isMobile ? "pt-20" : "py-8"}>
+        {!isMobile && (
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
+            <div>
+              <h1 className="text-3xl font-bold text-white mb-2">Editor de Bio Link</h1>
+              <p className="text-white/60">Personalize sua página de links e acompanhe o desempenho</p>
+              {hasUnsavedChanges && (
+                <p className="text-amber-400 text-sm mt-1 flex items-center gap-2 animate-fade-in">
+                  <AlertTriangle className="w-4 h-4" />
+                  Você tem alterações não salvas
+                </p>
+              )}
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <Button onClick={handlePreview} variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10" disabled={!editedUserData.username}>
+                <Eye className="w-5 h-5 mr-2" />
+                Visualizar
+              </Button>
+              {headerActions}
+            </div>
           </div>
-          <div className="flex flex-col sm:flex-row gap-3">
-            <Button onClick={handlePreview} variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10" disabled={!editedUserData.username}>
-              <Eye className="w-5 h-5 mr-2" />
-              Visualizar
-            </Button>
-            <Button onClick={handleSave} size="lg" disabled={isSaving || !hasUnsavedChanges} className="bg-gradient-neon hover:shadow-neon btn-futuristic">
-              {isSaving ? <Loader2 className="w-5 h-5 mr-2 animate-spin" /> : <Save className="w-5 h-5 mr-2" />}
-              {isSaving ? 'Salvando...' : 'Salvar'}
-            </Button>
-          </div>
-        </div>
+        )}
+        
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-8">
             <ProfileEditor userData={editedUserData} onUpdate={handleUserDataUpdate} />

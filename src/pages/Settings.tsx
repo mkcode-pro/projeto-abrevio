@@ -21,6 +21,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useUsernameCheck, useClearUsernameCache } from "@/store/hooks/useUsernameCheck";
 import { getUsernameQualityScore } from "@/lib/usernameValidator";
 import { Badge } from "@/components/ui/badge";
+import { useIsMobile } from "@/store/hooks/use-mobile";
+import { MobileHeader } from "@/components/mobile/MobileHeader";
 
 const userDataSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -39,6 +41,7 @@ export default function Settings() {
   const [passwordModalOpen, setPasswordModalOpen] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [logoutModalOpen, setLogoutModalOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const clearCache = useClearUsernameCache();
   const { register, handleSubmit, formState: { errors, isDirty }, reset, watch, setValue } = useForm<UserDataForm>({
@@ -59,7 +62,6 @@ export default function Settings() {
     }
   }, [user, reset]);
 
-  // Função para aplicar sugestão
   const applySuggestion = (suggestion: string) => {
     setValue('username', suggestion, { shouldValidate: true });
   };
@@ -76,7 +78,7 @@ export default function Settings() {
     }
     
     await updateProfile({ name: data.name, username: data.username });
-    clearCache(data.username); // Limpar cache após atualização
+    clearCache(data.username);
     reset(data);
   };
 
@@ -104,20 +106,28 @@ export default function Settings() {
 
   if (authLoading || !user) return <SettingsSkeleton />;
 
+  const headerActions = (
+    <Button onClick={handleSubmit(handleSave)} size="sm" disabled={!isDirty || authLoading || (usernameCheck.status === 'taken' && usernameValue !== user?.username)} className="bg-gradient-primary hover:opacity-90">
+      {authLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+      <span className="ml-2">Salvar</span>
+    </Button>
+  );
+
   return (
     <div className="min-h-screen bg-background relative overflow-x-hidden">
+      {isMobile && <MobileHeader title="Configurações" showBackButton actions={headerActions} />}
+      
       <div className="absolute inset-0 grid-pattern opacity-20" />
-      <div className="relative z-10 container mx-auto px-4 py-8 pb-28 md:pb-8 max-w-4xl">
-        <div className="flex items-center justify-between gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-bold neon-text">Configurações</h1>
-            <p className="text-muted-foreground">Gerencie sua conta e preferências</p>
+      <div className={`relative z-10 container mx-auto px-4 py-8 pb-28 md:pb-8 max-w-4xl ${isMobile ? 'pt-20' : ''}`}>
+        {!isMobile && (
+          <div className="flex items-center justify-between gap-4 mb-8">
+            <div>
+              <h1 className="text-3xl font-bold neon-text">Configurações</h1>
+              <p className="text-muted-foreground">Gerencie sua conta e preferências</p>
+            </div>
+            {headerActions}
           </div>
-          <Button onClick={handleSubmit(handleSave)} disabled={!isDirty || authLoading || (usernameCheck.status === 'taken' && usernameValue !== user?.username)} className="bg-gradient-primary hover:opacity-90">
-            {authLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
-            Salvar
-          </Button>
-        </div>
+        )}
 
         <form onSubmit={handleSubmit(handleSave)} className="space-y-8">
           <Card className="glass-card border-accent/20">
@@ -155,11 +165,9 @@ export default function Settings() {
                     </div>
                   </div>
                   
-                  {/* Mensagens de erro */}
                   {errors.username && <p className="text-sm text-destructive">{errors.username.message}</p>}
                   {usernameCheck.error && usernameValue !== user?.username && <p className="text-sm text-red-400">{usernameCheck.error}</p>}
                   
-                  {/* Badge de qualidade */}
                   {qualityScore && usernameCheck.status === 'available' && usernameValue !== user?.username && (
                     <div className="flex items-center gap-2">
                       <Badge 
@@ -176,7 +184,6 @@ export default function Settings() {
                     </div>
                   )}
                   
-                  {/* Sugestões de username */}
                   {usernameCheck.suggestions.length > 0 && usernameValue !== user?.username && (
                     <div className="space-y-2">
                       <p className="text-xs text-muted-foreground flex items-center gap-1">

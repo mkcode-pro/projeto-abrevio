@@ -9,6 +9,7 @@ import { useIsMobile } from "@/store/hooks/use-mobile"
 import { useAuth } from "@/store/contexts/AuthContext"
 import { Skeleton } from "@/components/ui/skeleton"
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader"
+import { MobileHeader } from "@/components/mobile/MobileHeader"
 
 export default function Dashboard() {
   const isMobile = useIsMobile()
@@ -19,7 +20,6 @@ export default function Dashboard() {
   }
 
   if (!user) {
-    // Idealmente, o usuário seria redirecionado para o login por uma rota protegida
     return (
       <div className="min-h-screen flex items-center justify-center">
         <p className="text-white">Por favor, faça login para acessar o dashboard.</p>
@@ -51,7 +51,7 @@ export default function Dashboard() {
         ) : (
           // Mobile: Layout otimizado
           <div className="min-h-screen">
-            <DashboardHeader />
+            <MobileHeader title="Dashboard" />
             <div className="pt-14"> {/* Adiciona padding para o header fixo */}
               <ResponsiveContainer padding="md" className="py-6">
                 <div className="space-y-6">
