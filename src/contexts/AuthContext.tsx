@@ -20,9 +20,14 @@ interface AuthState {
   loading: boolean;
 }
 
+interface AuthResult {
+  success: boolean;
+  error?: string;
+}
+
 interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (email: string, password: string, username: string, name: string) => Promise<boolean>;
+  login: (email: string, password: string, silent?: boolean) => Promise<AuthResult>;
+  register: (email: string, password: string, username: string, name: string, silent?: boolean) => Promise<AuthResult>;
   logout: () => Promise<void>;
   updateProfile: (updates: Partial<Pick<User, 'name' | 'username' | 'avatar'>>) => Promise<void>;
   changePassword: (newPassword: string) => Promise<void>;
@@ -31,7 +36,6 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Função para criar perfil automaticamente
 const createUserProfile = async (supabaseUser: SupabaseUser, additionalData?: { username?: string; name?: string }) => {
   const { data: existingProfile } = await supabase
     .from('profiles')
@@ -43,7 +47,6 @@ const createUserProfile = async (supabaseUser: SupabaseUser, additionalData?: { 
     return existingProfile;
   }
 
-  // Criar perfil se não existir
   const profileData = {
     id: supabaseUser.id,
     email: supabaseUser.email!,
@@ -91,7 +94,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Verificar sessão inicial
     const getInitialSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
@@ -103,11 +105,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     getInitialSession();
 
-    // Escutar mudanças de autenticação
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, session: Session | null) => {
-        console.log('Auth state changed:', event, session?.user?.email);
-        
         if (session?.user) {
           const userProfile = await fetchUserProfile(session.user);
           setUser(userProfile);
@@ -123,72 +122,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+  const login = useCallback(async (email: string, password: string, silent = false): Promise<AuthResult> => {
     setLoading(true);
     try {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       
       if (error) {
-        if (error.message.includes('Invalid login credentials')) {
-          toast.error("Credenciais inválidas", { 
-            description: "Email ou senha incorretos. Verifique e tente novamente." 
-          });
-        } else {
-          toast.error("Erro no login", { description: error.message });
+        if (!silent) {
+          if (error.message.includes('Invalid login credentials')) {
+            toast.error("Credenciais inválidas", { 
+              description: "Email ou senha incorretos. Verifique e tente novamente." 
+            });
+          } else {
+            toast.error("Erro no login", { description: error.message });
+          }
         }
-        return false;
+        return { success: false, error: error.message };
       }
 
-      toast.success("Login realizado com sucesso!");
-      return true;
+      if (!silent) toast.success("Login realizado com sucesso!");
+      return { success: true };
     } catch (error: any) {
       console.error('Erro inesperado no login:', error);
-      toast.error("Erro inesperado", { description: error.message });
-      return false;
+      if (!silent) toast.error("Erro inesperado", { description: error.message });
+      return { success: false, error: error.message };
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const register = useCallback(async (email: string, password: string, username: string, name: string): Promise<boolean> => {
+  const register = useCallback(async (email: string, password: string, username: string, name: string, silent = false): Promise<AuthResult> => {
     setLoading(true);
     try {
-      // Tentar verificar username via RPC primeiro
-      let usernameExists = false;
-      
-      try {
-        const { data, error: rpcError } = await supabase.rpc('username_exists', { p_username: username });
-        
-        if (rpcError) {
-          console.warn('RPC username_exists falhou, tentando fallback:', rpcError);
-          // Fallback: verificar diretamente na tabela profiles
-          const { data: profileData, error: queryError } = await supabase
-            .from('profiles')
-            .select('username')
-            .ilike('username', username)
-            .maybeSingle();
-          
-          if (queryError && queryError.code !== 'PGRST116') {
-            throw queryError;
-          }
-          
-          usernameExists = !!profileData;
-        } else {
-          usernameExists = data as boolean;
-        }
-      } catch (checkError) {
-        console.error('Erro ao verificar username:', checkError);
-        // Em caso de erro, permitir continuar mas avisar o usuário
-        toast.warning("Não foi possível verificar completamente o username", {
-          description: "Continuando com o registro..."
-        });
-      }
-
-      if (usernameExists) {
-        toast.error("Username já existe", { description: "Escolha outro nome de usuário." });
-        return false;
-      }
-
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -196,23 +161,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
 
       if (error) {
-        if (error.message.includes('already registered')) {
-          toast.error("Email já cadastrado", { description: "Este email já possui uma conta. Tente fazer login." });
-        } else {
-          toast.error("Erro ao criar conta", { description: error.message });
+        if (!silent) {
+          if (error.message.includes('already registered')) {
+            toast.error("Email já cadastrado", { description: "Este email já possui uma conta. Tente fazer login." });
+          } else {
+            toast.error("Erro ao criar conta", { description: error.message });
+          }
         }
-        return false;
+        return { success: false, error: error.message };
       }
 
       if (data.user) {
         await createUserProfile(data.user, { username, name });
-        return true;
+        return { success: true };
       }
-      return false;
+      return { success: false, error: 'Usuário não foi criado.' };
     } catch (error: any) {
       console.error('Erro no registro:', error);
-      toast.error("Erro inesperado no cadastro", { description: error.message });
-      return false;
+      if (!silent) toast.error("Erro inesperado no cadastro", { description: error.message });
+      return { success: false, error: error.message };
     } finally {
       setLoading(false);
     }

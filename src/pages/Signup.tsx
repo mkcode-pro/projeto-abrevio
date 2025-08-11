@@ -46,8 +46,8 @@ export default function Signup() {
       return;
     }
     
-    const success = await signup(data.email, data.password, data.username, data.name);
-    if (success) {
+    const result = await signup(data.email, data.password, data.username, data.name);
+    if (result.success) {
       clearCache(data.username); // Limpar cache após registro bem-sucedido
       toast.success("Conta criada com sucesso!", {
         description: "Agora faça login para acessar sua conta."
