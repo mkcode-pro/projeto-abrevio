@@ -25,7 +25,7 @@ export function LinksManager({ links, onLinksChange }: LinksManagerProps) {
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
 
-    if (active.id !== over.id) {
+    if (over && active.id !== over.id) {
       const oldIndex = links.findIndex(item => item.id === active.id)
       const newIndex = links.findIndex(item => item.id === over.id)
       onLinksChange(arrayMove(links, oldIndex, newIndex))

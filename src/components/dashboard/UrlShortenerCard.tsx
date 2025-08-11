@@ -144,7 +144,7 @@ export function UrlShortenerCard() {
                           {url.is_active ? "Ativo" : "Inativo"}
                         </Badge>
                         <span className="text-xs text-white/50">
-                          {new Date(url.created_at).toLocaleDateString('pt-BR')}
+                          {url.created_at ? new Date(url.created_at).toLocaleDateString('pt-BR') : ''}
                         </span>
                       </div>
                     </div>

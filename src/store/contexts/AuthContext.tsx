@@ -82,7 +82,7 @@ const fetchUserProfile = async (supabaseUser: SupabaseUser): Promise<User | null
       avatar: profile.avatar_url || undefined,
       plan: profile.plan || 'free',
       createdAt: supabaseUser.created_at,
-      lastLoginAt: supabaseUser.last_sign_in_at,
+      lastLoginAt: supabaseUser.last_sign_in_at ?? null,
     };
   } catch (error) {
     logger.error('Erro ao buscar perfil', error);
