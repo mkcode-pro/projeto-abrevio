@@ -10,7 +10,6 @@ import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import MobileDemo from "./pages/MobileDemo";
 import Dashboard from "./pages/Dashboard";
 import BioLinkEditor from "./pages/BioLinkEditor";
 import Analytics from "./pages/Analytics";
@@ -45,7 +44,6 @@ const App = () => (
                 <Route path="/" element={<Index />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
-                <Route path="/demo" element={<MobileDemo />} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/bio/:username" element={<BioLink />} />
                 <Route path="/joaosilva" element={<BioLink />} />

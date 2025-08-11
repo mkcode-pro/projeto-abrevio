@@ -54,24 +54,21 @@ export default function Dashboard() {
           // Mobile: Layout otimizado
           <div className="min-h-screen">
             <DashboardHeader />
-            <ResponsiveContainer padding="md" className="py-6">
-              <div className="space-y-6">
-                {/* Cards principais em grid otimizado */}
-                <StatsCards />
-                
-                {/* Bio Links */}
-                <div className="space-y-4">
-                  <h2 className="text-lg font-semibold text-white">Suas Bio Pages</h2>
-                  <BiolinksGrid />
+            <div className="pt-14"> {/* Adiciona padding para o header fixo */}
+              <ResponsiveContainer padding="md" className="py-6">
+                <div className="space-y-6">
+                  <StatsCards />
+                  <div className="space-y-4">
+                    <h2 className="text-lg font-semibold text-white">Suas Bio Pages</h2>
+                    <BiolinksGrid />
+                  </div>
+                  <div className="space-y-4">
+                    <h2 className="text-lg font-semibold text-white">Encurtador de Links</h2>
+                    <UrlShortenerCard />
+                  </div>
                 </div>
-                
-                {/* URL Shortener */}
-                <div className="space-y-4">
-                  <h2 className="text-lg font-semibold text-white">Encurtador de Links</h2>
-                  <UrlShortenerCard />
-                </div>
-              </div>
-            </ResponsiveContainer>
+              </ResponsiveContainer>
+            </div>
           </div>
         )}
       </div>
