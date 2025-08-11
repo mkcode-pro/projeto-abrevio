@@ -20,18 +20,6 @@ const Header = () => {
           </span>
         </div>
 
-        {/* CTA Principal Mobile - Sempre Visível */}
-        <div className="lg:hidden">
-          <Button 
-            size="sm" 
-            className="bg-gradient-neon hover:shadow-neon btn-futuristic text-xs px-4 h-8"
-            onClick={() => navigate("/signup")}
-          >
-            <Zap className="h-3 w-3 mr-1" />
-            Criar
-          </Button>
-        </div>
-
         {/* Navigation Desktop */}
         <nav className="hidden lg:flex items-center gap-6">
           <a 
@@ -77,7 +65,7 @@ const Header = () => {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="hidden text-foreground/70 hover:text-neon-blue hover:bg-white/5 w-8 h-8"
+          className="lg:hidden text-foreground/70 hover:text-neon-blue hover:bg-white/5 w-8 h-8"
           onClick={() => setIsMenuOpen(!isMenuOpen)}
         >
           {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
@@ -111,13 +99,6 @@ const Header = () => {
                 onClick={() => setIsMenuOpen(false)}
               >
                 Depoimentos
-              </a>
-              <a 
-                href="#contato" 
-                className="text-foreground/80 hover:text-neon-blue transition-all duration-300 py-2 font-medium"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contato
               </a>
             </nav>
             <div className="flex flex-col gap-3">

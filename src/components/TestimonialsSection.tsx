@@ -27,7 +27,7 @@ const testimonials = [
   }
 ];
 
-const CompactTestimonials = () => {
+const TestimonialsSection = () => {
   return (
     <section id="depoimentos" className="py-16 md:py-20 relative overflow-hidden">
       {/* Background */}
@@ -133,4 +133,4 @@ const CompactTestimonials = () => {
   );
 };
 
-export default CompactTestimonials;
+export default TestimonialsSection;

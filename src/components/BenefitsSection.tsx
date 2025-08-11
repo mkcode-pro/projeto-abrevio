@@ -1,5 +1,6 @@
 import { Zap, Smartphone, BarChart3, Shield, Sparkles, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const benefits = [
   {
@@ -46,7 +47,9 @@ const benefits = [
   }
 ];
 
-const MobileOptimizedBenefits = () => {
+const BenefitsSection = () => {
+  const navigate = useNavigate();
+
   return (
     <section id="recursos" className="py-16 md:py-24 relative overflow-hidden">
       {/* Background */}
@@ -115,6 +118,7 @@ const MobileOptimizedBenefits = () => {
             <div className="space-y-3">
               <Button 
                 className="w-full h-11 bg-gradient-neon hover:shadow-neon btn-futuristic font-semibold"
+                onClick={() => navigate('/signup')}
               >
                 <Zap className="w-4 h-4 mr-2" />
                 Começar Grátis Agora
@@ -131,4 +135,4 @@ const MobileOptimizedBenefits = () => {
   );
 };
 
-export default MobileOptimizedBenefits;
+export default BenefitsSection;
