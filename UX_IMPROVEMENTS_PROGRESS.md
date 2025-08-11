@@ -17,22 +17,24 @@ O objetivo desta fase é refinar a interface existente, garantindo que a experi�
 - [x] **1.2: Polimento do Dashboard (`/dashboard`)**
 - [x] **1.3: Polimento do Editor de Bio Link (`/dashboard/editor`)**
 - [x] **1.4: Refatoração do Header Mobile**
-  - [x] Criar componente `MobileHeader.tsx` dedicado
-  - [x] Garantir que o header seja fixo e ocupe 100% da largura
-  - [x] Adicionar suporte a "safe areas" (notches)
-  - [x] Implementar cabeçalhos contextuais nas páginas do painel
 
 ---
 
 ## ⚙️ FASE 2: ATIVAÇÃO DAS FUNCIONALIDADES PRINCIPAIS
-**Status**: ⏳ **PENDENTE**
+**Status**: 🟡 **EM ANDAMENTO**
 
 O objetivo desta fase é conectar a interface ao backend (Supabase), substituindo dados de exemplo por funcionalidades reais e persistentes.
 
 ### Tarefas:
-- [ ] **2.1: Conectar Editor de Bio Link ao Supabase**
+- [x] **2.1: Conectar Editor de Bio Link ao Supabase**
+  - [x] Implementar a função de salvar perfil (nome, bio, avatar)
+  - [x] Implementar CRUD (Criar, Ler, Atualizar, Deletar) para os links
 - [ ] **2.2: Conectar Encurtador de URL ao Supabase**
+  - [ ] Salvar URLs encurtadas no banco de dados
+  - [ ] Listar URLs reais do usuário
 - [ ] **2.3: Conectar Dashboard com Dados Reais**
+  - [ ] Exibir estatísticas reais de cliques e visualizações
+  - [ ] Listar os biolinks reais do usuário
 
 ---
 

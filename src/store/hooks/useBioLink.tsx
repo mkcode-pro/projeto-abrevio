@@ -61,7 +61,10 @@ const updateBioLinkProfile = async ({ bioLinkId, updates }: { bioLinkId: string;
 
 // Atualizar links do bio link
 const updateBioLinkItems = async ({ bioLinkId, links }: { bioLinkId: string; links: LinkData[] }) => {
+  // Deleta todos os links antigos
   await supabase.from("bio_link_items").delete().eq("bio_link_id", bioLinkId);
+  
+  // Insere os novos links se houver algum
   if (links.length > 0) {
     const newItems = links.map((link, index) => ({
       bio_link_id: bioLinkId,
@@ -111,6 +114,7 @@ export function useBioLink() {
     if (!user) return;
     let currentBioLink = bioLink;
 
+    // Se o usuário ainda não tem um bio link, cria um primeiro
     if (!currentBioLink) {
       try {
         currentBioLink = await createMutation.mutateAsync({ userId: user.id, username: user.username, name: user.name });
@@ -122,6 +126,7 @@ export function useBioLink() {
       return;
     }
 
+    // Executa as duas atualizações (perfil e links) em paralelo
     const savePromise = Promise.all([
       profileMutation.mutateAsync({ bioLinkId: currentBioLink.id, updates: userData }),
       linksMutation.mutateAsync({ bioLinkId: currentBioLink.id, links }),
@@ -134,6 +139,7 @@ export function useBioLink() {
     });
   };
 
+  // Transforma os dados do Supabase para o formato que os componentes esperam
   const bioLinkData = useMemo(() => {
     if (!user) return null;
     
