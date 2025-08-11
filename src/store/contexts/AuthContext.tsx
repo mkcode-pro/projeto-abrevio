@@ -96,12 +96,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const getInitialSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const userProfile = await fetchUserProfile(session.user);
-        setUser(userProfile);
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const userProfile = await fetchUserProfile(session.user);
+          setUser(userProfile);
+        }
+      } catch (error) {
+        logger.error("Erro ao buscar sessão inicial", error);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     getInitialSession();
@@ -148,7 +153,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!silent) toast.error("Erro inesperado", { description: error.message });
       return { success: false, error: error.message };
     } finally {
-      setLoading(false);
+      // O onAuthStateChange vai cuidar de setar o loading para false
     }
   }, []);
 
@@ -182,7 +187,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!silent) toast.error("Erro inesperado no cadastro", { description: error.message });
       return { success: false, error: error.message };
     } finally {
-      setLoading(false);
+      // O onAuthStateChange vai cuidar de setar o loading para false
     }
   }, []);
 
