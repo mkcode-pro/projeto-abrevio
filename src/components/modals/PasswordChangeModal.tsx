@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Lock, Eye, EyeOff, CheckCircle } from "lucide-react";
-import { useToast } from "@/store/hooks/use-toast";
+import { toast } from "sonner";
 
 const passwordSchema = z.object({
   currentPassword: z.string().min(1, "Senha atual é obrigatória"),
@@ -40,7 +40,6 @@ export function PasswordChangeModal({ open, onOpenChange }: PasswordChangeModalP
     confirm: false
   });
   const [loading, setLoading] = useState(false);
-  const { toast } = useToast();
 
   const {
     register,
@@ -69,18 +68,15 @@ export function PasswordChangeModal({ open, onOpenChange }: PasswordChangeModalP
       // Simular API call
       await new Promise(resolve => setTimeout(resolve, 2000));
       
-      toast({
-        title: "Senha alterada com sucesso",
+      toast.success("Senha alterada com sucesso", {
         description: "Sua senha foi atualizada com segurança.",
       });
       
       reset();
       onOpenChange(false);
     } catch (error) {
-      toast({
-        title: "Erro ao alterar senha",
+      toast.error("Erro ao alterar senha", {
         description: "Não foi possível alterar sua senha. Tente novamente.",
-        variant: "destructive"
       });
     } finally {
       setLoading(false);

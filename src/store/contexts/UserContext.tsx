@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useLocalStorage } from '@/store/hooks/useLocalStorage';
 import { useAuth } from './AuthContext';
-import { toast } from '@/store/hooks/use-toast';
+import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 
 interface UserStats {
@@ -151,15 +151,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         description: 'Preferências do usuário foram atualizadas'
       });
 
-      toast({
-        title: "Preferências atualizadas",
+      toast.success("Preferências atualizadas", {
         description: "Suas configurações foram salvas com sucesso",
       });
     } catch (error) {
-      toast({
-        title: "Erro ao atualizar preferências",
+      toast.error("Erro ao atualizar preferências", {
         description: "Tente novamente mais tarde",
-        variant: "destructive"
       });
       throw error;
     } finally {
@@ -196,8 +193,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const clearActivities = useCallback(() => {
     setUserActivities([]);
-    toast({
-      title: "Atividades limpas",
+    toast.info("Atividades limpas", {
       description: "Histórico de atividades foi removido",
     });
   }, [setUserActivities]);
@@ -231,15 +227,12 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       document.body.removeChild(link);
       URL.revokeObjectURL(url);
 
-      toast({
-        title: "Dados exportados",
+      toast.success("Dados exportados", {
         description: "Seus dados foram baixados com sucesso",
       });
     } catch (error) {
-      toast({
-        title: "Erro na exportação",
+      toast.error("Erro na exportação", {
         description: "Não foi possível exportar seus dados",
-        variant: "destructive"
       });
     } finally {
       setLoading(false);

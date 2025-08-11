@@ -7,7 +7,6 @@ export { NotificationProvider, useNotifications } from './contexts/NotificationC
 
 // Hooks
 export { useIsMobile } from './hooks/use-mobile';
-export { useToast } from './hooks/use-toast';
 export { useAnalytics } from './hooks/useAnalytics';
 export { useBioLink } from './hooks/useBioLink';
 export { useDashboardStats } from './hooks/useDashboardStats';

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { useLocalStorage } from '@/store/hooks/useLocalStorage';
 import { useAuth } from './AuthContext';
-import { toast } from '@/store/hooks/use-toast';
+import { toast } from 'sonner';
 import { logger } from '@/lib/logger';
 
 interface Notification {
@@ -184,11 +184,20 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     setNotifications(prev => [newNotification, ...prev.slice(0, 99)]); // Mantém apenas as últimas 100
 
     // Toast notification
-    toast({
-      title: notification.title,
-      description: notification.message,
-      variant: notification.type === 'error' ? 'destructive' : 'default'
-    });
+    switch (notification.type) {
+      case 'success':
+        toast.success(notification.title, { description: notification.message });
+        break;
+      case 'error':
+        toast.error(notification.title, { description: notification.message });
+        break;
+      case 'warning':
+        toast.warning(notification.title, { description: notification.message });
+        break;
+      default:
+        toast.info(notification.title, { description: notification.message });
+        break;
+    }
 
     // Browser notification se habilitado
     if (preferences.browserNotifications) {
@@ -211,8 +220,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       prev.map(notif => ({ ...notif, read: true }))
     );
     
-    toast({
-      title: "Notificações marcadas como lidas",
+    toast.info("Notificações marcadas como lidas", {
       description: `${unreadCount} notificações foram marcadas como lidas`,
     });
   }, [setNotifications, unreadCount]);
@@ -225,8 +233,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   const clearAllNotifications = useCallback(() => {
     setNotifications([]);
-    toast({
-      title: "Notificações removidas",
+    toast.info("Notificações removidas", {
       description: "Todas as notificações foram removidas",
     });
   }, [setNotifications]);
@@ -240,15 +247,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       const updatedPreferences = { ...preferences, ...updates };
       setPreferences(updatedPreferences);
 
-      toast({
-        title: "Preferências atualizadas",
+      toast.success("Preferências atualizadas", {
         description: "Configurações de notificação foram salvas",
       });
     } catch (error) {
-      toast({
-        title: "Erro ao atualizar preferências",
+      toast.error("Erro ao atualizar preferências", {
         description: "Tente novamente mais tarde",
-        variant: "destructive"
       });
       throw error;
     } finally {
@@ -265,10 +269,8 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
 
   const requestPermissions = useCallback(async (): Promise<boolean> => {
     if (!('Notification' in window)) {
-      toast({
-        title: "Notificações não suportadas",
+      toast.error("Notificações não suportadas", {
         description: "Seu navegador não suporta notificações",
-        variant: "destructive"
       });
       return false;
     }
@@ -280,16 +282,13 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
     const permission = await Notification.requestPermission();
     
     if (permission === 'granted') {
-      toast({
-        title: "Notificações habilitadas",
+      toast.success("Notificações habilitadas", {
         description: "Você receberá notificações do Abrev.io",
       });
       return true;
     } else {
-      toast({
-        title: "Notificações bloqueadas",
+      toast.warning("Notificações bloqueadas", {
         description: "Você pode habilitar nas configurações do navegador",
-        variant: "destructive"
       });
       return false;
     }
