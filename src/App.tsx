@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProviders } from "@/contexts";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
+import { DevAutoLogin } from "@/components/auth/DevAutoLogin"; // Importando o novo componente
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -30,6 +31,9 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          {/* Auto-login para facilitar o desenvolvimento */}
+          <DevAutoLogin />
+          
           <Suspense fallback={
             <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
               <div className="glass-card border-white/20 p-8 rounded-2xl">
