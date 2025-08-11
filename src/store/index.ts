@@ -6,7 +6,7 @@ export { UserProvider, useUser } from './contexts/UserContext';
 export { NotificationProvider, useNotifications } from './contexts/NotificationContext';
 
 // Hooks
-export { useMobile } from './hooks/use-mobile';
+export { useIsMobile } from './hooks/use-mobile';
 export { useToast } from './hooks/use-toast';
 export { useAnalytics } from './hooks/useAnalytics';
 export { useBioLink } from './hooks/useBioLink';
