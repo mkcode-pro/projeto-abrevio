@@ -5,6 +5,7 @@ import { GripVertical, Eye, Trash2 } from "lucide-react"
 import { Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { getIconById } from './IconLibrary'
+import { cn } from '@/lib/utils'
 
 export interface LinkData {
   id: string
@@ -34,7 +35,10 @@ const SortableLinkItem = memo(function SortableLinkItem({ link, onEdit, onDelete
     <div
       ref={setNodeRef}
       style={style}
-      className="glass-card border border-white/20 rounded-xl p-4 group hover:border-neon-blue/50 transition-all"
+      className={cn(
+        "glass-card border border-white/20 rounded-xl p-4 group hover:border-neon-blue/50 transition-all",
+        isDragging && "shadow-lg shadow-neon-blue/20 ring-2 ring-neon-blue"
+      )}
     >
       <div className="flex items-center gap-3">
         {/* Drag Handle */}

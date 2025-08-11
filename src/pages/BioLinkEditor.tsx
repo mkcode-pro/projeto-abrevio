@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Save, Eye, Loader2 } from "lucide-react";
+import { Save, Eye, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProfileEditor } from "@/components/biolink-editor/ProfileEditor";
 import { LinksManager } from "@/components/biolink-editor/LinksManager";
@@ -8,7 +8,7 @@ import { LinkData } from "@/components/biolink-editor/SortableLinkItem";
 import { ResponsiveContainer } from "@/components/layout/ResponsiveContainer";
 import { useBioLink } from "@/store/hooks/useBioLink";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 
 export default function BioLinkEditor() {
   const { bioLinkData, isLoading, isError, error, saveChanges, isSaving } = useBioLink();
@@ -78,7 +78,12 @@ export default function BioLinkEditor() {
           <div>
             <h1 className="text-3xl font-bold text-white mb-2">Editor de Bio Link</h1>
             <p className="text-white/60">Personalize sua página de links e acompanhe o desempenho</p>
-            {hasUnsavedChanges && <p className="text-amber-400 text-sm mt-1">⚠️ Você tem alterações não salvas</p>}
+            {hasUnsavedChanges && (
+              <p className="text-amber-400 text-sm mt-1 flex items-center gap-2 animate-fade-in">
+                <AlertTriangle className="w-4 h-4" />
+                Você tem alterações não salvas
+              </p>
+            )}
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <Button onClick={handlePreview} variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10" disabled={!editedUserData.username}>
