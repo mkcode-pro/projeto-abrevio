@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 
 // --- ATENÇÃO ---
@@ -16,6 +16,7 @@ export function DevAutoLogin() {
   }
 
   const { login, isAuthenticated, loading } = useAuth();
+  const loginAttempted = useRef(false); // Trava de segurança para tentar apenas uma vez
 
   useEffect(() => {
     // Função para tentar o login automático
@@ -24,8 +25,12 @@ export function DevAutoLogin() {
       await login(DEV_USER_EMAIL, DEV_USER_PASS);
     };
 
-    // Só tenta fazer login se não estiver carregando e se o usuário ainda não estiver logado.
-    if (!loading && !isAuthenticated) {
+    // Só tenta fazer login se:
+    // 1. Não estiver carregando
+    // 2. O usuário ainda não estiver logado
+    // 3. A trava de segurança não tiver sido ativada
+    if (!loading && !isAuthenticated && !loginAttempted.current) {
+      loginAttempted.current = true; // Ativa a trava para não tentar de novo
       autoLogin();
     }
   }, [isAuthenticated, loading, login]);
