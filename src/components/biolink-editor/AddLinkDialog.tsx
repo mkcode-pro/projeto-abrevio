@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,30 +14,64 @@ interface AddLinkDialogProps {
 
 export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
   const [open, setOpen] = useState(false)
-  const [selectedIcon, setSelectedIcon] = useState<IconData>(iconLibrary[0])
+  const [selectedIcon, setSelectedIcon] = useState<IconData>(iconLibrary.find(i => i.type === 'link')!)
+  
+  // Estado para formulário de link padrão
   const [title, setTitle] = useState('')
   const [url, setUrl] = useState('')
 
-  const handleAdd = () => {
-    if (!title || !url) {
-      toast.error("Título e URL são obrigatórios")
-      return
-    }
+  // Estado para formulário PIX
+  const [pixKey, setPixKey] = useState('')
+  const [pixName, setPixName] = useState('')
+  const [pixAmount, setPixAmount] = useState('')
+  const [pixCity, setPixCity] = useState('')
 
-    const newLink = {
-      title,
-      url,
-      iconId: selectedIcon.id
+  const selectedType = useMemo(() => selectedIcon.type, [selectedIcon])
+
+  const resetForms = () => {
+    setTitle('')
+    setUrl('')
+    setPixKey('')
+    setPixName('')
+    setPixAmount('')
+    setPixCity('')
+    setSelectedIcon(iconLibrary.find(i => i.type === 'link')!)
+  }
+
+  const handleAdd = () => {
+    let newLink: Omit<LinkData, 'id'>;
+
+    if (selectedType === 'pix') {
+      if (!pixKey) {
+        toast.error("Chave PIX é obrigatória")
+        return
+      }
+      newLink = {
+        title: `Receber PIX de ${pixName || 'valor'}${pixAmount ? ` de R$${pixAmount}` : ''}`,
+        url: JSON.stringify({
+          type: 'pix',
+          key: pixKey,
+          name: pixName,
+          amount: parseFloat(pixAmount) || undefined,
+          city: pixCity
+        }),
+        iconId: selectedIcon.id
+      }
+    } else {
+      if (!title || !url) {
+        toast.error("Título e URL são obrigatórios")
+        return
+      }
+      newLink = {
+        title,
+        url,
+        iconId: selectedIcon.id
+      }
     }
 
     onAdd(newLink)
-    
-    // Reset form
-    setTitle('')
-    setUrl('')
-    setSelectedIcon(iconLibrary[0])
+    resetForms()
     setOpen(false)
-    
     toast.success("Link adicionado com sucesso!")
   }
 
@@ -57,7 +91,7 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
         <div className="space-y-4">
           {/* Icon Selection */}
           <div>
-            <Label className="text-white text-sm mb-2 block">Ícone</Label>
+            <Label className="text-white text-sm mb-2 block">Tipo de Link</Label>
             <div className="grid grid-cols-4 gap-2 max-h-32 overflow-y-auto">
               {iconLibrary.map((icon) => {
                 const IconComponent = icon.icon
@@ -65,13 +99,7 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
                   <button
                     key={icon.id}
                     onClick={() => setSelectedIcon(icon)}
-                    className={`
-                      p-3 rounded-lg transition-all
-                      ${selectedIcon.id === icon.id 
-                        ? 'bg-neon-blue/20 border-2 border-neon-blue' 
-                        : 'bg-white/5 border border-white/20 hover:bg-white/10'
-                      }
-                    `}
+                    className={`p-3 rounded-lg transition-all ${selectedIcon.id === icon.id ? 'bg-neon-blue/20 border-2 border-neon-blue' : 'bg-white/5 border border-white/20 hover:bg-white/10'}`}
                   >
                     <IconComponent className="w-5 h-5 text-white mx-auto" />
                     <span className="text-xs text-white/80 mt-1 block">{icon.name}</span>
@@ -81,44 +109,46 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
             </div>
           </div>
 
-          {/* Form Fields */}
-          <div>
-            <Label htmlFor="title" className="text-white text-sm">Título *</Label>
-            <Input
-              id="title"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Ex: Instagram"
-              className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
-            />
-          </div>
+          {/* Formulário Dinâmico */}
+          {selectedType === 'link' && (
+            <div className="space-y-4 animate-fade-in">
+              <div>
+                <Label htmlFor="title" className="text-white text-sm">Título *</Label>
+                <Input id="title" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex: Instagram" className="bg-white/5 border-white/20 text-white placeholder:text-white/40" />
+              </div>
+              <div>
+                <Label htmlFor="url" className="text-white text-sm">URL *</Label>
+                <Input id="url" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://..." className="bg-white/5 border-white/20 text-white placeholder:text-white/40" />
+              </div>
+            </div>
+          )}
 
-          <div>
-            <Label htmlFor="url" className="text-white text-sm">URL *</Label>
-            <Input
-              id="url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://..."
-              className="bg-white/5 border-white/20 text-white placeholder:text-white/40"
-            />
-          </div>
+          {selectedType === 'pix' && (
+            <div className="space-y-4 animate-fade-in">
+              <div>
+                <Label htmlFor="pixKey" className="text-white text-sm">Chave PIX *</Label>
+                <Input id="pixKey" value={pixKey} onChange={(e) => setPixKey(e.target.value)} placeholder="Email, CPF/CNPJ, Telefone ou Aleatória" className="bg-white/5 border-white/20 text-white placeholder:text-white/40" />
+              </div>
+              <div>
+                <Label htmlFor="pixName" className="text-white text-sm">Nome do Favorecido</Label>
+                <Input id="pixName" value={pixName} onChange={(e) => setPixName(e.target.value)} placeholder="Seu nome ou da sua empresa" className="bg-white/5 border-white/20 text-white placeholder:text-white/40" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="pixAmount" className="text-white text-sm">Valor (opcional)</Label>
+                  <Input id="pixAmount" type="number" value={pixAmount} onChange={(e) => setPixAmount(e.target.value)} placeholder="0.00" className="bg-white/5 border-white/20 text-white placeholder:text-white/40" />
+                </div>
+                <div>
+                  <Label htmlFor="pixCity" className="text-white text-sm">Cidade</Label>
+                  <Input id="pixCity" value={pixCity} onChange={(e) => setPixCity(e.target.value)} placeholder="SAO PAULO" className="bg-white/5 border-white/20 text-white placeholder:text-white/40" />
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="flex gap-2 pt-4">
-            <Button 
-              onClick={() => setOpen(false)}
-              variant="ghost" 
-              className="flex-1 text-white hover:bg-white/10"
-            >
-              Cancelar
-            </Button>
-            <Button 
-              onClick={handleAdd}
-              variant="gradient" 
-              className="flex-1 btn-futuristic"
-            >
-              Adicionar
-            </Button>
+            <Button onClick={() => setOpen(false)} variant="ghost" className="flex-1 text-white hover:bg-white/10">Cancelar</Button>
+            <Button onClick={handleAdd} variant="gradient" className="flex-1 btn-futuristic">Adicionar</Button>
           </div>
         </div>
       </DialogContent>

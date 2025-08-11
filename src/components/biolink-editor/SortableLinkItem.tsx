@@ -1,8 +1,7 @@
-import { memo } from 'react'
+import { memo, useMemo } from 'react'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { GripVertical, Eye, Trash2 } from "lucide-react"
-import { Globe } from "lucide-react"
+import { GripVertical, Eye, Trash2, Globe } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { getIconById } from './IconLibrary'
 import { cn } from '@/lib/utils'
@@ -10,7 +9,7 @@ import { cn } from '@/lib/utils'
 export interface LinkData {
   id: string
   title: string
-  url: string
+  url: string // Para links normais, é a URL. Para PIX, é um JSON com os dados.
   iconId: string
 }
 
@@ -31,6 +30,18 @@ const SortableLinkItem = memo(function SortableLinkItem({ link, onEdit, onDelete
     opacity: isDragging ? 0.5 : 1,
   }
 
+  const displayInfo = useMemo(() => {
+    if (iconData?.type === 'pix') {
+      try {
+        const pixData = JSON.parse(link.url)
+        return `Chave: ${pixData.key}`
+      } catch (e) {
+        return "PIX Inválido"
+      }
+    }
+    return link.url
+  }, [link, iconData])
+
   return (
     <div
       ref={setNodeRef}
@@ -41,42 +52,21 @@ const SortableLinkItem = memo(function SortableLinkItem({ link, onEdit, onDelete
       )}
     >
       <div className="flex items-center gap-3">
-        {/* Drag Handle */}
-        <button
-          {...attributes}
-          {...listeners}
-          className="text-white/40 hover:text-white/80 cursor-grab active:cursor-grabbing p-1"
-        >
+        <button {...attributes} {...listeners} className="text-white/40 hover:text-white/80 cursor-grab active:cursor-grabbing p-1">
           <GripVertical className="w-4 h-4" />
         </button>
-
-        {/* Icon */}
         <div className={`p-2 rounded-lg bg-gradient-to-r ${iconData?.color || 'from-gray-500 to-gray-700'}`}>
           <IconComponent className="w-4 h-4 text-white" />
         </div>
-
-        {/* Content */}
         <div className="flex-1 min-w-0">
           <h4 className="text-white font-medium text-sm truncate">{link.title}</h4>
-          <p className="text-white/40 text-xs truncate">{link.url}</p>
+          <p className="text-white/40 text-xs truncate">{displayInfo}</p>
         </div>
-
-        {/* Actions */}
         <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-          <Button
-            onClick={() => onEdit(link)}
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-white/60 hover:text-white hover:bg-white/10"
-          >
+          <Button onClick={() => onEdit(link)} variant="ghost" size="icon" className="h-8 w-8 text-white/60 hover:text-white hover:bg-white/10">
             <Eye className="w-4 h-4" />
           </Button>
-          <Button
-            onClick={() => onDelete(link.id)}
-            variant="ghost"
-            size="icon"
-            className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10"
-          >
+          <Button onClick={() => onDelete(link.id)} variant="ghost" size="icon" className="h-8 w-8 text-red-400 hover:text-red-300 hover:bg-red-500/10">
             <Trash2 className="w-4 h-4" />
           </Button>
         </div>

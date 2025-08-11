@@ -2,11 +2,12 @@ import { useState, useEffect } from "react"
 import { useParams, Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
-import { ExternalLink, Share2, Link2 as LinkIcon, AlertTriangle } from "lucide-react"
+import { ExternalLink, Share2, Link2 as LinkIcon, AlertTriangle, CreditCard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getIconById } from "@/components/biolink-editor/IconLibrary"
 import { Skeleton } from "@/components/ui/skeleton"
+import { PixModal } from "@/components/biolink/PixModal"
 
 const fetchPublicBioLink = async (username: string) => {
   const { data, error } = await supabase
@@ -32,38 +33,64 @@ const fetchPublicBioLink = async (username: string) => {
 
 function LinkButton({ link, index }: { link: any, index: number }) {
   const [isClicked, setIsClicked] = useState(false);
+  const [showPixModal, setShowPixModal] = useState(false);
+  
   const iconData = getIconById(link.icon);
   const IconComponent = iconData?.icon || LinkIcon;
+  const isPix = iconData?.type === 'pix';
+
+  let pixData = null;
+  if (isPix) {
+    try {
+      pixData = JSON.parse(link.url);
+    } catch (e) {
+      return null; // Não renderiza link PIX inválido
+    }
+  }
 
   const handleClick = () => {
     setIsClicked(true);
     setTimeout(() => setIsClicked(false), 200);
-    window.open(link.url, '_blank');
+    
+    if (isPix) {
+      setShowPixModal(true);
+    } else {
+      window.open(link.url, '_blank');
+    }
   };
 
   return (
-    <div 
-      className="animate-slide-up opacity-0"
-      style={{ animationDelay: `${(index + 2) * 100}ms`, animationFillMode: 'forwards' }}
-    >
-      <Button
-        onClick={handleClick}
-        className={`w-full h-auto p-0 bg-transparent hover:bg-transparent transform transition-all duration-300 hover:scale-105 ${isClicked ? 'scale-95' : ''}`}
-        variant="ghost"
+    <>
+      <div 
+        className="animate-slide-up opacity-0"
+        style={{ animationDelay: `${(index + 2) * 100}ms`, animationFillMode: 'forwards' }}
       >
-        <div className="w-full glass-card border border-white/20 hover:border-neon-blue/50 rounded-2xl p-4 transition-all duration-300 hover:shadow-neon">
-          <div className="flex items-center gap-4">
-            <div className={`flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r ${iconData?.color || 'from-gray-500 to-gray-700'}`}>
-              <IconComponent className="w-6 h-6 text-white" />
+        <Button
+          onClick={handleClick}
+          className={`w-full h-auto p-0 bg-transparent hover:bg-transparent transform transition-all duration-300 hover:scale-105 ${isClicked ? 'scale-95' : ''}`}
+          variant="ghost"
+        >
+          <div className="w-full glass-card border border-white/20 hover:border-neon-blue/50 rounded-2xl p-4 transition-all duration-300 hover:shadow-neon">
+            <div className="flex items-center gap-4">
+              <div className={`flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r ${iconData?.color || 'from-gray-500 to-gray-700'}`}>
+                <IconComponent className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1 text-left">
+                <h3 className="font-semibold text-white text-base leading-tight">{link.title}</h3>
+              </div>
+              {isPix ? (
+                <CreditCard className="w-5 h-5 text-white/60" />
+              ) : (
+                <ExternalLink className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
+              )}
             </div>
-            <div className="flex-1 text-left">
-              <h3 className="font-semibold text-white text-base leading-tight">{link.title}</h3>
-            </div>
-            <ExternalLink className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
           </div>
-        </div>
-      </Button>
-    </div>
+        </Button>
+      </div>
+      {isPix && pixData && (
+        <PixModal open={showPixModal} onOpenChange={setShowPixModal} pixData={pixData} />
+      )}
+    </>
   );
 }
 
