@@ -1,8 +1,8 @@
 import Header from "@/components/Header";
 import HeroSection from "@/components/HeroSection";
-import MobileOptimizedBenefits from "@/components/MobileOptimizedBenefits";
-import CompactTestimonials from "@/components/CompactTestimonials";
-import OptimizedFooter from "@/components/OptimizedFooter";
+import BenefitsSection from "@/components/BenefitsSection";
+import TestimonialsSection from "@/components/TestimonialsSection";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   return (
@@ -10,10 +10,10 @@ const Index = () => {
       <Header />
       <main>
         <HeroSection />
-        <MobileOptimizedBenefits />
-        <CompactTestimonials />
+        <BenefitsSection />
+        <TestimonialsSection />
       </main>
-      <OptimizedFooter />
+      <Footer />
     </div>
   );
 };
