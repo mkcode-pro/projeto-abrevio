@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useIsMobile } from '@/store/hooks/use-mobile'
 
 export function useMobileOptimized() {
   const isMobile = useIsMobile()

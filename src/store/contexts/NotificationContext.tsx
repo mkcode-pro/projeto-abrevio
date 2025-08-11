@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useLocalStorage } from '@/store/hooks/useLocalStorage';
 import { useAuth } from './AuthContext';
-import { toast } from '@/hooks/use-toast';
+import { toast } from '@/store/hooks/use-toast';
 import { logger } from '@/lib/logger';
 
 interface Notification {

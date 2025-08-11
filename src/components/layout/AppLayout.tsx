@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { useLocation } from 'react-router-dom'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useIsMobile } from '@/store/hooks/use-mobile'
 import { MobileBottomNav } from '@/components/dashboard/MobileBottomNav'
 import { cn } from '@/lib/utils'
 

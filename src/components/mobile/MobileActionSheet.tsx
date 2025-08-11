@@ -2,7 +2,7 @@ import { ReactNode } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useIsMobile } from '@/store/hooks/use-mobile'
 
 interface MobileActionSheetProps {
   children: ReactNode

@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/store/contexts/AuthContext';
 import { toast } from 'sonner';
 import { env } from '@/config/environment';
 import { logger } from '@/lib/logger';

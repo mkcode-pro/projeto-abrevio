@@ -6,7 +6,7 @@ import { LinksManager } from "@/components/biolink-editor/LinksManager";
 import { BioLinkPreview, UserData } from "@/components/biolink-editor/BioLinkPreview";
 import { LinkData } from "@/components/biolink-editor/SortableLinkItem";
 import { ResponsiveContainer } from "@/components/layout/ResponsiveContainer";
-import { useBioLink } from "@/hooks/useBioLink";
+import { useBioLink } from "@/store/hooks/useBioLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/store/contexts/AuthContext";
 
 const fetchUserBioLinks = async (userId: string) => {
   const { data, error } = await supabase

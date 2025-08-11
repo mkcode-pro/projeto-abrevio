@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { useAnalytics } from "@/hooks/useAnalytics"
+import { useAnalytics } from "@/store/hooks/useAnalytics"
 import { Skeleton } from "@/components/ui/skeleton"
 import { getIconById } from "@/components/biolink-editor/IconLibrary"
 

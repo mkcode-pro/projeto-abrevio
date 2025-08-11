@@ -11,14 +11,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
-import { useTheme } from "@/hooks/useTheme";
-import { useFileUpload } from "@/hooks/useFileUpload";
+import { useTheme } from "@/store/hooks/useTheme";
+import { useFileUpload } from "@/store/hooks/useFileUpload";
 import { PasswordChangeModal } from "@/components/modals/PasswordChangeModal";
 import { ConfirmDeleteModal } from "@/components/modals/ConfirmDeleteModal";
 import { ConfirmLogoutModal } from "@/components/modals/ConfirmLogoutModal";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/store/contexts/AuthContext";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useUsernameCheck, useClearUsernameCache } from "@/hooks/useUsernameCheck";
+import { useUsernameCheck, useClearUsernameCache } from "@/store/hooks/useUsernameCheck";
 import { getUsernameQualityScore } from "@/lib/usernameValidator";
 import { Badge } from "@/components/ui/badge";
 

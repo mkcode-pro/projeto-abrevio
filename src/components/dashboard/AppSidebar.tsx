@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/sidebar"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { ConfirmLogoutModal } from "@/components/modals/ConfirmLogoutModal"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/store/contexts/AuthContext"
 import { Skeleton } from "@/components/ui/skeleton"
 
 const sidebarItems = [

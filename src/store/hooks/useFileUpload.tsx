@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/store/contexts/AuthContext";
 import { toast } from "sonner";
 import { optimizeImage, validateImageFile, createImagePreview } from "@/lib/imageOptimizer";
 import { logger } from "@/lib/logger";

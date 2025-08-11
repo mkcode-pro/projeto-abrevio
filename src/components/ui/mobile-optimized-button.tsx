@@ -1,7 +1,7 @@
 import { forwardRef } from 'react'
 import { Button, ButtonProps } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import { useMobileOptimized } from '@/hooks/useMobileOptimized'
+import { useMobileOptimized } from '@/store/hooks/useMobileOptimized'
 
 export interface MobileOptimizedButtonProps extends ButtonProps {
   touchOptimized?: boolean

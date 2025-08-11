@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { Eye, MousePointer, TrendingUp } from "lucide-react"
 import { Card, CardContent } from "@/components/ui/card"
-import { useDashboardStats } from "@/hooks/useDashboardStats"
+import { useDashboardStats } from "@/store/hooks/useDashboardStats"
 import { Skeleton } from "@/components/ui/skeleton"
 
 export const StatsCards = memo(function StatsCards() {

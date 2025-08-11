@@ -1,7 +1,7 @@
 import { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useIsMobile } from '@/store/hooks/use-mobile'
 
 interface MobileCardProps {
   children: ReactNode

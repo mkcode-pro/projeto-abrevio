@@ -19,7 +19,7 @@ import {
   Home
 } from 'lucide-react'
 import { ConfirmLogoutModal } from '@/components/modals/ConfirmLogoutModal'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAuth } from '@/store/contexts/AuthContext'
 import { Skeleton } from '@/components/ui/skeleton'
 
 const navigationItems = [

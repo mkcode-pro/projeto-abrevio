@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { cn } from '@/lib/utils'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useIsMobile } from '@/store/hooks/use-mobile'
 
 interface ResponsiveGridProps {
   children: ReactNode

@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/store/contexts/AuthContext";
 import { toast } from "sonner";
 import { LinkData } from "@/components/biolink-editor/SortableLinkItem";
 import { UserData } from "@/components/biolink-editor/BioLinkPreview";

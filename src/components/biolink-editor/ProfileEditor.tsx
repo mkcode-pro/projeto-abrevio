@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Progress } from "@/components/ui/progress"
 import { UserData } from './BioLinkPreview'
-import { useFileUpload } from "@/hooks/useFileUpload"
+import { useFileUpload } from "@/store/hooks/useFileUpload"
 import { toast } from "sonner"
 import { logger } from "@/lib/logger"
 

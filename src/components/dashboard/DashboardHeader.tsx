@@ -4,9 +4,9 @@ import { Input } from "@/components/ui/input"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { useNavigate } from "react-router-dom"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useIsMobile } from "@/hooks/use-mobile"
+import { useIsMobile } from "@/store/hooks/use-mobile"
 import { cn } from "@/lib/utils"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAuth } from "@/store/contexts/AuthContext"
 
 export function DashboardHeader() {
   const navigate = useNavigate()
