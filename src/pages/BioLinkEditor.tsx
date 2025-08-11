@@ -69,8 +69,8 @@ export default function BioLinkEditor() {
   if (!editedUserData) return <EditorSkeleton isMobile={isMobile} />;
 
   const headerActions = (
-    <Button onClick={handleSave} size="sm" disabled={isSaving || !hasUnsavedChanges} className="bg-gradient-neon hover:shadow-neon btn-futuristic">
-      {isSaving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
+    <Button onClick={handleSave} size="sm" disabled={isSaving || !hasUnsavedChanges} className="bg-gradient-primary hover:opacity-90">
+      {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
       <span className="ml-2">Salvar</span>
     </Button>
   );

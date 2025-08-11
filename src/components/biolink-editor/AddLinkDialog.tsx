@@ -21,6 +21,7 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
   const [url, setUrl] = useState('')
 
   // Estado para formulário PIX
+  const [pixTitle, setPixTitle] = useState('')
   const [pixKey, setPixKey] = useState('')
   const [pixName, setPixName] = useState('')
   const [pixAmount, setPixAmount] = useState('')
@@ -31,6 +32,7 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
   const resetForms = () => {
     setTitle('')
     setUrl('')
+    setPixTitle('')
     setPixKey('')
     setPixName('')
     setPixAmount('')
@@ -47,9 +49,8 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
         return
       }
       newLink = {
-        title: `Receber PIX de ${pixName || 'valor'}${pixAmount ? ` de R$${pixAmount}` : ''}`,
+        title: pixTitle || 'PIX', // Usa o título do usuário ou um padrão simples
         url: JSON.stringify({
-          type: 'pix',
           key: pixKey,
           name: pixName,
           amount: parseFloat(pixAmount) || undefined,
@@ -125,6 +126,10 @@ export function AddLinkDialog({ onAdd }: AddLinkDialogProps) {
 
           {selectedType === 'pix' && (
             <div className="space-y-4 animate-fade-in">
+              <div>
+                <Label htmlFor="pixTitle" className="text-white text-sm">Título do Botão</Label>
+                <Input id="pixTitle" value={pixTitle} onChange={(e) => setPixTitle(e.target.value)} placeholder="Ex: Me pague um café" className="bg-white/5 border-white/20 text-white placeholder:text-white/40" />
+              </div>
               <div>
                 <Label htmlFor="pixKey" className="text-white text-sm">Chave PIX *</Label>
                 <Input id="pixKey" value={pixKey} onChange={(e) => setPixKey(e.target.value)} placeholder="Email, CPF/CNPJ, Telefone ou Aleatória" className="bg-white/5 border-white/20 text-white placeholder:text-white/40" />
