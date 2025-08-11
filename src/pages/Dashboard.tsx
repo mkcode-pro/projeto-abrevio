@@ -1,6 +1,5 @@
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/dashboard/AppSidebar"
-import { QuickActions } from "@/components/dashboard/QuickActions"
 import { StatsCards } from "@/components/dashboard/StatsCards"
 import { BiolinksGrid } from "@/components/dashboard/BiolinksGrid"
 import { UrlShortenerCard } from "@/components/dashboard/UrlShortenerCard"
@@ -39,7 +38,6 @@ export default function Dashboard() {
               <DashboardHeader />
               <ResponsiveContainer size="xl" padding="lg" className="py-8">
                 <div className="space-y-8">
-                  <QuickActions />
                   <StatsCards />
                   
                   <ResponsiveGrid cols={{ desktop: 2, tablet: 1, mobile: 1 }} gap="lg">

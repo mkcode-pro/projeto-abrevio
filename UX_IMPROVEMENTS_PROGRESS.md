@@ -1,7 +1,7 @@
 # 🚀 PLANO DE MELHORIA DE EXPERIÊNCIA DO USUÁRIO (UX) - ABREV.IO
 
 > **Última Atualização**: 11/08/2025 - 20:00
-> **Status Geral**: 🟢 **INICIADO**
+> **Status Geral**: 🟡 **EM ANDAMENTO**
 
 Este documento rastreia todas as melhorias focadas no layout, design, funcionalidades e experiência do usuário (UX) da plataforma Abrev.io.
 
@@ -18,10 +18,11 @@ O objetivo desta fase é refinar a interface existente, garantindo que a experi�
   - [x] Melhorar animações e layout do `HeroSection`
   - [x] Adicionar animações de entrada no `BenefitsSection`
   - [x] Aprimorar design dos cards no `TestimonialsSection`
-- [ ] **1.2: Polimento do Dashboard (`/dashboard`)**
-  - [ ] Revisar responsividade dos cards de estatísticas
-  - [ ] Ajustar layout do grid de biolinks e encurtador
-  - [ ] Garantir consistência de espaçamentos e fontes
+- [x] **1.2: Polimento do Dashboard (`/dashboard`)**
+  - [x] Revisar responsividade dos cards de estatísticas
+  - [x] Ajustar layout do grid de biolinks e encurtador
+  - [x] Garantir consistência de espaçamentos e fontes
+  - [x] Aprimorar navegação mobile com menu de ações rápidas
 - [ ] **1.3: Polimento do Editor de Bio Link (`/dashboard/editor`)**
   - [ ] Melhorar a experiência de arrastar e soltar (drag-and-drop)
   - [ ] Refinar o layout do preview em telas menores
