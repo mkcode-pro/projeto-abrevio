@@ -1,3 +1,4 @@
+import { useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -18,17 +19,22 @@ type LoginFormValues = z.infer<typeof loginSchema>
 
 export default function Login() {
   const navigate = useNavigate()
-  const { login, loading } = useAuth()
+  const { login, loading, isAuthenticated } = useAuth()
   const { register, handleSubmit, formState: { errors, isValid } } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     mode: "onChange"
   })
 
-  const onSubmit = async (data: LoginFormValues) => {
-    const result = await login(data.email, data.password);
-    if (result.success) {
+  useEffect(() => {
+    // Redireciona APENAS quando o estado de autenticação mudar para true
+    if (isAuthenticated) {
       navigate("/dashboard");
     }
+  }, [isAuthenticated, navigate]);
+
+  const onSubmit = async (data: LoginFormValues) => {
+    await login(data.email, data.password);
+    // A navegação agora é tratada pelo useEffect
   }
 
   return (

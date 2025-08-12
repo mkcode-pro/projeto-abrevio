@@ -3,6 +3,7 @@ import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/dashboard/AppSidebar";
 import { DashboardHeader } from "@/components/dashboard/DashboardHeader";
 import { useIsMobile } from "@/store/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 export function DashboardLayout() {
   const isMobile = useIsMobile();
@@ -16,13 +17,16 @@ export function DashboardLayout() {
             <AppSidebar />
             <main className="flex-1">
               <DashboardHeader />
-              <Outlet /> {/* O conteúdo da página será renderizado aqui */}
+              <div className="p-8">
+                <Outlet />
+              </div>
             </main>
           </div>
         ) : (
-          // Mobile: Layout otimizado (o header é adicionado em cada página)
+          // Mobile: Layout otimizado
           <div className="min-h-screen">
-            <Outlet /> {/* O conteúdo da página será renderizado aqui */}
+            {/* O header é adicionado em cada página mobile para ser contextual */}
+            <Outlet />
           </div>
         )}
       </div>
