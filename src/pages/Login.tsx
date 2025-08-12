@@ -38,42 +38,49 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-4">
-      <Card className="glass-card border-white/20 w-full max-w-md animate-fade-in">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 rounded-xl bg-gradient-neon neon-glow">
-              <Link2 className="h-6 w-6 text-primary-foreground" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-3 sm:p-4">
+      <Card className="glass-card border-white/20 w-full max-w-[min(90vw,26rem)] animate-fade-in">
+        <CardHeader className="text-center pb-4 sm:pb-6">
+          <div className="flex justify-center mb-3 sm:mb-4">
+            <div className="p-2.5 sm:p-3 rounded-xl bg-gradient-neon neon-glow">
+              <Link2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-white">Bem-vindo de volta!</CardTitle>
-          <CardDescription>Faça login para acessar seu painel.</CardDescription>
+          <CardTitle className="text-xl sm:text-2xl font-bold text-white">Bem-vindo de volta!</CardTitle>
+          <CardDescription className="text-sm sm:text-base mt-1.5">Faça login para acessar seu painel.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+        <CardContent className="px-4 sm:px-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="email" className="text-sm sm:text-base">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="seu@email.com"
+                autoComplete="email"
+                autoFocus
                 {...register("email")}
-                className="bg-white/5 border-white/20 text-white"
+                className="bg-white/5 border-white/20 text-white h-10 sm:h-11 text-sm sm:text-base"
+                aria-invalid={!!errors.email}
+                aria-describedby={errors.email ? "email-error" : undefined}
               />
-              {errors.email && <p className="text-sm text-red-400">{errors.email.message}</p>}
+              {errors.email && <p id="email-error" className="text-xs sm:text-sm text-red-400 mt-1">{errors.email.message}</p>}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="password" className="text-sm sm:text-base">Senha</Label>
               <Input
                 id="password"
                 type="password"
                 placeholder="Sua senha"
+                autoComplete="current-password"
                 {...register("password")}
-                className="bg-white/5 border-white/20 text-white"
+                className="bg-white/5 border-white/20 text-white h-10 sm:h-11 text-sm sm:text-base"
+                aria-invalid={!!errors.password}
+                aria-describedby={errors.password ? "password-error" : undefined}
               />
-              {errors.password && <p className="text-sm text-red-400">{errors.password.message}</p>}
+              {errors.password && <p id="password-error" className="text-xs sm:text-sm text-red-400 mt-1">{errors.password.message}</p>}
             </div>
-            <Button type="submit" disabled={!isValid || loading} className="w-full bg-gradient-primary hover:opacity-90 btn-futuristic">
+            <Button type="submit" disabled={!isValid || loading} className="w-full bg-gradient-primary hover:opacity-90 btn-futuristic h-10 sm:h-11 text-sm sm:text-base mt-4 sm:mt-6">
               {loading ? "Entrando..." : (
                 <>
                   <LogIn className="h-4 w-4 mr-2" />
@@ -82,9 +89,9 @@ export default function Login() {
               )}
             </Button>
           </form>
-          <div className="mt-4 text-center text-sm">
+          <div className="mt-4 sm:mt-6 text-center text-xs sm:text-sm">
             <span className="text-white/70">Não tem uma conta? </span>
-            <Link to="/signup" className="font-semibold text-neon-blue hover:underline">
+            <Link to="/signup" className="font-semibold text-neon-blue hover:underline focus:outline-none focus:ring-2 focus:ring-neon-blue/50 rounded px-1">
               Cadastre-se
             </Link>
           </div>

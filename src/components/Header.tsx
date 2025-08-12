@@ -9,13 +9,13 @@ const Header = () => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 glass backdrop-blur-xl border-b border-white/5 bg-background/80">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
+      <div className="container mx-auto px-3 sm:px-4 lg:px-6 h-14 sm:h-16 flex items-center justify-between">
         {/* Logo Compacto */}
-        <div className="flex items-center gap-2">
-          <div className="relative p-1.5 rounded-lg bg-gradient-neon">
-            <Link2 className="h-4 w-4 text-primary-foreground" />
+        <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="relative p-1 sm:p-1.5 rounded-lg bg-gradient-neon">
+            <Link2 className="h-3.5 sm:h-4 w-3.5 sm:w-4 text-primary-foreground" />
           </div>
-          <span className="text-lg font-bold font-poppins text-foreground">
+          <span className="text-base sm:text-lg font-bold font-poppins text-foreground">
             Abrev.io
           </span>
         </div>

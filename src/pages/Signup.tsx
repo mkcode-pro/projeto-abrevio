@@ -62,32 +62,44 @@ export default function Signup() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-4">
-      <Card className="glass-card border-white/20 w-full max-w-md animate-fade-in">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <div className="p-3 rounded-xl bg-gradient-neon neon-glow">
-              <Link2 className="h-6 w-6 text-primary-foreground" />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-3 sm:p-4 py-8">
+      <Card className="glass-card border-white/20 w-full max-w-[min(90vw,26rem)] animate-fade-in">
+        <CardHeader className="text-center pb-4 sm:pb-6">
+          <div className="flex justify-center mb-3 sm:mb-4">
+            <div className="p-2.5 sm:p-3 rounded-xl bg-gradient-neon neon-glow">
+              <Link2 className="h-5 w-5 sm:h-6 sm:w-6 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-white">Crie sua conta</CardTitle>
-          <CardDescription>Comece a centralizar seus links gratuitamente.</CardDescription>
+          <CardTitle className="text-xl sm:text-2xl font-bold text-white">Crie sua conta</CardTitle>
+          <CardDescription className="text-sm sm:text-base mt-1.5">Comece a centralizar seus links gratuitamente.</CardDescription>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Nome</Label>
-              <Input id="name" placeholder="Seu nome" {...register("name")} className="bg-white/5 border-white/20 text-white" />
-              {errors.name && <p className="text-sm text-red-400">{errors.name.message}</p>}
+        <CardContent className="px-4 sm:px-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="name" className="text-sm sm:text-base">Nome</Label>
+              <Input 
+                id="name" 
+                placeholder="Seu nome" 
+                autoComplete="name"
+                autoFocus
+                {...register("name")} 
+                className="bg-white/5 border-white/20 text-white h-10 sm:h-11 text-sm sm:text-base" 
+                aria-invalid={!!errors.name}
+                aria-describedby={errors.name ? "name-error" : undefined}
+              />
+              {errors.name && <p id="name-error" className="text-xs sm:text-sm text-red-400 mt-1">{errors.name.message}</p>}
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="username">Usuário</Label>
+            <div className="space-y-1.5 sm:space-y-2">
+              <Label htmlFor="username" className="text-sm sm:text-base">Usuário</Label>
               <div className="relative">
                 <Input 
                   id="username" 
                   placeholder="seu_usuario" 
+                  autoComplete="username"
                   {...register("username")} 
-                  className="bg-white/5 border-white/20 text-white pr-8" 
+                  className="bg-white/5 border-white/20 text-white pr-10 h-10 sm:h-11 text-sm sm:text-base" 
+                  aria-invalid={!!errors.username || usernameCheck.status === 'taken'}
+                  aria-describedby={errors.username || usernameCheck.error ? "username-error" : undefined}
                 />
                 <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                   {usernameCheck.status === 'checking' && <Loader2 className="h-4 w-4 text-white/50 animate-spin" />}
@@ -98,8 +110,8 @@ export default function Signup() {
               </div>
               
               {/* Mensagens de erro */}
-              {errors.username && <p className="text-sm text-red-400">{errors.username.message}</p>}
-              {usernameCheck.error && <p className="text-sm text-red-400">{usernameCheck.error}</p>}
+              {errors.username && <p id="username-error" className="text-xs sm:text-sm text-red-400 mt-1">{errors.username.message}</p>}
+              {usernameCheck.error && <p className="text-xs sm:text-sm text-red-400 mt-1">{usernameCheck.error}</p>}
               
               {/* Badge de qualidade */}
               {qualityScore && usernameCheck.status === 'available' && (

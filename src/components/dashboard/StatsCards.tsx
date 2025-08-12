@@ -9,10 +9,10 @@ export const StatsCards = memo(function StatsCards() {
 
   if (isLoading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Skeleton className="h-32 rounded-2xl" />
-        <Skeleton className="h-32 rounded-2xl" />
-        <Skeleton className="h-32 rounded-2xl" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
+        <Skeleton className="h-24 sm:h-28 lg:h-32 rounded-xl" />
+        <Skeleton className="h-24 sm:h-28 lg:h-32 rounded-xl" />
+        <Skeleton className="h-24 sm:h-28 lg:h-32 rounded-xl hidden sm:block md:block" />
       </div>
     );
   }
@@ -42,18 +42,18 @@ export const StatsCards = memo(function StatsCards() {
   ]
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 lg:gap-6">
       {stats.map((stat, index) => (
         <Card key={index} className="glass-card border-white/10 hover:border-neon-blue/50 transition-all">
-          <CardContent className="p-6">
+          <CardContent className="p-4 sm:p-5 lg:p-6">
             <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted-foreground">{stat.title}</p>
-                <p className="text-2xl font-bold text-white mt-1 truncate">{stat.value}</p>
-                <p className={`text-xs mt-1 ${stat.color}`}>{stat.change}</p>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground">{stat.title}</p>
+                <p className="text-xl sm:text-2xl font-bold text-white mt-1 truncate">{stat.value}</p>
+                <p className={`text-[0.65rem] sm:text-xs mt-1 ${stat.color}`}>{stat.change}</p>
               </div>
-              <div className={`p-3 rounded-xl bg-white/10`}>
-                <stat.icon className={`h-6 w-6 ${stat.color}`} />
+              <div className={`p-2 sm:p-2.5 lg:p-3 rounded-lg sm:rounded-xl bg-white/10`}>
+                <stat.icon className={`h-5 w-5 sm:h-6 sm:w-6 ${stat.color}`} />
               </div>
             </div>
           </CardContent>

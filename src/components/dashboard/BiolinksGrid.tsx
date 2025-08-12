@@ -58,11 +58,11 @@ export function BiolinksGrid() {
     <div>
       <h2 className="text-xl font-bold text-white mb-4">Meus Bio Links</h2>
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {[...Array(2)].map((_, i) => <Skeleton key={i} className="h-36 rounded-2xl" />)}
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
           {bioLinks.map((link) => (
             <Card key={link.id} className="glass-card border-white/10 hover:border-primary/30 transition-all group">
               <CardContent className="p-4 flex flex-col justify-between h-full">
