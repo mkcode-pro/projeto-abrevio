@@ -11,6 +11,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
 import { useIsMobile } from "@/store/hooks/use-mobile";
 import { MobileHeader } from "@/components/mobile/MobileHeader";
+import { AppearanceEditor } from "@/components/biolink-editor/AppearanceEditor";
+import { BioLinkTheme, defaultTheme } from "@/components/biolink-editor/ThemeLibrary";
 
 export default function BioLinkEditor() {
   const { bioLinkData, isLoading, isError, error, saveChanges, isSaving } = useBioLink();
@@ -18,12 +20,14 @@ export default function BioLinkEditor() {
   
   const [editedUserData, setEditedUserData] = useState<UserData | null>(null);
   const [editedLinks, setEditedLinks] = useState<LinkData[]>([]);
+  const [editedTheme, setEditedTheme] = useState<BioLinkTheme>(defaultTheme);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   useEffect(() => {
     if (bioLinkData) {
       setEditedUserData(bioLinkData.userData);
       setEditedLinks(bioLinkData.links);
+      setEditedTheme(bioLinkData.theme);
       setHasUnsavedChanges(false);
     }
   }, [bioLinkData]);
@@ -39,9 +43,14 @@ export default function BioLinkEditor() {
     setHasUnsavedChanges(true);
   };
 
+  const handleThemeChange = (newTheme: BioLinkTheme) => {
+    setEditedTheme(newTheme);
+    setHasUnsavedChanges(true);
+  };
+
   const handleSave = () => {
     if (editedUserData) {
-      saveChanges(editedUserData, editedLinks);
+      saveChanges(editedUserData, editedLinks, editedTheme);
       setHasUnsavedChanges(false);
     }
   };
@@ -105,11 +114,12 @@ export default function BioLinkEditor() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
             <div className="lg:col-span-8 space-y-8">
               <ProfileEditor userData={editedUserData} onUpdate={handleUserDataUpdate} />
+              <AppearanceEditor theme={editedTheme} onThemeChange={handleThemeChange} />
               <LinksManager links={editedLinks} onLinksChange={handleLinksChange} />
             </div>
             <div className="lg:col-span-4">
               <div className="sticky top-24">
-                <BioLinkPreview userData={editedUserData} links={editedLinks} />
+                <BioLinkPreview userData={editedUserData} links={editedLinks} theme={editedTheme} />
               </div>
             </div>
           </div>

@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { LinkData } from "@/components/biolink-editor/SortableLinkItem";
 import { UserData } from "@/components/biolink-editor/BioLinkPreview";
 import { useMemo } from "react";
+import { BioLinkTheme, defaultTheme } from "@/components/biolink-editor/ThemeLibrary";
 
 // Buscar bio link do usuário
 const fetchBioLink = async (userId: string) => {
@@ -37,6 +38,7 @@ const createBioLink = async ({ userId, username, name }: {
       user_id: userId,
       username: username,
       display_name: name,
+      theme: defaultTheme as any, // Salva o objeto de tema padrão
     })
     .select('*, bio_link_items(*)')
     .single();
@@ -45,8 +47,8 @@ const createBioLink = async ({ userId, username, name }: {
   return data;
 };
 
-// Atualizar perfil do bio link
-const updateBioLinkProfile = async ({ bioLinkId, updates }: { bioLinkId: string; updates: Partial<UserData> }) => {
+// Atualizar perfil e tema do bio link
+const updateBioLink = async ({ bioLinkId, updates, theme }: { bioLinkId: string; updates: Partial<UserData>, theme: BioLinkTheme }) => {
   const { error } = await supabase
     .from("bio_links")
     .update({
@@ -54,6 +56,7 @@ const updateBioLinkProfile = async ({ bioLinkId, updates }: { bioLinkId: string;
       username: updates.username,
       bio: updates.bio,
       avatar_url: updates.avatar,
+      theme: theme as any,
     })
     .eq("id", bioLinkId);
   if (error) throw new Error(error.message);
@@ -61,10 +64,8 @@ const updateBioLinkProfile = async ({ bioLinkId, updates }: { bioLinkId: string;
 
 // Atualizar links do bio link
 const updateBioLinkItems = async ({ bioLinkId, links }: { bioLinkId: string; links: LinkData[] }) => {
-  // Deleta todos os links antigos
   await supabase.from("bio_link_items").delete().eq("bio_link_id", bioLinkId);
   
-  // Insere os novos links se houver algum
   if (links.length > 0) {
     const newItems = links.map((link, index) => ({
       bio_link_id: bioLinkId,
@@ -86,7 +87,7 @@ export function useBioLink() {
     queryKey: ["bioLink", user?.id],
     queryFn: () => fetchBioLink(user!.id),
     enabled: !!user,
-    refetchOnWindowFocus: false, // Impede que os dados sejam recarregados e apaguem as edições
+    refetchOnWindowFocus: false,
   });
 
   const createMutation = useMutation({
@@ -98,8 +99,8 @@ export function useBioLink() {
     onError: (err: any) => toast.error("Erro ao criar Bio Link", { description: err.message }),
   });
 
-  const profileMutation = useMutation({
-    mutationFn: updateBioLinkProfile,
+  const updateMutation = useMutation({
+    mutationFn: updateBioLink,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["bioLink", user?.id] }),
     onError: (err: any) => toast.error("Erro ao salvar perfil", { description: err.message }),
   });
@@ -110,11 +111,10 @@ export function useBioLink() {
     onError: (err: any) => toast.error("Erro ao salvar links", { description: err.message }),
   });
 
-  const handleSave = async (userData: UserData, links: LinkData[]) => {
+  const handleSave = async (userData: UserData, links: LinkData[], theme: BioLinkTheme) => {
     if (!user) return;
     let currentBioLink = bioLink;
 
-    // Se o usuário ainda não tem um bio link, cria um primeiro
     if (!currentBioLink) {
       try {
         currentBioLink = await createMutation.mutateAsync({ userId: user.id, username: user.username, name: user.name });
@@ -126,9 +126,8 @@ export function useBioLink() {
       return;
     }
 
-    // Executa as duas atualizações (perfil e links) em paralelo
     const savePromise = Promise.all([
-      profileMutation.mutateAsync({ bioLinkId: currentBioLink.id, updates: userData }),
+      updateMutation.mutateAsync({ bioLinkId: currentBioLink.id, updates: userData, theme }),
       linksMutation.mutateAsync({ bioLinkId: currentBioLink.id, links }),
     ]);
 
@@ -139,9 +138,10 @@ export function useBioLink() {
     });
   };
 
-  // Transforma os dados do Supabase para o formato que os componentes esperam
   const bioLinkData = useMemo(() => {
     if (!user) return null;
+    
+    const themeData = bioLink?.theme as any;
     
     return {
       userData: {
@@ -157,6 +157,7 @@ export function useBioLink() {
           url: item.url,
           iconId: item.icon || 'website'
         })) || [],
+      theme: (themeData && typeof themeData === 'object') ? { ...defaultTheme, ...themeData, styles: { ...defaultTheme.styles, ...themeData.styles } } : defaultTheme,
     };
   }, [user, bioLink]);
 
@@ -166,6 +167,6 @@ export function useBioLink() {
     isError,
     error,
     saveChanges: handleSave,
-    isSaving: profileMutation.isPending || linksMutation.isPending || createMutation.isPending,
+    isSaving: updateMutation.isPending || linksMutation.isPending || createMutation.isPending,
   };
 }

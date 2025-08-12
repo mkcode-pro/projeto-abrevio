@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { useParams, Link } from "react-router-dom"
 import { useQuery } from "@tanstack/react-query"
 import { supabase } from "@/integrations/supabase/client"
@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { getIconById } from "@/components/biolink-editor/IconLibrary"
 import { Skeleton } from "@/components/ui/skeleton"
 import { PixModal } from "@/components/biolink/PixModal"
+import { BioLinkTheme, defaultTheme } from "@/components/biolink-editor/ThemeLibrary"
 
 const fetchPublicBioLink = async (username: string) => {
   const { data, error } = await supabase
@@ -18,6 +19,7 @@ const fetchPublicBioLink = async (username: string) => {
       bio,
       avatar_url,
       view_count,
+      theme,
       bio_link_items ( title, url, icon, position )
     `)
     .eq('username', username)
@@ -31,7 +33,7 @@ const fetchPublicBioLink = async (username: string) => {
   return data;
 };
 
-function LinkButton({ link, index }: { link: any, index: number }) {
+function LinkButton({ link, index, theme }: { link: any, index: number, theme: BioLinkTheme }) {
   const [isClicked, setIsClicked] = useState(false);
   const [showPixModal, setShowPixModal] = useState(false);
   
@@ -44,7 +46,7 @@ function LinkButton({ link, index }: { link: any, index: number }) {
     try {
       pixData = JSON.parse(link.url);
     } catch (e) {
-      return null; // Não renderiza link PIX inválido
+      return null;
     }
   }
 
@@ -69,19 +71,24 @@ function LinkButton({ link, index }: { link: any, index: number }) {
           onClick={handleClick}
           className={`w-full h-auto p-0 bg-transparent hover:bg-transparent transform transition-all duration-300 hover:scale-105 ${isClicked ? 'scale-95' : ''}`}
           variant="ghost"
+          style={{
+            backgroundColor: theme.styles.buttonColor,
+            border: theme.styles.buttonBorder,
+            borderRadius: '1rem'
+          }}
         >
-          <div className="w-full glass-card border border-white/20 hover:border-neon-blue/50 rounded-2xl p-4 transition-all duration-300 hover:shadow-neon">
+          <div className="w-full p-4">
             <div className="flex items-center gap-4">
               <div className={`flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r ${iconData?.color || 'from-gray-500 to-gray-700'}`}>
                 <IconComponent className="w-6 h-6 text-white" />
               </div>
               <div className="flex-1 text-left">
-                <h3 className="font-semibold text-white text-base leading-tight">{link.title}</h3>
+                <h3 className="font-semibold text-base leading-tight" style={{ color: theme.styles.buttonTextColor }}>{link.title}</h3>
               </div>
               {isPix ? (
-                <CreditCard className="w-5 h-5 text-white/60" />
+                <CreditCard className="w-5 h-5" style={{ color: theme.styles.buttonTextColor }} />
               ) : (
-                <ExternalLink className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
+                <ExternalLink className="w-5 h-5" style={{ color: theme.styles.buttonTextColor }} />
               )}
             </div>
           </div>
@@ -136,6 +143,21 @@ export default function BioLink() {
 
   const [shareClicked, setShareClicked] = useState(false);
 
+  const theme = useMemo(() => {
+    const themeData = bioLink?.theme as any;
+    if (themeData && typeof themeData === 'object') {
+      return { ...defaultTheme, ...themeData, styles: { ...defaultTheme.styles, ...themeData.styles } };
+    }
+    return defaultTheme;
+  }, [bioLink]);
+
+  const backgroundStyle = useMemo(() => {
+    if (theme.styles.backgroundType === 'gradient') {
+      return { background: `linear-gradient(to bottom right, ${theme.styles.backgroundColor1}, ${theme.styles.backgroundColor2})` };
+    }
+    return { backgroundColor: theme.styles.backgroundColor1 };
+  }, [theme]);
+
   const handleShare = async () => {
     setShareClicked(true);
     setTimeout(() => setShareClicked(false), 200);
@@ -147,57 +169,51 @@ export default function BioLink() {
       }).catch(() => {});
     } else {
       navigator.clipboard.writeText(window.location.href);
-      // You can add a toast notification here
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-purple-900/20 relative overflow-hidden flex items-center justify-center">
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-neon-blue/10 rounded-full blur-3xl animate-float"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-float" style={{animationDelay: '2s'}}></div>
-      </div>
-
+    <div className="min-h-screen relative overflow-hidden flex items-center justify-center" style={backgroundStyle}>
       {isLoading && <BioLinkSkeleton />}
       {!isLoading && (isError || !bioLink) && <NotFoundContent />}
       {!isLoading && !isError && bioLink && (
-        <div className="relative z-10 max-w-md mx-auto px-6 py-8">
+        <div className="relative z-10 max-w-md mx-auto px-6 py-8 w-full">
           <div className="flex justify-between items-center mb-8">
-            <div className="text-xs text-white/60 font-medium">
+            <div className="text-xs font-medium" style={{ color: theme.styles.textColor }}>
               {bioLink.view_count || 0} visualizações
             </div>
-            <Button onClick={handleShare} variant="ghost" size="icon" className={`text-white/60 hover:text-white hover:bg-white/10 rounded-full transform transition-all duration-200 ${shareClicked ? 'scale-90' : ''}`}>
+            <Button onClick={handleShare} variant="ghost" size="icon" className={`hover:bg-white/10 rounded-full transform transition-all duration-200 ${shareClicked ? 'scale-90' : ''}`} style={{ color: theme.styles.textColor }}>
               <Share2 className="w-5 h-5" />
             </Button>
           </div>
           <div className="text-center mb-8">
             <div className="animate-scale-in opacity-0 mb-4" style={{ animationDelay: '200ms', animationFillMode: 'forwards' }}>
-              <Avatar className="w-24 h-24 mx-auto glass border-2 border-white/20 shadow-elegant">
+              <Avatar className="w-24 h-24 mx-auto border-2" style={{ borderColor: theme.styles.buttonColor }}>
                 <AvatarImage src={bioLink.avatar_url || undefined} alt={bioLink.display_name || ''} />
-                <AvatarFallback className="bg-gradient-neon text-black text-xl font-bold">
+                <AvatarFallback className="text-xl font-bold" style={{ backgroundColor: theme.styles.buttonColor, color: theme.styles.buttonTextColor }}>
                   {(bioLink.display_name || 'A').split(' ').map(n => n[0]).join('')}
                 </AvatarFallback>
               </Avatar>
             </div>
             <div className="animate-fade-in opacity-0 mb-4" style={{ animationDelay: '400ms', animationFillMode: 'forwards' }}>
-              <h1 className="text-2xl font-bold text-white">{bioLink.display_name}</h1>
-              <p className="text-neon-blue font-medium">@{bioLink.username}</p>
+              <h1 className="text-2xl font-bold" style={{ color: theme.styles.nameColor }}>{bioLink.display_name}</h1>
+              <p className="font-medium" style={{ color: theme.styles.usernameColor }}>@{bioLink.username}</p>
             </div>
             {bioLink.bio && (
               <div className="animate-fade-in opacity-0" style={{ animationDelay: '600ms', animationFillMode: 'forwards' }}>
-                <p className="text-white/80 text-center leading-relaxed px-4">{bioLink.bio}</p>
+                <p className="text-center leading-relaxed px-4" style={{ color: theme.styles.textColor }}>{bioLink.bio}</p>
               </div>
             )}
           </div>
           <div className="space-y-4 mb-8">
             {(bioLink.bio_link_items as any[]).sort((a, b) => a.position - b.position).map((link, index) => (
-              <LinkButton key={link.id || index} link={link} index={index} />
+              <LinkButton key={link.id || index} link={link} index={index} theme={theme} />
             ))}
           </div>
-          <div className="text-center pt-8 border-t border-white/10 animate-fade-in opacity-0" style={{ animationDelay: `${((bioLink.bio_link_items as any[]).length + 3) * 100}ms`, animationFillMode: 'forwards' }}>
-            <Button asChild variant="ghost" className="text-white/60 hover:text-neon-blue">
+          <div className="text-center pt-8 border-t" style={{ borderColor: 'rgba(255, 255, 255, 0.1)' }}>
+            <Button asChild variant="ghost" className="hover:text-neon-blue" style={{ color: theme.styles.textColor }}>
               <Link to="/">
-                Criado com <span className="text-neon-blue font-bold mx-1">Abrev.io</span>
+                Criado com <span className="font-bold mx-1" style={{ color: theme.styles.usernameColor }}>Abrev.io</span>
               </Link>
             </Button>
           </div>
