@@ -1,7 +1,6 @@
 import { StatsCards } from "@/components/dashboard/StatsCards"
 import { BiolinksGrid } from "@/components/dashboard/BiolinksGrid"
 import { UrlShortenerCard } from "@/components/dashboard/UrlShortenerCard"
-import { ResponsiveGrid } from "@/components/layout/ResponsiveGrid"
 import { useIsMobile } from "@/store/hooks/use-mobile"
 import { useAuth } from "@/store/contexts/AuthContext"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -27,10 +26,14 @@ export default function Dashboard() {
   const content = (
     <div className="space-y-8">
       <StatsCards />
-      <ResponsiveGrid cols={{ desktop: 2, tablet: 1, mobile: 1 }} gap="lg">
-        <BiolinksGrid />
-        <UrlShortenerCard />
-      </ResponsiveGrid>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <BiolinksGrid />
+        </div>
+        <div>
+          <UrlShortenerCard />
+        </div>
+      </div>
     </div>
   );
 
@@ -58,10 +61,14 @@ const DashboardSkeleton = ({ isMobile }: { isMobile: boolean }) => {
         <Skeleton className="h-32" />
         <Skeleton className="h-32" />
       </div>
-      <ResponsiveGrid cols={{ desktop: 2, tablet: 1, mobile: 1 }} gap="lg">
-        <Skeleton className="h-96" />
-        <Skeleton className="h-96" />
-      </ResponsiveGrid>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          <Skeleton className="h-96" />
+        </div>
+        <div>
+          <Skeleton className="h-96" />
+        </div>
+      </div>
     </div>
   );
 

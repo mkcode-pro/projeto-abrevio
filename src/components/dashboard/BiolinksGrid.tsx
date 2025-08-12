@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/store/contexts/AuthContext";
-import { ExternalLink, Plus, Edit } from "lucide-react";
+import { ExternalLink, Plus, Edit, Link as LinkIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface BioLink {
   id: string;
@@ -53,64 +54,50 @@ export function BiolinksGrid() {
     window.open(`/bio/${username}`, '_blank');
   };
 
-  if (isLoading) {
-    return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[...Array(3)].map((_, i) => (
-          <Skeleton key={i} className="h-24 rounded-xl" />
-        ))}
-      </div>
-    );
-  }
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {bioLinks.map((link) => (
-        <div 
-          key={link.id}
-          className="glass border border-white/10 rounded-xl p-4 hover:border-neon-blue/50 transition-all hover-scale"
-        >
-          <div className="flex items-start justify-between">
-            <div className="flex-1 min-w-0">
-              <h4 className="font-semibold text-white truncate">{link.display_name || link.username}</h4>
-              <p className="text-sm text-muted-foreground truncate">/bio/{link.username}</p>
-              <div className="flex items-center gap-1 mt-1">
-                <span className="text-xs text-neon-blue">{link.link_count} links</span>
-              </div>
-            </div>
-            <div className="flex gap-1 ml-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-white/60 hover:text-white hover:bg-white/10"
-                onClick={() => navigate("/dashboard/editor")}
-                title="Editar"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 text-white/60 hover:text-white hover:bg-white/10"
-                onClick={() => handleOpenLink(link.username)}
-                title="Ver página"
-              >
-                <ExternalLink className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+    <div>
+      <h2 className="text-xl font-bold text-white mb-4">Meus Bio Links</h2>
+      {isLoading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[...Array(2)].map((_, i) => <Skeleton key={i} className="h-36 rounded-2xl" />)}
         </div>
-      ))}
-      
-      <div 
-        className="glass border border-dashed border-white/20 rounded-xl p-4 flex items-center justify-center hover:border-neon-blue/50 transition-all hover-scale cursor-pointer"
-        onClick={() => navigate("/dashboard/editor")}
-      >
-        <div className="text-center">
-          <Plus className="h-6 w-6 mx-auto text-white/60 mb-2" />
-          <p className="text-sm font-medium text-white">Criar Novo Bio Link</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {bioLinks.map((link) => (
+            <Card key={link.id} className="glass-card border-white/10 hover:border-primary/30 transition-all group">
+              <CardContent className="p-4 flex flex-col justify-between h-full">
+                <div>
+                  <h3 className="font-semibold text-white truncate">{link.display_name || link.username}</h3>
+                  <p className="text-sm text-muted-foreground truncate group-hover:text-primary transition-colors">/bio/{link.username}</p>
+                </div>
+                <div className="flex items-end justify-between mt-4">
+                  <div className="flex items-center gap-2 text-sm text-foreground/70">
+                    <LinkIcon className="w-4 h-4" />
+                    <span>{link.link_count} links</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Button variant="ghost" size="sm" className="h-8 px-2" onClick={() => navigate("/dashboard/editor")}>
+                      <Edit className="w-4 h-4 mr-2" /> Editar
+                    </Button>
+                    <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleOpenLink(link.username)}>
+                      <ExternalLink className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+          <Card 
+            className="glass-card border-dashed border-white/20 hover:border-primary/50 transition-all flex items-center justify-center min-h-[144px] cursor-pointer"
+            onClick={() => navigate("/dashboard/editor")}
+          >
+            <div className="text-center text-muted-foreground hover:text-white transition-colors">
+              <Plus className="h-8 w-8 mx-auto mb-2" />
+              <p className="font-medium">Criar Novo Bio Link</p>
+            </div>
+          </Card>
         </div>
-      </div>
+      )}
     </div>
   );
 }
