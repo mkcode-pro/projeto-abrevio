@@ -7,7 +7,6 @@ import { AppProviders } from "@/store/contexts";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { DevAutoLogin } from "@/components/auth/DevAutoLogin";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -30,8 +29,6 @@ const App = () => (
       <TooltipProvider>
         <Sonner />
         <BrowserRouter>
-          <DevAutoLogin />
-          
           <Suspense fallback={
             <div className="min-h-screen bg-gradient-hero flex items-center justify-center">
               <div className="glass-card border-white/20 p-8 rounded-2xl">
