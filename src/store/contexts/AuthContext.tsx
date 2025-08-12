@@ -153,8 +153,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (!silent) toast.error("Erro inesperado", { description: error.message });
       return { success: false, error: error.message };
     } finally {
-      // O onAuthStateChange vai cuidar de setar o loading para false na maioria dos casos,
-      // mas garantimos aqui caso haja um erro que não dispare o evento.
       setLoading(false);
     }
   }, []);
