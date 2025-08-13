@@ -20,21 +20,6 @@ Plataforma completa para centralizar todos os seus links em uma página visual m
 - **Ícones**: Lucide React
 - **Formulários**: React Hook Form + Zod
 
-### 🚀 Início Rápido
-
-```bash
-# Clone o repositório
-git clone https://github.com/seu-usuario/abrev-io.git
-
-# Instale as dependências
-npm install
-
-# Inicie o desenvolvimento
-npm run dev
-```
-
-Acesse: `http://localhost:5173`
-
 ### 📁 Estrutura do Projeto
 
 ```
@@ -55,14 +40,6 @@ src/
 - `/dashboard/analytics` - Estatísticas e relatórios
 - `/dashboard/settings` - Configurações da conta
 - `/bio/:username` - Página pública do biolink
-
-### 📈 Status do Projeto
-
-**Em Desenvolvimento** - Frontend completo, integração Supabase em progresso
-
-### 📄 Documentação
-
-Documentação completa disponível em [`docs/`](./docs/)
 
 ### 📝 Licença
 
