@@ -5,7 +5,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProviders } from "@/store/contexts";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
-import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -47,14 +46,12 @@ const App = () => (
               
               <Route path="/r/:shortCode" element={<RedirectPage />} />
 
-              {/* Protected Routes with Dashboard Layout */}
+              {/* Protected Routes */}
               <Route element={<ProtectedRoute />}>
-                <Route element={<DashboardLayout />}>
-                  <Route path="/dashboard" element={<Dashboard />} />
-                  <Route path="/dashboard/editor" element={<BioLinkEditor />} />
-                  <Route path="/dashboard/analytics" element={<Analytics />} />
-                  <Route path="/dashboard/settings" element={<Settings />} />
-                </Route>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/dashboard/editor" element={<BioLinkEditor />} />
+                <Route path="/dashboard/analytics" element={<Analytics />} />
+                <Route path="/dashboard/settings" element={<Settings />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />

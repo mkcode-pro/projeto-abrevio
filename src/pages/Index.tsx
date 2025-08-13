@@ -1,15 +1,15 @@
 import HeroSection from "@/components/HeroSection";
 import BenefitsSection from "@/components/BenefitsSection";
 import TestimonialsSection from "@/components/TestimonialsSection";
-import { PublicLayout } from "@/components/layout/PublicLayout";
+import { PageLayout } from "@/components/layout/PageLayout";
 
 const Index = () => {
   return (
-    <PublicLayout>
+    <PageLayout variant="public">
       <HeroSection />
       <BenefitsSection />
       <TestimonialsSection />
-    </PublicLayout>
+    </PageLayout>
   );
 };
 
