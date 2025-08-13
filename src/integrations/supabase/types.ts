@@ -235,7 +235,6 @@ export type Database = {
           current_period_start: string
           current_period_end: string
           cancel_at_period_end: boolean
-          created_at: string | null
         }
         Insert: {
           id?: string
@@ -244,8 +243,7 @@ export type Database = {
           status: "active" | "canceled" | "past_due" | "trialing"
           current_period_start: string
           current_period_end: string
-          cancel_at_period_end: boolean
-          created_at?: string | null
+          cancel_at_period_end?: boolean
         }
         Update: {
           id?: string
@@ -255,7 +253,6 @@ export type Database = {
           current_period_start?: string
           current_period_end?: string
           cancel_at_period_end?: boolean
-          created_at?: string | null
         }
         Relationships: [
           {
