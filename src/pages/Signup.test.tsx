@@ -1,4 +1,4 @@
-import * as RTL from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import Signup from './Signup';
 import { describe, it, expect, vi } from 'vitest';
@@ -23,18 +23,18 @@ vi.mock('@/store/hooks/useUsernameCheck', () => ({
 
 describe('Página de Cadastro', () => {
   it('deve renderizar o formulário de cadastro corretamente', () => {
-    RTL.render(
+    render(
       <BrowserRouter>
         <Signup />
       </BrowserRouter>
     );
 
     // Verifica se os elementos principais estão na tela
-    expect(RTL.screen.getByRole('heading', { name: /Crie sua conta/i })).toBeInTheDocument();
-    expect(RTL.screen.getByLabelText(/Nome/i)).toBeInTheDocument();
-    expect(RTL.screen.getByLabelText(/Usuário/i)).toBeInTheDocument();
-    expect(RTL.screen.getByLabelText(/Email/i)).toBeInTheDocument();
-    expect(RTL.screen.getByLabelText(/Senha/i)).toBeInTheDocument();
-    expect(RTL.screen.getByRole('button', { name: /Criar Conta Grátis/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Crie sua conta/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/Nome/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Usuário/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Senha/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Criar Conta Grátis/i })).toBeInTheDocument();
   });
 });

@@ -1,4 +1,4 @@
-import * as RTL from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import Login from './Login';
 import { describe, it, expect, vi } from 'vitest';
@@ -8,21 +8,22 @@ vi.mock('@/store/contexts/AuthContext', () => ({
   useAuth: () => ({
     login: vi.fn().mockResolvedValue({ success: true }),
     loading: false,
+    isAuthenticated: false,
   }),
 }));
 
 describe('Página de Login', () => {
   it('deve renderizar o formulário de login corretamente', () => {
-    RTL.render(
+    render(
       <BrowserRouter>
         <Login />
       </BrowserRouter>
     );
 
     // Verifica se os elementos principais estão na tela
-    expect(RTL.screen.getByRole('heading', { name: /Bem-vindo de volta!/i })).toBeInTheDocument();
-    expect(RTL.screen.getByLabelText(/Email/i)).toBeInTheDocument();
-    expect(RTL.screen.getByLabelText(/Senha/i)).toBeInTheDocument();
-    expect(RTL.screen.getByRole('button', { name: /Entrar/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /Bem-vindo de volta!/i })).toBeInTheDocument();
+    expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Senha/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Entrar/i })).toBeInTheDocument();
   });
 });
