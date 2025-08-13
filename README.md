@@ -1,72 +1,82 @@
-# Abrev.io
+# Abrev.io 🚀
 
-## 🚀 SaaS brasileiro para biolinks e URLs encurtadas
+**A plataforma brasileira definitiva para centralizar todos os seus links.** Crie páginas de biolink com design futurista, encurte URLs com analytics detalhados e receba pagamentos com PIX nativo.
 
-Plataforma completa para centralizar todos os seus links em uma página visual moderna, com encurtador de URLs integrado e analytics detalhado.
+![Abrev.io Hero Section](https://lovable.dev/opengraph-image-p98pqg.png)
 
-### ✨ Principais Funcionalidades
+---
 
-- **📱 Páginas Biolink**: Editor visual drag-and-drop, temas modernos, links ilimitados
-- **🔗 Encurtador de URLs**: Links personalizados, dashboard de gerenciamento, estatísticas detalhadas  
-- **📊 Analytics**: Acompanhe cliques, visualizações e performance dos links
-- **🎨 Design Futurista**: Glassmorphism, gradientes neon, animações suaves
-- **📱 Mobile-First**: Interface otimizada para dispositivos móveis
+## ✨ Principais Funcionalidades
 
-### 🛠 Tecnologias
+-   **📱 Páginas Biolink**: Editor visual *drag-and-drop*, temas modernos e links ilimitados.
+-   **🔗 Encurtador de URLs**: Links curtos e personalizados com QR Code integrado.
+-   **📊 Analytics Profissional**: Acompanhe cliques, visualizações e performance em tempo real.
+-   **💸 PIX Nativo**: Receba doações e pagamentos diretamente no seu biolink.
+-   **🤖 IA Integrada**: Sugestões automáticas para otimizar sua bio e links.
+-   **🎨 Design Futurista**: Interface com *Glassmorphism*, gradientes neon e animações suaves.
+-   **📱 Mobile-First**: Experiência 100% otimizada para dispositivos móveis.
 
-- **Frontend**: React 18 + TypeScript + Vite
-- **Styling**: Tailwind CSS + shadcn/ui + Glassmorphism
-- **Backend**: Supabase (autenticação, banco de dados, storage)
-- **Ícones**: Lucide React
-- **Formulários**: React Hook Form + Zod
+## 🛠️ Tecnologias
 
-### 🚀 Início Rápido
+-   **Frontend**: React 18 + TypeScript + Vite
+-   **Styling**: Tailwind CSS + shadcn/ui
+-   **Backend**: Supabase (Autenticação, Banco de Dados PostgreSQL, Storage)
+-   **Data Fetching**: TanStack Query (React Query)
+-   **Formulários**: React Hook Form + Zod
+-   **Ícones**: Lucide React
 
-```bash
-# Clone o repositório
-git clone https://github.com/seu-usuario/abrev-io.git
+## 🚀 Início Rápido
 
-# Instale as dependências
-npm install
+1.  **Clone o repositório:**
+    ```bash
+    git clone https://github.com/seu-usuario/abrev-io.git
+    cd abrev-io
+    ```
 
-# Inicie o desenvolvimento
-npm run dev
-```
+2.  **Instale as dependências (Bun é recomendado):**
+    ```bash
+    bun install
+    ```
 
-Acesse: `http://localhost:5173`
+3.  **Configure as variáveis de ambiente:**
+    -   Copie `.env.example` para `.env` e preencha com suas chaves do Supabase.
 
-### 📁 Estrutura do Projeto
+4.  **Inicie o servidor de desenvolvimento:**
+    ```bash
+    bun run dev
+    ```
+
+5.  **Acesse a aplicação:**
+    -   Abra [http://localhost:8080](http://localhost:8080) no seu navegador.
+
+## 📁 Estrutura do Projeto
 
 ```
 src/
-├── components/          # Componentes UI e de funcionalidades
-├── pages/              # Páginas da aplicação
-├── hooks/              # Hooks customizados
-├── contexts/           # Context providers
-├── integrations/       # Configurações externas (Supabase)
-└── lib/               # Utilitários e helpers
+├── components/          # Componentes reutilizáveis
+│   ├── ui/              # Componentes base (shadcn)
+│   ├── dashboard/       # Componentes do painel
+│   ├── biolink-editor/  # Componentes do editor de biolink
+│   └── modals/          # Modais e dialogs
+├── pages/               # Páginas da aplicação (rotas)
+├── store/               # Estado global e hooks
+│   ├── contexts/        # React Context providers
+│   └── hooks/           # Hooks customizados
+├── integrations/        # Configurações de serviços externos (Supabase)
+└── lib/                 # Funções utilitárias e helpers
 ```
 
-### 🎯 Páginas Principais
+## 📈 Status do Projeto
 
-- `/` - Homepage com apresentação da plataforma
-- `/dashboard` - Painel principal do usuário
-- `/dashboard/editor` - Editor de biolink
-- `/dashboard/analytics` - Estatísticas e relatórios
-- `/dashboard/settings` - Configurações da conta
-- `/bio/:username` - Página pública do biolink
+**Em Desenvolvimento Ativo.** O frontend está completo e funcional com dados simulados. A integração com o backend Supabase está em andamento.
 
-### 📈 Status do Projeto
+## 📄 Documentação
 
-**Em Desenvolvimento** - Frontend completo, integração Supabase em progresso
+Para uma visão detalhada da arquitetura, componentes e guias de desenvolvimento, consulte a [documentação completa](./docs/README.md).
 
-### 📄 Documentação
+## 📝 Licença
 
-Documentação completa disponível em [`docs/`](./docs/)
-
-### 📝 Licença
-
-MIT License
+Este projeto está sob a licença MIT.
 
 ---
 
