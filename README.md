@@ -1,50 +1,93 @@
-# Abrev.io
+# Abrev.io - Biolink & Encurtador de URL
 
-## 🚀 SaaS brasileiro para biolinks e URLs encurtadas
+![Abrev.io](https://lovable.dev/opengraph-image-p98pqg.png)
 
-Plataforma completa para centralizar todos os seus links em uma página visual moderna, com encurtador de URLs integrado e analytics detalhado.
+**Abrev.io** é uma plataforma SaaS moderna, construída no Brasil, para criar páginas de biolink personalizadas e encurtar URLs. A ferramenta é focada em design, performance e uma experiência de usuário mobile-first.
 
-### ✨ Principais Funcionalidades
+> **Status do Projeto:** Em desenvolvimento ativo.
 
-- **📱 Páginas Biolink**: Editor visual drag-and-drop, temas modernos, links ilimitados
-- **🔗 Encurtador de URLs**: Links personalizados, dashboard de gerenciamento, estatísticas detalhadas  
-- **📊 Analytics**: Acompanhe cliques, visualizações e performance dos links
-- **🎨 Design Futurista**: Glassmorphism, gradientes neon, animações suaves
-- **📱 Mobile-First**: Interface otimizada para dispositivos móveis
+## ✨ Funcionalidades Principais
 
-### 🛠 Tecnologias
+-   **📱 Editor de Biolink Visual**: Crie e personalize sua página de links com um editor drag-and-drop intuitivo.
+-   **🎨 Temas e Customização**: Escolha entre temas pré-definidos ou crie o seu, com total controle sobre cores e aparência.
+-   **🔗 Encurtador de URLs Inteligente**: Crie links curtos com códigos personalizados e QR Codes.
+-   **📊 Analytics Detalhado**: Monitore visualizações, cliques e a performance de cada link em tempo real.
+-   **💸 Integração PIX Nativa**: Adicione um link de PIX para receber doações ou pagamentos diretamente na sua página.
+-   **🤖 Assistente com IA**: Receba sugestões para otimizar sua bio, títulos de links e mais.
 
-- **Frontend**: React 18 + TypeScript + Vite
-- **Styling**: Tailwind CSS + shadcn/ui + Glassmorphism
-- **Backend**: Supabase (autenticação, banco de dados, storage)
-- **Ícones**: Lucide React
-- **Formulários**: React Hook Form + Zod
+## 🛠️ Tecnologias Utilizadas
 
-### 📁 Estrutura do Projeto
+-   **Framework**: React 18 + TypeScript + Vite
+-   **Backend & DB**: Supabase (PostgreSQL, Auth, Storage)
+-   **Estilização**: Tailwind CSS + shadcn/ui
+-   **Estado da UI**: React Context
+-   **Estado do Servidor**: TanStack Query (React Query)
+-   **Formulários**: React Hook Form + Zod
+-   **Roteamento**: React Router DOM
+-   **Ícones**: Lucide React
+
+## 🚀 Como Executar o Projeto Localmente
+
+Para rodar o Abrev.io na sua máquina, siga os passos abaixo.
+
+### Pré-requisitos
+
+-   Node.js (versão 18 ou superior)
+-   Bun (ou npm/yarn)
+-   Uma conta no [Supabase](https://supabase.com/)
+
+### Instalação
+
+1.  **Clone o repositório:**
+    ```bash
+    git clone https://github.com/seu-usuario/abrev-io.git
+    cd abrev-io
+    ```
+
+2.  **Instale as dependências:**
+    ```bash
+    bun install
+    ```
+
+3.  **Configure as variáveis de ambiente:**
+    -   Renomeie o arquivo `.env.example` para `.env`.
+    -   Adicione suas chaves do Supabase (URL e Anon Key) no arquivo `.env`. Você pode encontrá-las no painel do seu projeto Supabase em `Project Settings > API`.
+    ```env
+    VITE_SUPABASE_URL=SUA_URL_SUPABASE
+    VITE_SUPABASE_ANON_KEY=SUA_CHAVE_ANON_SUPABASE
+    ```
+
+### Executando a Aplicação
+
+Com tudo configurado, inicie o servidor de desenvolvimento:
+
+```bash
+bun run dev
+```
+
+A aplicação estará disponível em `http://localhost:8080`.
+
+## 📁 Estrutura do Projeto
+
+A estrutura de pastas foi organizada para ser escalável e de fácil manutenção.
 
 ```
 src/
-├── components/          # Componentes UI e de funcionalidades
-├── pages/              # Páginas da aplicação
-├── hooks/              # Hooks customizados
-├── contexts/           # Context providers
-├── integrations/       # Configurações externas (Supabase)
-└── lib/               # Utilitários e helpers
+├── components/       # Componentes reutilizáveis (UI, layout, etc.)
+├── config/           # Configurações de ambiente
+├── integrations/     # Clientes de serviços externos (Supabase)
+├── lib/              # Funções utilitárias e helpers
+├── pages/            # Componentes de página (rotas)
+├── store/            # Lógica de estado global (Contexts e Hooks)
+│   ├── contexts/
+│   └── hooks/
+└── types/            # Definições de tipos globais
 ```
 
-### 🎯 Páginas Principais
+## 📝 Licença
 
-- `/` - Homepage com apresentação da plataforma
-- `/dashboard` - Painel principal do usuário
-- `/dashboard/editor` - Editor de biolink
-- `/dashboard/analytics` - Estatísticas e relatórios
-- `/dashboard/settings` - Configurações da conta
-- `/bio/:username` - Página pública do biolink
-
-### 📝 Licença
-
-MIT License
+Este projeto está sob a licença MIT. Veja o arquivo `LICENSE` para mais detalhes.
 
 ---
 
-**Abrev.io** - Conecte. Personalize. Monetize.
+Feito com ❤️ no Brasil.
