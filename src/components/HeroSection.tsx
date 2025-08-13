@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, Zap, Smartphone, ExternalLink, Heart, Share2, Sparkles, TrendingUp } from "lucide-react";
+import { ArrowRight, Zap, Smartphone, Sparkles, TrendingUp } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {

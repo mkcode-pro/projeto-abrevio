@@ -1,4 +1,4 @@
-import { Star, Quote, TrendingUp, Zap } from "lucide-react";
+import { Star, Quote, TrendingUp } from "lucide-react";
 
 const testimonials = [
   {
