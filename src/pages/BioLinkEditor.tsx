@@ -5,18 +5,15 @@ import { ProfileEditor } from "@/components/biolink-editor/ProfileEditor";
 import { LinksManager } from "@/components/biolink-editor/LinksManager";
 import { BioLinkPreview, UserData } from "@/components/biolink-editor/BioLinkPreview";
 import { LinkData } from "@/components/biolink-editor/SortableLinkItem";
-import { PageContainer } from "@/components/layout/PageContainer";
+import { PageLayout } from "@/components/layout/PageLayout";
 import { useBioLink } from "@/store/hooks/useBioLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
-import { useIsMobile } from "@/store/hooks/use-mobile";
-import { MobileHeader } from "@/components/mobile/MobileHeader";
 import { AppearanceEditor } from "@/components/biolink-editor/AppearanceEditor";
 import { BioLinkTheme, defaultTheme } from "@/components/biolink-editor/ThemeLibrary";
 
 export default function BioLinkEditor() {
   const { bioLinkData, isLoading, isError, error, saveChanges, isSaving } = useBioLink();
-  const isMobile = useIsMobile();
   
   const [editedUserData, setEditedUserData] = useState<UserData | null>(null);
   const [editedLinks, setEditedLinks] = useState<LinkData[]>([]);
@@ -61,101 +58,72 @@ export default function BioLinkEditor() {
     }
   };
 
-  if (isLoading) return <EditorSkeleton isMobile={isMobile} />;
+  if (isLoading) return <EditorSkeleton />;
 
   if (isError) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Card className="glass-card border-red-500/20 max-w-md text-center p-6">
-          <h3 className="text-lg font-semibold text-red-400 mb-2">Erro ao carregar dados</h3>
-          <p className="text-sm text-white/70 mb-4">{error?.message || "Ocorreu um erro inesperado."}</p>
-          <Button onClick={() => window.location.reload()}>Recarregar Página</Button>
-        </Card>
-      </div>
+      <PageLayout variant="dashboard" title="Erro">
+        <div className="flex items-center justify-center h-full">
+          <Card className="glass-card border-red-500/20 max-w-md text-center p-6">
+            <h3 className="text-lg font-semibold text-red-400 mb-2">Erro ao carregar dados</h3>
+            <p className="text-sm text-white/70 mb-4">{error?.message || "Ocorreu um erro inesperado."}</p>
+            <Button onClick={() => window.location.reload()}>Recarregar Página</Button>
+          </Card>
+        </div>
+      </PageLayout>
     );
   }
 
-  if (!editedUserData) return <EditorSkeleton isMobile={isMobile} />;
+  if (!editedUserData) return <EditorSkeleton />;
 
   const headerActions = (
-    <Button onClick={handleSave} size="sm" disabled={isSaving || !hasUnsavedChanges} className="bg-gradient-primary hover:opacity-90">
-      {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-      <span className="ml-2">Salvar</span>
-    </Button>
+    <div className="flex items-center gap-3">
+      <Button onClick={handlePreview} variant="outline" size="sm" className="border-white/20 text-white hover:bg-white/10 hidden sm:flex" disabled={!editedUserData.username}>
+        <Eye className="w-4 h-4 mr-2" />
+        Visualizar
+      </Button>
+      <Button onClick={handleSave} size="sm" disabled={isSaving || !hasUnsavedChanges} className="bg-gradient-primary hover:opacity-90">
+        {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+        <span className="ml-2">Salvar</span>
+      </Button>
+    </div>
   );
 
   return (
-    <>
-      {isMobile && <MobileHeader title="Editor de Bio Link" showBackButton actions={headerActions} />}
-      <div className={isMobile ? "pt-14" : ""}>
-        <PageContainer size="xl" className="py-8 px-4 sm:px-6 lg:px-8">
-          {!isMobile && (
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
-              <div>
-                <h1 className="text-3xl font-bold text-white mb-2">Editor de Bio Link</h1>
-                <p className="text-white/60">Personalize sua página de links e acompanhe o desempenho</p>
-                {hasUnsavedChanges && (
-                  <p className="text-amber-400 text-sm mt-1 flex items-center gap-2 animate-fade-in">
-                    <AlertTriangle className="w-4 h-4" />
-                    Você tem alterações não salvas
-                  </p>
-                )}
-              </div>
-              <div className="flex flex-col sm:flex-row gap-3">
-                <Button onClick={handlePreview} variant="outline" size="lg" className="border-white/20 text-white hover:bg-white/10" disabled={!editedUserData.username}>
-                  <Eye className="w-5 h-5 mr-2" />
-                  Visualizar
-                </Button>
-                {headerActions}
-              </div>
-            </div>
-          )}
-          
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-8 space-y-8">
-              <ProfileEditor userData={editedUserData} onUpdate={handleUserDataUpdate} />
-              <AppearanceEditor theme={editedTheme} onThemeChange={handleThemeChange} />
-              <LinksManager links={editedLinks} onLinksChange={handleLinksChange} />
-            </div>
-            <div className="lg:col-span-4">
-              <div className="sticky top-24">
-                <BioLinkPreview userData={editedUserData} links={editedLinks} theme={editedTheme} />
-              </div>
-            </div>
+    <PageLayout variant="dashboard" title="Editor de Bio Link" showBackButton headerActions={headerActions}>
+      {hasUnsavedChanges && (
+        <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm rounded-lg p-3 flex items-center gap-3 mb-6 animate-fade-in">
+          <AlertTriangle className="w-4 h-4" />
+          Você tem alterações não salvas. Não se esqueça de salvar!
+        </div>
+      )}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-7 xl:col-span-8 space-y-8">
+          <ProfileEditor userData={editedUserData} onUpdate={handleUserDataUpdate} />
+          <AppearanceEditor theme={editedTheme} onThemeChange={handleThemeChange} />
+          <LinksManager links={editedLinks} onLinksChange={handleLinksChange} />
+        </div>
+        <div className="lg:col-span-5 xl:col-span-4">
+          <div className="sticky top-24">
+            <BioLinkPreview userData={editedUserData} links={editedLinks} theme={editedTheme} />
           </div>
-        </PageContainer>
+        </div>
       </div>
-    </>
+    </PageLayout>
   );
 }
 
-const EditorSkeleton = ({ isMobile }: { isMobile: boolean }) => (
-  <>
-    {isMobile && <Skeleton className="h-14 w-full fixed top-0 left-0 z-50" />}
-    <div className={isMobile ? "pt-14" : ""}>
-      <PageContainer size="xl" className="py-8 px-4 sm:px-6 lg:px-8">
-        {!isMobile && (
-          <div className="flex items-center justify-between mb-8">
-            <div>
-              <Skeleton className="h-9 w-72 mb-2" />
-              <Skeleton className="h-5 w-96" />
-            </div>
-            <div className="flex gap-3">
-              <Skeleton className="h-12 w-40" />
-              <Skeleton className="h-12 w-40" />
-            </div>
-          </div>
-        )}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          <div className="lg:col-span-8 space-y-8">
-            <Skeleton className="h-64 w-full" />
-            <Skeleton className="h-96 w-full" />
-          </div>
-          <div className="lg:col-span-4">
-            <Skeleton className="h-[80vh] w-full" />
-          </div>
-        </div>
-      </PageContainer>
+const EditorSkeleton = () => (
+  <PageLayout variant="dashboard" title="Carregando Editor...">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="lg:col-span-7 xl:col-span-8 space-y-8">
+        <Skeleton className="h-64 w-full rounded-2xl" />
+        <Skeleton className="h-80 w-full rounded-2xl" />
+        <Skeleton className="h-96 w-full rounded-2xl" />
+      </div>
+      <div className="lg:col-span-5 xl:col-span-4">
+        <Skeleton className="h-[80vh] w-full rounded-2xl" />
+      </div>
     </div>
-  </>
+  </PageLayout>
 );
