@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Link2, UserPlus, Loader2, CheckCircle, XCircle, AlertCircle, Lightbulb } from "lucide-react"
-import { PageLayout } from "@/components/layout/PageLayout"
+import { BaseLayout } from "@/components/layout/BaseLayout"
 import { useUsernameCheck, useClearUsernameCache } from "@/store/hooks/useUsernameCheck"
 import { getUsernameQualityScore } from "@/lib/usernameValidator"
 import { toast } from "sonner"
@@ -63,7 +63,7 @@ export default function Signup() {
   }
 
   return (
-    <PageLayout variant="auth">
+    <BaseLayout variant="auth" className="flex items-center justify-center py-8">
       <Card className="glass-card border-white/20 w-full max-w-[min(90vw,26rem)] animate-fade-in">
         <CardHeader className="text-center pb-4 sm:pb-6">
           <div className="flex justify-center mb-3 sm:mb-4">
@@ -184,6 +184,6 @@ export default function Signup() {
           </div>
         </CardContent>
       </Card>
-    </PageLayout>
+    </BaseLayout>
   )
 }

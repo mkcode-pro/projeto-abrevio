@@ -9,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Link2, LogIn } from "lucide-react"
-import { PageLayout } from "@/components/layout/PageLayout"
+import { BaseLayout } from "@/components/layout/BaseLayout"
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -27,6 +27,7 @@ export default function Login() {
   })
 
   useEffect(() => {
+    // Redireciona APENAS quando o estado de autenticação mudar para true
     if (isAuthenticated) {
       navigate("/dashboard");
     }
@@ -34,10 +35,11 @@ export default function Login() {
 
   const onSubmit = async (data: LoginFormValues) => {
     await login(data.email, data.password);
+    // A navegação agora é tratada pelo useEffect
   }
 
   return (
-    <PageLayout variant="auth">
+    <BaseLayout variant="auth" className="flex items-center justify-center">
       <Card className="glass-card border-white/20 w-full max-w-[min(90vw,26rem)] animate-fade-in">
         <CardHeader className="text-center pb-4 sm:pb-6">
           <div className="flex justify-center mb-3 sm:mb-4">
@@ -96,6 +98,6 @@ export default function Login() {
           </div>
         </CardContent>
       </Card>
-    </PageLayout>
+    </BaseLayout>
   )
 }

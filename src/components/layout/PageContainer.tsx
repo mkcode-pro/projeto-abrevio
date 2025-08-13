@@ -7,12 +7,14 @@ interface PageContainerProps {
   children: ReactNode
   size?: ContainerSize
   className?: string
+  centered?: boolean
 }
 
 export function PageContainer({ 
   children, 
   size = 'lg',
   className,
+  centered = false
 }: PageContainerProps) {
   const sizeClasses = {
     sm: 'max-w-2xl',
@@ -24,8 +26,9 @@ export function PageContainer({
 
   return (
     <div className={cn(
-      'mx-auto w-full px-4 sm:px-6 lg:px-8',
+      'mx-auto w-full',
       sizeClasses[size],
+      centered && 'flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]',
       className
     )}>
       {children}

@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { PageLayout } from "@/components/layout/PageLayout";
+import { BaseLayout } from "@/components/layout/BaseLayout";
 import { PageContainer } from "@/components/layout/PageContainer";
 
 export default function Pricing() {
@@ -100,7 +100,7 @@ export default function Pricing() {
   };
 
   return (
-    <PageLayout variant="public">
+    <BaseLayout variant="public">
       {/* Grid pattern background */}
       <div className="absolute inset-0 grid-pattern opacity-20" />
       
@@ -111,7 +111,7 @@ export default function Pricing() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => navigate(-1)}
+              onClick={() => navigate("/dashboard")}
               className="hover:bg-accent/20"
             >
               <ArrowLeft className="h-5 w-5" />
@@ -338,6 +338,6 @@ export default function Pricing() {
         onOpenChange={setCheckoutModalOpen}
         plan={selectedPlan}
       />
-    </PageLayout>
+    </BaseLayout>
   );
 }
