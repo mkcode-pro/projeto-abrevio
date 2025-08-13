@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/store/hooks/use-mobile";
 import { MobileHeader } from "@/components/mobile/MobileHeader";
 import { PageContainer } from "@/components/layout/PageContainer";
+import { ResponsiveContainer } from "@/components/layout/ResponsiveContainer";
 
 const userDataSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),

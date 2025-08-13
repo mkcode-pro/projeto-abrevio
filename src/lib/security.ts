@@ -1,10 +1,10 @@
-import { RateLimiter } from 'limiter'
+import { RateLimiter, Interval } from 'limiter'
 import DOMPurify from 'isomorphic-dompurify'
 
 // Rate limiting configuration
 const rateLimiters = new Map<string, RateLimiter>()
 
-export function getRateLimiter(key: string, tokensPerInterval = 10, interval = 'minute'): RateLimiter {
+export function getRateLimiter(key: string, tokensPerInterval = 10, interval: Interval = 'minute'): RateLimiter {
   if (!rateLimiters.has(key)) {
     rateLimiters.set(key, new RateLimiter({ tokensPerInterval, interval }))
   }
