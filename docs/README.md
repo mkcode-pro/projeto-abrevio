@@ -2,48 +2,25 @@
 
 ## 📚 Guia de Documentação
 
-Esta pasta contém toda a documentação técnica e de desenvolvimento do projeto Abrev.io.
+Bem-vindo à documentação técnica do Abrev.io. Esta pasta contém guias detalhados sobre a arquitetura, desenvolvimento e manutenção do projeto.
 
-### Estrutura da Documentação
+### Guias Principais
 
-- **[Arquitetura](./architecture.md)** - Visão geral da arquitetura do sistema
-- **[Frontend](./frontend.md)** - Documentação do frontend React
-- **[Backend](./backend.md)** - Integração Supabase e backend
-- **[Componentes](./components.md)** - Guia dos componentes UI
-- **[Hooks](./hooks.md)** - Hooks customizados e uso
-- **[Contextos](./contexts.md)** - Context providers e gestão de estado
-- **[Styling](./styling.md)** - Design system e estilos
-- **[Páginas](./pages.md)** - Estrutura e funcionalidades das páginas
-- **[Setup](./setup.md)** - Configuração e instalação
-- **[Integração](./integration.md)** - Status da integração Supabase
-- **[Roadmap](./roadmap.md)** - Próximas etapas e funcionalidades
+- **[Arquitetura do Sistema](./architecture.md)**: Visão geral da stack tecnológica e da estrutura do projeto.
+- **[Guia de Setup](./setup.md)**: Instruções para configurar o ambiente de desenvolvimento local.
+- **[Roadmap do Projeto](./roadmap.md)**: Próximas etapas e funcionalidades planejadas.
 
-### Estado Atual do Projeto
+### Desenvolvimento
 
-**Status**: 🚀 **Frontend Completo** - Pronto para integração Supabase
+- **[Frontend](./frontend.md)**: Detalhes sobre a aplicação React, roteamento e gestão de estado.
+- **[Backend (Supabase)](./backend.md)**: Informações sobre o schema do banco de dados, RLS e integração com Supabase.
+- **[Componentes UI](./components.md)**: Guia de uso para os componentes da interface.
+- **[Hooks Customizados](./hooks.md)**: Documentação dos hooks reutilizáveis do projeto.
+- **[Contexts (Estado Global)](./contexts.md)**: Explicação sobre os providers de contexto da aplicação.
+- **[Design System & Styling](./styling.md)**: Padrões de design, sistema de cores e CSS.
+- **[Páginas](./pages.md)**: Estrutura e funcionalidades de cada página da aplicação.
 
-O projeto possui frontend 100% funcional com dados mock e database Supabase otimizado, seguro e pronto para integração.
+### Produção
 
-### Início Rápido
-
-1. Leia o [Setup](./setup.md) para configuração inicial
-2. Consulte [Arquitetura](./architecture.md) para entender a estrutura
-3. Veja [Integração](./integration.md) para o status atual do Supabase
-4. Confira [Roadmap](./roadmap.md) para próximos passos
-
-### Para Desenvolvedores
-
-Se você está assumindo este projeto ou colaborando:
-
-1. **Primeiro**: Leia a documentação de [Arquitetura](./architecture.md)
-2. **Setup**: Siga o guia de [Setup](./setup.md)
-3. **Estado atual**: Entenda o status em [Integração](./integration.md)
-4. **Desenvolvimento**: Use os guias de [Componentes](./components.md) e [Hooks](./hooks.md)
-
-### Convenções do Projeto
-
-- **Commits**: Use conventional commits
-- **Componentes**: PascalCase, arquivos .tsx
-- **Hooks**: camelCase, prefixo 'use'
-- **Estilos**: Design system definido em index.css
-- **Temas**: Light, Dark, Neon suportados
+- **[Guia de Deploy](./deployment.md)**: Passos para fazer o deploy da aplicação em um servidor de produção.
+- **[Checklist de Produção](./production-checklist.md)**: Lista de verificação para garantir um lançamento seguro.
