@@ -244,7 +244,7 @@ export type Database = {
           status: "active" | "canceled" | "past_due" | "trialing"
           current_period_start: string
           current_period_end: string
-          cancel_at_period_end?: boolean
+          cancel_at_period_end: boolean
           created_at?: string | null
         }
         Update: {
