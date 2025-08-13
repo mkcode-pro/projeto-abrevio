@@ -23,7 +23,7 @@ import { getUsernameQualityScore } from "@/lib/usernameValidator";
 import { Badge } from "@/components/ui/badge";
 import { useIsMobile } from "@/store/hooks/use-mobile";
 import { MobileHeader } from "@/components/mobile/MobileHeader";
-import { ResponsiveContainer } from "@/components/layout/ResponsiveContainer";
+import { PageContainer } from "@/components/layout/PageContainer";
 
 const userDataSchema = z.object({
   name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
@@ -115,7 +115,8 @@ export default function Settings() {
   );
 
   const content = (
-    <form onSubmit={handleSubmit(handleSave)} className="space-y-8">
+    <PageContainer size="lg">
+      <form onSubmit={handleSubmit(handleSave)} className="space-y-8">
       {!isMobile && (
         <div className="flex items-center justify-between gap-4">
           <div>
@@ -200,17 +201,16 @@ export default function Settings() {
           <div className="flex items-center justify-between p-4 rounded-lg bg-destructive/10"><div><h4 className="font-medium text-destructive">Deletar conta</h4><p className="text-sm text-destructive/80">Esta ação é permanente e removerá todos os seus dados.</p></div><Button type="button" variant="destructive" onClick={() => setDeleteModalOpen(true)}><Trash2 className="h-4 w-4 mr-2" />Deletar</Button></div>
         </CardContent>
       </Card>
-    </form>
+      </form>
+    </PageContainer>
   );
 
   if (isMobile) {
     return (
       <>
         <MobileHeader title="Configurações" showBackButton actions={headerActions} />
-        <div className="pt-14">
-          <ResponsiveContainer padding="md" className="py-6">
-            {content}
-          </ResponsiveContainer>
+        <div className="pt-14 py-6">
+          {content}
         </div>
       </>
     );

@@ -5,7 +5,7 @@ import { useIsMobile } from "@/store/hooks/use-mobile"
 import { useAuth } from "@/store/contexts/AuthContext"
 import { Skeleton } from "@/components/ui/skeleton"
 import { MobileHeader } from "@/components/mobile/MobileHeader"
-import { ResponsiveContainer } from "@/components/layout/ResponsiveContainer"
+import { PageContainer } from "@/components/layout/PageContainer"
 
 export default function Dashboard() {
   const isMobile = useIsMobile()
@@ -24,17 +24,19 @@ export default function Dashboard() {
   }
 
   const content = (
-    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
-      <StatsCards />
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-        <div className="lg:col-span-2 order-2 lg:order-1">
-          <BiolinksGrid />
-        </div>
-        <div className="order-1 lg:order-2">
-          <UrlShortenerCard />
+    <PageContainer size="xl">
+      <div className="space-y-4 sm:space-y-6 lg:space-y-8">
+        <StatsCards />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+          <div className="lg:col-span-2 order-2 lg:order-1">
+            <BiolinksGrid />
+          </div>
+          <div className="order-1 lg:order-2">
+            <UrlShortenerCard />
+          </div>
         </div>
       </div>
-    </div>
+    </PageContainer>
   );
 
   if (isMobile) {
@@ -42,9 +44,7 @@ export default function Dashboard() {
       <>
         <MobileHeader title="Dashboard" />
         <div className="pt-14 pb-20">
-          <ResponsiveContainer padding="sm" className="py-4 sm:py-6">
-            {content}
-          </ResponsiveContainer>
+          {content}
         </div>
       </>
     );

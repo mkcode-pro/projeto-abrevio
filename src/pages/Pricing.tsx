@@ -16,6 +16,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { BaseLayout } from "@/components/layout/BaseLayout";
+import { PageContainer } from "@/components/layout/PageContainer";
 
 export default function Pricing() {
   const navigate = useNavigate();
@@ -98,11 +100,11 @@ export default function Pricing() {
   };
 
   return (
-    <div className="min-h-screen bg-background relative overflow-hidden">
+    <BaseLayout variant="public">
       {/* Grid pattern background */}
       <div className="absolute inset-0 grid-pattern opacity-20" />
       
-      <div className="relative z-10 container mx-auto px-4 py-8 max-w-7xl">
+      <PageContainer size="xl" className="relative z-10 py-8">
         {/* Header */}
         <div className="flex items-center justify-between mb-12">
           <div className="flex items-center gap-4">
@@ -328,7 +330,7 @@ export default function Pricing() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </PageContainer>
 
       {/* Checkout Modal */}
       <CheckoutModal 
@@ -336,6 +338,6 @@ export default function Pricing() {
         onOpenChange={setCheckoutModalOpen}
         plan={selectedPlan}
       />
-    </div>
+    </BaseLayout>
   );
 }

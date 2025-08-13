@@ -9,6 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Link2, LogIn } from "lucide-react"
+import { BaseLayout } from "@/components/layout/BaseLayout"
 
 const loginSchema = z.object({
   email: z.string().email("Email inválido"),
@@ -38,7 +39,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-hero p-3 sm:p-4">
+    <BaseLayout variant="auth" className="flex items-center justify-center">
       <Card className="glass-card border-white/20 w-full max-w-[min(90vw,26rem)] animate-fade-in">
         <CardHeader className="text-center pb-4 sm:pb-6">
           <div className="flex justify-center mb-3 sm:mb-4">
@@ -97,6 +98,6 @@ export default function Login() {
           </div>
         </CardContent>
       </Card>
-    </div>
+    </BaseLayout>
   )
 }

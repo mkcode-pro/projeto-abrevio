@@ -97,7 +97,7 @@ export async function optimizeImage(
  * Valida se o arquivo é uma imagem válida
  */
 export function validateImageFile(file: File): { valid: boolean; error?: string } {
-  // Verificar tipo MIME - ACEITAR TODOS OS FORMATOS DE IMAGEM COMUNS
+  // Verificar tipo MIME - Aceita todos os formatos de imagem comuns
   const validTypes = [
     'image/jpeg',
     'image/jpg', 

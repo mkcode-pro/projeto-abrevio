@@ -5,6 +5,23 @@
 /* Futuristic Design System with Glassmorphism */
 
 @layer base {
+  /* Global reset for overflow issues */
+  html {
+    overflow-x: hidden;
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    overflow-x: hidden;
+    min-height: 100vh;
+    position: relative;
+  }
+  
+  #root {
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  
   :root {
     /* Dark theme colors */
     --background: 216 24% 12%;

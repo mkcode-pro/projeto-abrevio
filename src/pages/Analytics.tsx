@@ -19,7 +19,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { getIconById } from "@/components/biolink-editor/IconLibrary"
 import { useIsMobile } from "@/store/hooks/use-mobile"
 import { MobileHeader } from "@/components/mobile/MobileHeader"
-import { ResponsiveContainer } from "@/components/layout/ResponsiveContainer"
+import { PageContainer } from "@/components/layout/PageContainer"
 
 function MetricCard({ title, value, change, icon: Icon, suffix = "" }: {
   title: string
@@ -87,7 +87,8 @@ export default function Analytics() {
   }
 
   const content = (
-    <div className="space-y-6">
+    <PageContainer size="xl">
+      <div className="space-y-6">
       {/* Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         {!isMobile && (
@@ -186,7 +187,8 @@ export default function Analytics() {
           </Card>
         </>
       )}
-    </div>
+      </div>
+    </PageContainer>
   );
 
   if (isMobile) {
@@ -194,9 +196,9 @@ export default function Analytics() {
       <>
         <MobileHeader title="Analytics" showBackButton />
         <div className="pt-14">
-          <ResponsiveContainer padding="md" className="py-6">
+          <div className="py-6">
             {content}
-          </ResponsiveContainer>
+          </div>
         </div>
       </>
     );
