@@ -1,4 +1,4 @@
-import { Star, Quote, TrendingUp, Zap } from "lucide-react";
+import { Star, Quote, TrendingUp } from "lucide-react";
 
 const testimonials = [
   {
@@ -29,101 +29,88 @@ const testimonials = [
 
 const TestimonialsSection = () => {
   return (
-    <section id="depoimentos" className="py-16 md:py-20 relative overflow-hidden">
-      {/* Background */}
+    <section id="depoimentos" className="py-20 md:py-24 relative overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-t from-background to-background/50"></div>
       
       <div className="container mx-auto px-4 relative z-10">
-        {/* Header Compacto */}
-        <div className="text-center mb-10 max-w-xl mx-auto">
+        <div className="text-center mb-12 max-w-xl mx-auto">
           <div className="inline-flex items-center gap-2 glass-card px-3 py-1.5 mb-4 text-xs">
             <Star className="h-3 w-3 text-yellow-400 fill-current" />
             <span className="font-medium text-foreground">4.9/5 • +2.000 usuários</span>
           </div>
           
-          <h2 className="text-2xl md:text-3xl font-bold font-poppins mb-3">
+          <h2 className="text-3xl md:text-4xl font-bold font-poppins mb-3">
             <span className="text-foreground">Resultados que</span>
             <br />
             <span className="bg-gradient-neon bg-clip-text text-transparent">falam por si</span>
           </h2>
         </div>
 
-        {/* Testimonials Mobile-First */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
           {testimonials.map((testimonial, index) => (
             <div 
               key={index}
-              className="glass-card p-4 rounded-xl hover:shadow-elegant transition-all duration-300 animate-fade-in group"
+              className="glass-card p-6 rounded-2xl hover:shadow-elegant transition-all duration-300 animate-fade-in group hover:-translate-y-1"
               style={{ animationDelay: `${index * 0.2}s` }}
             >
-              {/* Header */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  {/* Avatar */}
-                  <div className="w-10 h-10 rounded-full bg-gradient-neon flex items-center justify-center">
-                    <span className="text-xs font-bold text-primary-foreground">
-                      {testimonial.avatar}
-                    </span>
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full bg-gradient-neon flex items-center justify-center text-primary-foreground font-bold text-lg">
+                    {testimonial.avatar}
                   </div>
                   
-                  {/* Info */}
                   <div>
-                    <div className="flex items-center gap-1">
-                      <h4 className="font-semibold text-sm text-foreground">
+                    <div className="flex items-center gap-1.5">
+                      <h4 className="font-semibold text-foreground">
                         {testimonial.name}
                       </h4>
                       {testimonial.verified && (
-                        <div className="w-3 h-3 rounded-full bg-neon-blue flex items-center justify-center">
-                          <span className="text-[8px] text-white">✓</span>
+                        <div className="w-4 h-4 rounded-full bg-neon-blue flex items-center justify-center">
+                          <span className="text-[10px] text-white">✓</span>
                         </div>
                       )}
                     </div>
-                    <p className="text-xs text-foreground/60">
+                    <p className="text-sm text-foreground/60">
                       {testimonial.role}
                     </p>
                   </div>
                 </div>
-
-                {/* Quote Icon */}
-                <Quote className="w-4 h-4 text-neon-blue/40" />
+                <Quote className="w-5 h-5 text-neon-blue/40" />
               </div>
 
-              {/* Content */}
               <p className="text-sm text-foreground/80 mb-4 leading-relaxed">
                 "{testimonial.content}"
               </p>
 
-              {/* Metric */}
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-4 h-4 text-green-400" />
-                <span className="text-xs font-bold text-green-400">
-                  {testimonial.metric}
-                </span>
-              </div>
-
-              {/* Stars */}
-              <div className="flex items-center gap-1 mt-3">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="w-3 h-3 text-yellow-400 fill-current" />
-                ))}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  <TrendingUp className="w-4 h-4 text-green-400" />
+                  <span className="text-sm font-bold text-green-400">
+                    {testimonial.metric}
+                  </span>
+                </div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Social Proof Stats */}
-        <div className="glass-card p-4 rounded-xl max-w-2xl mx-auto">
+        <div className="glass-card p-6 rounded-2xl max-w-2xl mx-auto">
           <div className="grid grid-cols-3 gap-4 text-center">
             <div>
-              <div className="font-bold text-lg md:text-xl text-neon-blue">2.547</div>
+              <div className="font-bold text-xl md:text-2xl text-neon-blue">2.547</div>
               <div className="text-xs text-foreground/60">Usuários Ativos</div>
             </div>
             <div>
-              <div className="font-bold text-lg md:text-xl text-green-400">R$ 847k</div>
+              <div className="font-bold text-xl md:text-2xl text-green-400">R$ 847k</div>
               <div className="text-xs text-foreground/60">Via PIX/mês</div>
             </div>
             <div>
-              <div className="font-bold text-lg md:text-xl text-neon-purple">340%</div>
+              <div className="font-bold text-xl md:text-2xl text-neon-purple">340%</div>
               <div className="text-xs text-foreground/60">+ Cliques médio</div>
             </div>
           </div>
