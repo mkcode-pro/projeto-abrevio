@@ -1,5 +1,7 @@
-import { RateLimiter, Interval } from 'limiter'
+import { RateLimiter } from 'limiter'
 import DOMPurify from 'isomorphic-dompurify'
+
+type Interval = "second" | "minute" | "hour" | "day";
 
 // Rate limiting configuration
 const rateLimiters = new Map<string, RateLimiter>()
