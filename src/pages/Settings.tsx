@@ -233,9 +233,9 @@ const SettingsSkeleton = ({ isMobile }: { isMobile: boolean }) => {
       <>
         <Skeleton className="h-14 w-full fixed top-0 left-0 z-50" />
         <div className="pt-14">
-          <ResponsiveContainer padding="md" className="py-6">
+          <div className="px-6 py-6">
             {skeletonContent}
-          </ResponsiveContainer>
+          </div>
         </div>
       </>
     );

@@ -5,7 +5,7 @@ import { ProfileEditor } from "@/components/biolink-editor/ProfileEditor";
 import { LinksManager } from "@/components/biolink-editor/LinksManager";
 import { BioLinkPreview, UserData } from "@/components/biolink-editor/BioLinkPreview";
 import { LinkData } from "@/components/biolink-editor/SortableLinkItem";
-import { ResponsiveContainer } from "@/components/layout/ResponsiveContainer";
+import { PageContainer } from "@/components/layout/PageContainer";
 import { useBioLink } from "@/store/hooks/useBioLink";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card } from "@/components/ui/card";
@@ -88,7 +88,7 @@ export default function BioLinkEditor() {
     <>
       {isMobile && <MobileHeader title="Editor de Bio Link" showBackButton actions={headerActions} />}
       <div className={isMobile ? "pt-14" : ""}>
-        <ResponsiveContainer size="xl" padding="lg" className="py-8">
+        <PageContainer size="xl" padding="lg" className="py-8">
           {!isMobile && (
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
               <div>
@@ -123,7 +123,7 @@ export default function BioLinkEditor() {
               </div>
             </div>
           </div>
-        </ResponsiveContainer>
+        </PageContainer>
       </div>
     </>
   );
@@ -133,7 +133,7 @@ const EditorSkeleton = ({ isMobile }: { isMobile: boolean }) => (
   <>
     {isMobile && <Skeleton className="h-14 w-full fixed top-0 left-0 z-50" />}
     <div className={isMobile ? "pt-14" : ""}>
-      <ResponsiveContainer size="xl" padding="lg" className="py-8">
+      <PageContainer size="xl" padding="lg" className="py-8">
         {!isMobile && (
           <div className="flex items-center justify-between mb-8">
             <div>
@@ -155,7 +155,7 @@ const EditorSkeleton = ({ isMobile }: { isMobile: boolean }) => (
             <Skeleton className="h-[80vh] w-full" />
           </div>
         </div>
-      </ResponsiveContainer>
+      </PageContainer>
     </div>
   </>
 );
