@@ -196,9 +196,7 @@ export default function Analytics() {
       <>
         <MobileHeader title="Analytics" showBackButton />
         <div className="pt-14">
-          <div className="py-6">
-            {content}
-          </div>
+          {content}
         </div>
       </>
     );

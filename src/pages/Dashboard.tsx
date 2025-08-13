@@ -6,7 +6,6 @@ import { useAuth } from "@/store/contexts/AuthContext"
 import { Skeleton } from "@/components/ui/skeleton"
 import { MobileHeader } from "@/components/mobile/MobileHeader"
 import { PageContainer } from "@/components/layout/PageContainer"
-import { ResponsiveContainer } from "@/components/layout/ResponsiveContainer"
 
 export default function Dashboard() {
   const isMobile = useIsMobile()

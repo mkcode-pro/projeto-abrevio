@@ -19,8 +19,6 @@ import {
   Shield,
   Clock
 } from "lucide-react";
-import { useCheckout } from "@/store/hooks/usePayment";
-import { toast } from "sonner";
 
 interface CheckoutModalProps {
   open: boolean;
@@ -29,7 +27,7 @@ interface CheckoutModalProps {
 }
 
 export function CheckoutModal({ open, onOpenChange, plan }: CheckoutModalProps) {
-  const { checkout, isProcessing } = useCheckout();
+  const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const planDetails = {
@@ -40,16 +38,19 @@ export function CheckoutModal({ open, onOpenChange, plan }: CheckoutModalProps) 
   const details = planDetails[plan];
 
   const handleCheckout = async () => {
-    try {
-      await checkout('pro', plan);
-      setSuccess(true);
-      setTimeout(() => {
-        setSuccess(false);
-        onOpenChange(false);
-      }, 3000);
-    } catch (error) {
-      toast.error('Erro ao processar pagamento');
-    }
+    setLoading(true);
+    
+    // Simular processamento
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    setLoading(false);
+    setSuccess(true);
+    
+    // Auto fechar após sucesso
+    setTimeout(() => {
+      setSuccess(false);
+      onOpenChange(false);
+    }, 3000);
   };
 
   if (success) {
@@ -167,10 +168,10 @@ export function CheckoutModal({ open, onOpenChange, plan }: CheckoutModalProps) 
           {/* Botão de Checkout */}
           <Button 
             onClick={handleCheckout}
-            disabled={isProcessing}
+            disabled={loading}
             className="w-full bg-gradient-primary hover:opacity-90 text-lg py-6 btn-futuristic"
           >
-            {isProcessing ? (
+            {loading ? (
               <div className="flex items-center gap-2">
                 <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
                 Processando...

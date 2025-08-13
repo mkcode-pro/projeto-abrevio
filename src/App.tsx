@@ -7,16 +7,14 @@ import { AppProviders } from "@/store/contexts";
 import { AppLayout } from "@/components/layout/AppLayout";
 import { ProtectedRoute } from "@/components/auth/ProtectedRoute";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { lazy } from "react";
-
-const Index = lazy(() => import("./pages/Index"));
-const Login = lazy(() => import("./pages/Login"));
-const Signup = lazy(() => import("./pages/Signup"));
-const Dashboard = lazy(() => import("./pages/Dashboard"));
-const BioLinkEditor = lazy(() => import("./pages/BioLinkEditor"));
-const Analytics = lazy(() => import("./pages/Analytics"));
-const Settings = lazy(() => import("./pages/Settings"));
-const RedirectPage = lazy(() => import("./pages/RedirectPage"));
+import Index from "./pages/Index";
+import Login from "./pages/Login";
+import Signup from "./pages/Signup";
+import Dashboard from "./pages/Dashboard";
+import BioLinkEditor from "./pages/BioLinkEditor";
+import Analytics from "./pages/Analytics";
+import Settings from "./pages/Settings";
+import RedirectPage from "./pages/RedirectPage";
 import { 
   Pricing, 
   BioLink, 
