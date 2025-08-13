@@ -114,7 +114,7 @@ export default function Settings() {
 
   return (
     <PageLayout variant="dashboard" title="Configurações" showBackButton headerActions={headerActions}>
-      <PageContainer size="lg" className="px-0">
+      <PageContainer size="lg">
         <form onSubmit={handleSubmit(handleSave)} className="space-y-8">
           <Card className="glass-card border-accent/20">
             <CardHeader><CardTitle className="flex items-center gap-2"><User className="h-5 w-5 text-primary" />Dados Pessoais</CardTitle></CardHeader>
@@ -203,7 +203,7 @@ export default function Settings() {
 const SettingsSkeleton = () => {
   return (
     <PageLayout variant="dashboard" title="Carregando...">
-      <PageContainer size="lg" className="px-0">
+      <PageContainer size="lg">
         <div className="space-y-8">
           <Skeleton className="h-80 w-full rounded-2xl" />
           <Skeleton className="h-48 w-full rounded-2xl" />

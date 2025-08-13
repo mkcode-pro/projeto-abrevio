@@ -92,7 +92,7 @@ export default function BioLinkEditor() {
 
   return (
     <PageLayout variant="dashboard" title="Editor de Bio Link" showBackButton headerActions={headerActions}>
-      <PageContainer size="xl" className="px-0">
+      <PageContainer size="xl">
         {hasUnsavedChanges && (
           <div className="bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm rounded-lg p-3 flex items-center gap-3 mb-6 animate-fade-in">
             <AlertTriangle className="w-4 h-4" />
@@ -118,7 +118,7 @@ export default function BioLinkEditor() {
 
 const EditorSkeleton = () => (
   <PageLayout variant="dashboard" title="Carregando Editor...">
-    <PageContainer size="xl" className="px-0">
+    <PageContainer size="xl">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         <div className="lg:col-span-7 xl:col-span-8 space-y-8">
           <Skeleton className="h-64 w-full rounded-2xl" />

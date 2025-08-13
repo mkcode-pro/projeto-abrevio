@@ -23,7 +23,7 @@ export default function Dashboard() {
 
   return (
     <PageLayout variant="dashboard" title="Dashboard">
-      <PageContainer size="xl" className="px-0">
+      <PageContainer size="xl">
         <div className="space-y-4 sm:space-y-6 lg:space-y-8">
           <StatsCards />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
@@ -43,7 +43,7 @@ export default function Dashboard() {
 const DashboardSkeleton = () => {
   return (
     <PageLayout variant="dashboard" title="Carregando...">
-      <PageContainer size="xl" className="px-0">
+      <PageContainer size="xl">
         <div className="space-y-4 sm:space-y-6 lg:space-y-8">
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4 md:gap-6">
             <Skeleton className="h-24 sm:h-28 md:h-32 rounded-xl" />
