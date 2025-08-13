@@ -16,7 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BaseLayout } from "@/components/layout/BaseLayout";
+import { PublicLayout } from "@/components/layout/PublicLayout";
 import { PageContainer } from "@/components/layout/PageContainer";
 
 export default function Pricing() {
@@ -100,7 +100,7 @@ export default function Pricing() {
   };
 
   return (
-    <BaseLayout variant="public">
+    <PublicLayout>
       {/* Grid pattern background */}
       <div className="absolute inset-0 grid-pattern opacity-20" />
       
@@ -338,6 +338,6 @@ export default function Pricing() {
         onOpenChange={setCheckoutModalOpen}
         plan={selectedPlan}
       />
-    </BaseLayout>
+    </PublicLayout>
   );
 }

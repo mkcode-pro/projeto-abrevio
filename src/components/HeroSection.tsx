@@ -7,7 +7,7 @@ const HeroSection = () => {
   const navigate = useNavigate();
 
   return (
-    <section className="min-h-[calc(100vh-64px)] pt-16 sm:pt-20 pb-8 sm:pb-12 md:pb-20 relative overflow-hidden flex items-center">
+    <section className="min-h-[calc(100vh-4rem)] py-12 md:py-20 relative overflow-hidden flex items-center">
       {/* Background minimalista */}
       <div className="absolute inset-0 bg-gradient-to-br from-background via-background to-neon-blue/5"></div>
       <div className="absolute top-20 sm:top-32 -left-10 sm:left-4 w-32 h-32 sm:w-40 sm:h-40 md:w-96 md:h-96 bg-neon-blue/5 rounded-full blur-3xl animate-pulse"></div>
