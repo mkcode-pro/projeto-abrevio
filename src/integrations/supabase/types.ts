@@ -226,6 +226,47 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          plan_id: string
+          status: "active" | "canceled" | "past_due" | "trialing"
+          current_period_start: string
+          current_period_end: string
+          cancel_at_period_end: boolean
+          created_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          plan_id: string
+          status: "active" | "canceled" | "past_due" | "trialing"
+          current_period_start: string
+          current_period_end: string
+          cancel_at_period_end?: boolean
+          created_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          plan_id?: string
+          status?: "active" | "canceled" | "past_due" | "trialing"
+          current_period_start?: string
+          current_period_end?: string
+          cancel_at_period_end?: boolean
+          created_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
       url_clicks: {
         Row: {
           bio_link_item_id: string | null

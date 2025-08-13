@@ -99,8 +99,8 @@ importers:
         specifier: ^1.1.4
         version: 1.2.7(@types/react-dom@18.3.7(@types/react@18.3.23))(@types/react@18.3.23)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@stripe/stripe-js':
-        specifier: ^7.8.0
-        version: 7.8.0
+        specifier: ^4.1.0
+        version: 4.10.0
       '@supabase/supabase-js':
         specifier: ^2.53.0
         version: 2.54.0
@@ -210,12 +210,6 @@ importers:
       eslint:
         specifier: ^9.9.0
         version: 9.33.0(jiti@1.21.7)
-      eslint-plugin-react-hooks:
-        specifier: ^5.1.0-rc.0
-        version: 5.2.0(eslint@9.33.0(jiti@1.21.7))
-      eslint-plugin-react-refresh:
-        specifier: ^0.4.9
-        version: 0.4.20(eslint@9.33.0(jiti@1.21.7))
       globals:
         specifier: ^15.9.0
         version: 15.15.0
@@ -1464,8 +1458,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@stripe/stripe-js@7.8.0':
-    resolution: {integrity: sha512-DNXRfYUgkZlrniQORbA/wH8CdFRhiBSE0R56gYU0V5vvpJ9WZwvGrz9tBAZmfq2aTgw6SK7mNpmTizGzLWVezw==}
+  '@stripe/stripe-js@4.10.0':
+    resolution: {integrity: sha512-KrMOL+sH69htCIXCaZ4JluJ35bchuCCznyPyrbN8JXSGQfwBI1SuIEMZNwvy8L8ykj29t6sa5BAAiL7fNoLZ8A==}
     engines: {node: '>=12.16'}
 
   '@supabase/auth-js@2.71.1':
@@ -2114,17 +2108,6 @@ packages:
   escape-string-regexp@4.0.0:
     resolution: {integrity: sha512-TtpcNJ3XAzx3Gq8sWRzJaVajRs0uVxA2YAkdb1jm2YkPz4G6egUFAyA3n5vtEIZefPk5Wa4UXbKuS5fKkJWdgA==}
     engines: {node: '>=10'}
-
-  eslint-plugin-react-hooks@5.2.0:
-    resolution: {integrity: sha512-+f15FfK64YQwZdJNELETdn5ibXEUQmW1DZL6KXhNnc2heoy/sg9VJJeT7n8TlMWouzWqSWavFkIhHyIbIAEapg==}
-    engines: {node: '>=10'}
-    peerDependencies:
-      eslint: ^3.0.0 || ^4.0.0 || ^5.0.0 || ^6.0.0 || ^7.0.0 || ^8.0.0-0 || ^9.0.0
-
-  eslint-plugin-react-refresh@0.4.20:
-    resolution: {integrity: sha512-XpbHQ2q5gUF8BGOX4dHe+71qoirYMhApEPZ7sfhF/dNnOF1UXnCMGZf79SFTBO7Bz5YEIT4TMieSlJBWhP9WBA==}
-    peerDependencies:
-      eslint: '>=8.40'
 
   eslint-scope@8.4.0:
     resolution: {integrity: sha512-sNXOfKCn74rt8RICKMvJS7XKV/Xk9kA7DyJr8mJik3S7Cwgy3qlkkmyS2uQB3jiJg6VNdZd/pDBJu0nvG2NlTg==}
@@ -4344,7 +4327,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.46.2':
     optional: true
 
-  '@stripe/stripe-js@7.8.0': {}
+  '@stripe/stripe-js@4.10.0': {}
 
   '@supabase/auth-js@2.71.1':
     dependencies:
@@ -5052,14 +5035,6 @@ snapshots:
   escalade@3.2.0: {}
 
   escape-string-regexp@4.0.0: {}
-
-  eslint-plugin-react-hooks@5.2.0(eslint@9.33.0(jiti@1.21.7)):
-    dependencies:
-      eslint: 9.33.0(jiti@1.21.7)
-
-  eslint-plugin-react-refresh@0.4.20(eslint@9.33.0(jiti@1.21.7)):
-    dependencies:
-      eslint: 9.33.0(jiti@1.21.7)
 
   eslint-scope@8.4.0:
     dependencies:
