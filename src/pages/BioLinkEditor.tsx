@@ -88,7 +88,7 @@ export default function BioLinkEditor() {
     <>
       {isMobile && <MobileHeader title="Editor de Bio Link" showBackButton actions={headerActions} />}
       <div className={isMobile ? "pt-14" : ""}>
-        <PageContainer size="xl" padding="lg" className="py-8">
+        <PageContainer size="xl" className="py-8 px-4 sm:px-6 lg:px-8">
           {!isMobile && (
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8">
               <div>
@@ -133,7 +133,7 @@ const EditorSkeleton = ({ isMobile }: { isMobile: boolean }) => (
   <>
     {isMobile && <Skeleton className="h-14 w-full fixed top-0 left-0 z-50" />}
     <div className={isMobile ? "pt-14" : ""}>
-      <PageContainer size="xl" padding="lg" className="py-8">
+      <PageContainer size="xl" className="py-8 px-4 sm:px-6 lg:px-8">
         {!isMobile && (
           <div className="flex items-center justify-between mb-8">
             <div>
